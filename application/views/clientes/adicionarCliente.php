@@ -91,25 +91,29 @@
             <form action="<?php echo current_url(); ?>" id="formCliente" method="post" class="form-horizontal">
                 <div class="widget-content nopadding tab-content">
                     <div class="span6">
-                        <div class="control-group">
-                            <label for="documento" class="control-label">CPF/CNPJ</label>
-                            <div class="controls">
-                                <input id="documento" class="cpfcnpj" type="text" name="documento" value="<?php echo set_value('documento'); ?>" />
-                                <button id="buscar_info_cnpj" class="btn btn-xs" type="button">Buscar(CNPJ)</button>
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label for="nomeCliente" class="control-label">Nome/Razão Social<span class="required">*</span></label>
-                            <div class="controls">
-                                <input id="nomeCliente" type="text" name="nomeCliente" value="<?php echo set_value('nomeCliente'); ?>" />
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label for="contato" class="control-label">Contato:</label>
-                            <div class="controls">
-                                <input class="contato" type="text" name="contato" value="<?php echo set_value('contato'); ?>" />
-                            </div>
-                        </div>
+                    <div class="control-group">
+                    <label for="documento" class="control-label">CPF/CNPJ</label>
+                    <div class="controls">
+                        <input id="documento" class="cpfcnpj" type="text" name="documento" value="<?php echo set_value('documento'); ?>" />
+                        <button id="buscar_info_cnpj" class="btn btn-xs" type="button">Buscar(CNPJ)</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="nomeCliente" id="nomeClienteLabel" class="control-label">Nome<span class="required">*</span></label>
+                    <div class="controls">
+                        <input id="nomeCliente" type="text" name="nomeCliente" value="<?php echo set_value('nomeCliente'); ?>" />
+                    </div>
+                </div>
+
+                <div class="control-group" id="contato-group" style="display: none;">
+                    <label for="contato" class="control-label">Contato:</label>
+                    <div class="controls">
+                        <input class="contato" type="text" name="contato" value="<?php echo set_value('contato'); ?>" />
+                    </div>
+                </div>
+
+            
                         <div class="control-group">
                             <label for="telefone" class="control-label">Telefone</label>
                             <div class="controls">
@@ -117,7 +121,7 @@
                             </div>
                         </div>
                         <div class="control-group">
-                            <label for="celular" class="control-label">Celular</label>
+                            <label for="celular" class="control-label">Celular<span class="required">*</span></label>
                             <div class="controls">
                                 <input id="celular" type="text" name="celular" value="<?php echo set_value('celular'); ?>" />
                             </div>
@@ -125,13 +129,13 @@
                         <div class="control-group">
                             <label for="email" class="control-label">Email</label>
                             <div class="controls">
-                                <input id="email" type="text" name="email" value="<?php echo set_value('email'); ?>" autocomplete="off" />
+                                <input id="email" type="text" name="email" value="<?php echo set_value('email'); ?>" />
                             </div>
                         </div>
                         <div class="control-group">
                             <label for="senha" class="control-label">Senha</label>
                             <div class="controls">
-                                <input class="form-control" id="senha" type="password" name="senha" autocomplete="new-password" value="<?php echo set_value('senha'); ?>" />
+                                <input class="form-control" id="senha" type="password" name="senha" value="<?php echo set_value('senha'); ?>" />
                                 <img id="imgSenha" src="<?php echo base_url() ?>assets/img/eye.svg" alt="">
                             </div>
                         </div>
@@ -256,4 +260,20 @@
             }
         });
     });
+</script>
+
+<script>
+document.getElementById('documento').addEventListener('input', function() {
+    var documentoValue = this.value;
+    var contatoGroup = document.getElementById('contato-group');
+    var nomeClienteLabel = document.getElementById('nomeClienteLabel');
+    
+    if (documentoValue.length > 14) {
+        contatoGroup.style.display = 'block';
+        nomeClienteLabel.innerHTML = 'Razão Social<span class="required">*</span>';
+    } else {
+        contatoGroup.style.display = 'none';
+        nomeClienteLabel.innerHTML = 'Nome<span class="required">*</span>';
+    }
+});
 </script>
