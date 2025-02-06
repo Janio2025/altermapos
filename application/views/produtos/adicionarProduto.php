@@ -71,7 +71,7 @@
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
-        background-color: rgba(7, 5, 315, .5);
+        background-color: rgb(0 109 204);
         ;
         color: white;
         border: none;
@@ -367,19 +367,8 @@
                                         </div>
                                     </div>
 
-                                    
-
-
-                                    
-
-                                    
-
                                 </div>
 
-                                
-                                
-
-                                
                                 
                                 
                             </div>

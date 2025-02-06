@@ -125,6 +125,11 @@ public function adicionar()
         $data = [
             'codDeBarra' => set_value('codDeBarra'),
             'descricao' => set_value('descricao'),
+            'marcaProduto' => set_value('marcaProduto'),
+            'idModelo' => $idModelo,
+            'nsProduto' => set_value('nsProduto'),
+            'codigoPeca' => set_value('codigoPeca'),
+            'localizacaoProduto' => set_value('localizacaoProduto'),
             'unidade' => set_value('unidade'),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,
@@ -132,9 +137,11 @@ public function adicionar()
             'estoqueMinimo' => set_value('estoqueMinimo'),
             'saida' => set_value('saida'),
             'entrada' => set_value('entrada'),
-            'idModelo' => $idModelo,
             'idCondicao' => $idCondicao,
-            'idDirecao' => $idDirecao
+            'idDirecao' => $idDirecao,
+            'dataPedido' => set_value('dataPedido'),
+            'dataChegada' => set_value('dataChegada'),
+            'numeroPeca' => set_value('numeroPeca')
         ];
     
         if ($this->produtos_model->add('produtos', $data) == true) {
@@ -195,6 +202,11 @@ public function editar()
         $data = [
             'codDeBarra' => set_value('codDeBarra'),
             'descricao' => $this->input->post('descricao'),
+            'marcaProduto' => $this->input->post('marcaProduto'),
+            'idModelo' => $this->input->post('idModelo'),
+            'nsProduto' => $this->input->post('nsProduto'),
+            'codigoPeca' => $this->input->post('codigoPeca'),
+            'localizacaoProduto' => $this->input->post('localizacaoProduto'),
             'unidade' => $this->input->post('unidade'),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,
@@ -202,6 +214,11 @@ public function editar()
             'estoqueMinimo' => $this->input->post('estoqueMinimo'),
             'saida' => set_value('saida'),
             'entrada' => set_value('entrada'),
+            'idCondicao' => $this->input->post('idCondicao'),
+            'idDirecao' => $this->input->post('idDirecao'),
+            'dataPedido' => $this->input->post('dataPedido'),
+            'dataChegada' => $this->input->post('dataChegada'),
+            'numeroPeca' => $this->input->post('numeroPeca')
         ];
 
         // Atualizar o produto
@@ -234,14 +251,21 @@ public function editar()
         }
     }
 
+    // Recuperar o ID do produto da URI
+    $produtoId = $this->uri->segment(3);
+
     // Recuperar os dados do produto e modelos compatíveis
-    $this->data['result'] = $this->produtos_model->getById($this->uri->segment(3));
-    $this->data['modelos_compativeis'] = $this->produtos_model->get_modelos_compativeis($this->uri->segment(3));
+    $this->data['result'] = $this->produtos_model->getById($produtoId);
+    $this->data['modelos_compativeis'] = $this->produtos_model->get_modelos_compativeis($produtoId);
+
+    // Buscar imagens do produto
+    $this->data['imagensProduto'] = $this->produtos_model->getImagensProduto($produtoId);
     
     $this->data['view'] = 'produtos/editarProduto';
 
     return $this->layout();
 }
+
 
 
 public function visualizar()
@@ -272,7 +296,7 @@ public function visualizar()
     $this->data['imagensProduto'] = $this->produtos_model->getImagensProduto($produtoId);
 
     // Adicionar informações extras do produto (se necessário)
-    $this->data['informacoesExtras'] = $this->produtos_model->get_informacoes_extras($produtoId);
+    
 
     $this->data['view'] = 'produtos/visualizarProduto';
 
@@ -469,8 +493,9 @@ public function downloadProduto($id = null)
     $this->load->library('upload');
     $this->load->library('image_lib');
     $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'produtos' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'Produto-' . $idProduto;
+    
     if (!is_dir($directory . DIRECTORY_SEPARATOR . 'thumbs')) {
-        // make directory for images and thumbs
+        // Criar diretório para imagens e thumbs
         try {
             mkdir($directory . DIRECTORY_SEPARATOR . 'thumbs', 0755, true);
         } catch (Exception $e) {
@@ -478,9 +503,11 @@ public function downloadProduto($id = null)
             die();
         }
     }
+
+    // Configuração do upload
     $upload_conf = [
         'upload_path' => $directory,
-        'allowed_types' => 'jpg|png|gif|jpeg|JPG|PNG|GIF|JPEG', // formatos permitidos para anexos de os
+        'allowed_types' => 'jpg|png|gif|jpeg|JPG|PNG|GIF|JPEG', // formatos permitidos
         'max_size' => 0,
     ];
     $this->upload->initialize($upload_conf);
@@ -502,14 +529,16 @@ public function downloadProduto($id = null)
 
     $error = [];
     $success = [];
+    $nomeProduto = $this->input->post('descricao'); // Captura o nome do produto (campo 'descricao')
+
     foreach ($_FILES as $field_name => $file) {
         if (!$this->upload->do_upload($field_name)) {
             $error['upload'][] = $this->upload->display_errors();
         } else {
             $upload_data = $this->upload->data();
-            $new_file_name = uniqid() . '.' . pathinfo($upload_data['file_name'], PATHINFO_EXTENSION);
+            $new_file_name = $nomeProduto . '-' . uniqid() . '.' . pathinfo($upload_data['file_name'], PATHINFO_EXTENSION); // Renomeia o arquivo
             $new_file_path = $upload_data['file_path'] . $new_file_name;
-            rename($upload_data['full_path'], $new_file_path);
+            rename($upload_data['full_path'], $new_file_path); // Move e renomeia o arquivo
 
             if ($upload_data['is_image'] == 1) {
                 $resize_conf = [
@@ -539,10 +568,11 @@ public function downloadProduto($id = null)
             }
         }
     }
+
     if (count($error) > 0) {
         echo json_encode(['result' => false, 'mensagem' => 'Ocorreu um erro ao processar os arquivos.', 'errors' => $error]);
     } else {
-        log_info('Adicionou imagen(s) a um Produto. ID (Produto): ' . $this->input->post('idProdutoImg'));
+        log_info('Adicionou imagem(s) a um Produto. ID (Produto): ' . $this->input->post('idProdutoImg'));
         echo json_encode(['result' => true, 'mensagem' => 'Arquivo(s) anexado(s) com sucesso.']);
     }
 }
