@@ -114,14 +114,15 @@ class Os_model extends CI_Model
     }
 
     public function getProdutos($id = null)
-    {
-        $this->db->select('produtos_os.*, produtos.*');
-        $this->db->from('produtos_os');
-        $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
-        $this->db->where('os_id', $id);
+{
+    $this->db->select('produtos_os.*, produtos.*, modelo.nomeModelo');
+    $this->db->from('produtos_os');
+    $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
+    $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo'); // Junção adicional com a tabela modelo
+    $this->db->where('os_id', $id);
 
-        return $this->db->get()->result();
-    }
+    return $this->db->get()->result();
+}
 
     public function getServicos($id = null)
     {
@@ -176,35 +177,54 @@ class Os_model extends CI_Model
     }
 
     public function autoCompleteProduto($q)
-    {
-        $this->db->select('*');
-        $this->db->limit(25);
-        $this->db->like('codDeBarra', $q);
-        $this->db->or_like('descricao', $q);
-        $query = $this->db->get('produtos');
-        if ($query->num_rows() > 0) {
-            foreach ($query->result_array() as $row) {
-                $row_set[] = ['label' => $row['descricao'] . ' | Preço: R$ ' . $row['precoVenda'] . ' | Estoque: ' . $row['estoque'], 'estoque' => $row['estoque'], 'id' => $row['idProdutos'], 'preco' => $row['precoVenda']];
-            }
-            echo json_encode($row_set);
+{
+    $this->db->select('produtos.*, modelo.nomeModelo');
+    $this->db->from('produtos');
+    $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo');
+    $this->db->limit(5);
+    $this->db->like('codDeBarra', $q);
+    $this->db->or_like('descricao', $q);
+    $this->db->or_like('modelo.nomeModelo', $q);
+    $query = $this->db->get();
+    
+    if ($query->num_rows() > 0) {
+        foreach ($query->result_array() as $row) {
+            $row_set[] = [
+                'label' => $row['descricao'] . ' - ' . $row['marcaProduto'] . ' - ' . $row['nomeModelo'] . ' - Preço: R$ ' . $row['precoVenda'],
+                'id' => $row['idProdutos'],
+                'preco' => $row['precoVenda']
+            ];
         }
+        echo json_encode($row_set);
     }
+}
 
-    public function autoCompleteProdutoSaida($q)
-    {
-        $this->db->select('*');
-        $this->db->limit(25);
-        $this->db->like('codDeBarra', $q);
-        $this->db->or_like('descricao', $q);
-        $this->db->where('saida', 1);
-        $query = $this->db->get('produtos');
-        if ($query->num_rows() > 0) {
-            foreach ($query->result_array() as $row) {
-                $row_set[] = ['label' => $row['descricao'] . ' | Preço: R$ ' . $row['precoVenda'] . ' | Estoque: ' . $row['estoque'], 'estoque' => $row['estoque'], 'id' => $row['idProdutos'], 'preco' => $row['precoVenda']];
-            }
-            echo json_encode($row_set);
+    
+public function autoCompleteProdutoSaida($q)
+{
+    $this->db->select('produtos.*, modelo.nomeModelo');
+    $this->db->from('produtos');
+    $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo');
+    $this->db->limit(5);
+    $this->db->like('codDeBarra', $q);
+    $this->db->or_like('descricao', $q);
+    $this->db->or_like('marcaProduto', $q);
+    $this->db->or_like('modelo.nomeModelo', $q);
+    $this->db->where('saida', 1);
+    $query = $this->db->get();
+    
+    if ($query->num_rows() > 0) {
+        foreach ($query->result_array() as $row) {
+            $row_set[] = [
+                'label' => $row['descricao'] . ' | ' . $row['marcaProduto'] . ' | ' . $row['nomeModelo'] . ' | R$ ' . $row['precoVenda'] . ' | Estoque: ' . $row['estoque'],
+                'estoque' => $row['estoque'],
+                'id' => $row['idProdutos'],
+                'preco' => $row['precoVenda']
+            ];
         }
+        echo json_encode($row_set);
     }
+}
 
     public function autoCompleteCliente($q)
     {

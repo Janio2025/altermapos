@@ -162,14 +162,17 @@ class Vendas_model extends CI_Model
     }
 
     public function getProdutos($id = null)
-    {
-        $this->db->select('itens_de_vendas.*, produtos.*');
-        $this->db->from('itens_de_vendas');
-        $this->db->join('produtos', 'produtos.idProdutos = itens_de_vendas.produtos_id');
-        $this->db->where('vendas_id', $id);
+{
+    $this->db->select('itens_de_vendas.*, produtos.*, modelo.nomeModelo');
+    $this->db->from('itens_de_vendas');
+    $this->db->join('produtos', 'produtos.idProdutos = itens_de_vendas.produtos_id');  // Corrigir o nome da chave primária de produtos
+    $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo');  // Junção com a tabela modelo
+    $this->db->where('vendas_id', $id);
 
-        return $this->db->get()->result();
-    }
+    return $this->db->get()->result();
+}
+
+   
 
     public function getCobrancas($id = null)
     {
@@ -230,11 +233,13 @@ class Vendas_model extends CI_Model
         $query = $this->db->get('produtos');
         if ($query->num_rows() > 0) {
             foreach ($query->result_array() as $row) {
-                $row_set[] = ['label' => $row['descricao'] . ' | Preço: R$ ' . $row['precoVenda'] . ' | Estoque: ' . $row['estoque'], 'estoque' => $row['estoque'], 'id' => $row['idProdutos'], 'preco' => $row['precoVenda']];
+                $row_set[] = ['label' => $row['descricao'] . $row['marcaProduto'] . ' - ' . $row['nomeModelo'] . ' | Preço: R$ ' . $row['precoVenda'] . ' | Estoque: ' . $row['estoque'], 'estoque' => $row['estoque'], 'id' => $row['idProdutos'], 'preco' => $row['precoVenda']];
             }
             echo json_encode($row_set);
         }
     }
+
+    
 
     public function autoCompleteCliente($q)
     {

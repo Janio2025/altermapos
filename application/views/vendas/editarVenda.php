@@ -168,6 +168,8 @@
                                     <thead>
                                         <tr>
                                             <th>Produto</th>
+                                            <th>Marca</th>
+                                            <th>Modelo</th>
                                             <th width="8%">Quantidade</th>
                                             <th width="10%">Preço</th>
                                             <th width="6%">Ações</th>
@@ -177,17 +179,19 @@
                                     <tbody>
                                         <?php
                                         $total = 0;
-foreach ($produtos as $p) {
-    $preco = $p->preco ?: $p->precoVenda;
-    $total = $total + $p->subTotal;
-    echo '<tr>';
-    echo '<td>' . $p->descricao . '</td>';
-    echo '<td><div align="center">' . $p->quantidade . '</td>';
-    echo '<td><div align="center">R$: ' . $preco . '</td>';
-    echo '<td><div align="center"><a href="" idAcao="' . $p->idItens . '" prodAcao="' . $p->idProdutos . '" quantAcao="' . $p->quantidade . '" title="Excluir Produto" class="btn-nwe4"><i class="bx bx-trash-alt"></i></a></td>';
-    echo '<td><div align="center">R$: ' . number_format($p->subTotal, 2, '.', '') . '</td>';
-    echo '</tr>';
-} ?>
+                                            foreach ($produtos as $p) {
+                                                $preco = $p->preco ?: $p->precoVenda;
+                                                $total = $total + $p->subTotal;
+                                                echo '<tr>';
+                                                echo '<td>' . $p->descricao . '</td>';
+                                                echo '<td><div align="center">' . $p->marcaProduto . '</td>';
+                                                echo '<td><div align="center">' . $p->nomeModelo . '</td>';
+                                                echo '<td><div align="center">' . $p->quantidade . '</td>';
+                                                echo '<td><div align="center">R$: ' . $preco . '</td>';
+                                                echo '<td><div align="center"><a href="" idAcao="' . $p->idItens . '" prodAcao="' . $p->idProdutos . '" quantAcao="' . $p->quantidade . '" title="Excluir Produto" class="btn-nwe4"><i class="bx bx-trash-alt"></i></a></td>';
+                                                echo '<td><div align="center">R$: ' . number_format($p->subTotal, 2, '.', '') . '</td>';
+                                                echo '</tr>';
+                                            } ?>
                                     </tbody>
                                     <tfoot>
                                         <tr>
