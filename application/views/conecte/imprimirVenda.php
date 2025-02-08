@@ -111,10 +111,12 @@
 
                 <?php if ($produtos) : ?>
                     <div class="tabela">
-                        <table class="table table-bordered">
+                    <table class="table table-bordered">
                             <thead>
                                 <tr class="table-secondary">
                                     <th>PRODUTO(S)</th>
+                                    <th>MARCA</th>
+                                    <th>MODELO</th>
                                     <th class="text-center" width="10%">QTD</th>
                                     <th class="text-center" width="10%">UNT</th>
                                     <th class="text-end" width="15%" >SUBTOTAL</th>
@@ -125,13 +127,15 @@
                                     $totalProdutos = $totalProdutos + $p->subTotal;
                                     echo '<tr>';
                                     echo '  <td>' . $p->descricao . '</td>';
+                                    echo '  <td>' . $p->marcaProduto . '</td>';
+                                    echo '  <td>' . $p->nomeModelo . '</td>';
                                     echo '  <td class="text-center">' . $p->quantidade . '</td>';
                                     echo '  <td class="text-center">' . number_format($p->preco ?: $p->precoVenda, 2, ',', '.') . '</td>';
                                     echo '  <td class="text-end">R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';
                                     echo '</tr>';
                                 endforeach; ?>
                                 <tr>
-                                    <td colspan="3" class="text-end"><b>TOTAL PRODUTOS:</b></td>
+                                    <td colspan="5" class="text-end"><b>TOTAL PRODUTOS:</b></td>
                                     <td class="text-end"><b>R$ <?= number_format($totalProdutos, 2, ',', '.') ?></b></td>
                                 </tr>
                             </tbody>

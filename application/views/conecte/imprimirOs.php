@@ -97,11 +97,24 @@
                 </div>
 
                 <?php if ($result->descricaoProduto) : ?>
-                    <div class="subtitle">DESCRIÇÃO</div>
-                    <div class="dados">
-                        <div>
-                            <?= htmlspecialchars_decode($result->descricaoProduto) ?>
-                        </div>
+                    <div class="tabela table-bordered">
+                        <table class="table ">
+                            <thead>
+                                <tr class="table-secondary">
+                                    <th class="text-center">PRODUTO</th>
+                                    <th class="text-center">MARCA</th>
+                                    <th class="text-center">MODELO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center"><?= $result->descricaoProduto ?></td>
+                                    <td class="text-center"><?= $result->marcaProdutoOs ?></td>
+                                    <td class="text-center"><?= $result->modeloProdutoOs ?></td>
+                                    
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 <?php endif; ?>
 
@@ -138,6 +151,8 @@
                             <thead>
                                 <tr class="table-secondary">
                                     <th>PRODUTO(S)</th>
+                                    <th>MARCA</th>
+                                    <th>MODELO</th>
                                     <th class="text-center" width="10%">QTD</th>
                                     <th class="text-center" width="10%">UNT</th>
                                     <th class="text-end" width="15%" >SUBTOTAL</th>
@@ -148,13 +163,15 @@
                                     $totalProdutos = $totalProdutos + $p->subTotal;
                                     echo '<tr>';
                                     echo '  <td>' . $p->descricao . '</td>';
+                                    echo '  <td>' . $p->marcaProduto . '</td>';
+                                    echo '  <td>' . $p->nomeModelo . '</td>';
                                     echo '  <td class="text-center">' . $p->quantidade . '</td>';
                                     echo '  <td class="text-center">' . number_format($p->preco ?: $p->precoVenda, 2, ',', '.') . '</td>';
                                     echo '  <td class="text-end">R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';
                                     echo '</tr>';
                                 endforeach; ?>
                                 <tr>
-                                    <td colspan="3" class="text-end"><b>TOTAL PRODUTOS:</b></td>
+                                    <td colspan="5" class="text-end"><b>TOTAL PRODUTOS:</b></td>
                                     <td class="text-end"><b>R$ <?= number_format($totalProdutos, 2, ',', '.') ?></b></td>
                                 </tr>
                             </tbody>

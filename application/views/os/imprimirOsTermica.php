@@ -242,30 +242,39 @@ $totalProdutos = 0; ?>
                             </tbody>
                         </table>
                     <?php } ?>
-                    <table class="table table-bordered table-condensed">
-                        <tbody>
-                            <tr>
-                                <td colspan="5"> <?php
-                                    if ($totalProdutos != 0 || $totalServico != 0) {
-                                        if ($result->valor_desconto != 0) {
-                                            echo "<h4 style='text-align: right; font-size: 13px;'>Subtotal: R$ " . number_format($totalProdutos + $totalServico, 2, ',', '.') . "</h4>";
-                                            echo $result->valor_desconto != 0 ? "<h4 style='text-align: right; font-size: 13px;'> Desconto: R$ " . number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') . "</h4>" : "";
-                                            echo $result->valor_desconto != 0 ? "<h4 style='text-align: right; font-size: 13px;'> Total: R$ " . number_format($result->valor_desconto, 2, ',', '.') . "</h4>" : "";
-                                        } else { echo "<h4 style='text-align: right; font-size: 13px;'>Total: R$ " . number_format($totalProdutos + $totalServico, 2, ',', '.') . "</h4>"; }
-                                    } ?>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <?php if ($result->status == 'Finalizado' || $result->status == 'Orçamento') { ?>
-                            <?php if ($qrCode) : ?>
-                                <td style="width: 15%; padding: 0;text-align:center;">
-                                    <img style="margin:12px 0px 0px 0px" src="<?php echo base_url(); ?>assets/img/logo_pix.png" width="64px" alt="QR Code de Pagamento" /></br>
-                                    <img style="margin:5px 0px 0px 0px" width="94px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></br>
-                                    <?php echo '<span style="margin:0px;font-size: 80%;text-align:center;">Chave PIX: ' . $chaveFormatada . '</span><hr>' ;?>
-                                </td>
-                            <?php endif ?>
-                        <?php } ?>
-                    </table>
+                    <?php
+// Certifique-se de que $qrCode está definido antes de ser utilizado
+$qrCode = isset($qrCode) ? $qrCode : null;
+?>
+<table class="table table-bordered table-condensed">
+    <tbody>
+        <tr>
+            <td colspan="5">
+                <?php
+                if ($totalProdutos != 0 || $totalServico != 0) {
+                    if ($result->valor_desconto != 0) {
+                        echo "<h4 style='text-align: right; font-size: 13px;'>Subtotal: R$ " . number_format($totalProdutos + $totalServico, 2, ',', '.') . "</h4>";
+                        echo "<h4 style='text-align: right; font-size: 13px;'> Desconto: R$ " . number_format($result->valor_desconto - ($totalProdutos + $totalServico), 2, ',', '.') . "</h4>";
+                        echo "<h4 style='text-align: right; font-size: 13px;'> Total: R$ " . number_format($result->valor_desconto, 2, ',', '.') . "</h4>";
+                    } else {
+                        echo "<h4 style='text-align: right; font-size: 13px;'>Total: R$ " . number_format($totalProdutos + $totalServico, 2, ',', '.') . "</h4>";
+                    }
+                }
+                ?>
+            </td>
+        </tr>
+    </tbody>
+    <?php if ($result->status == 'Finalizado' || $result->status == 'Orçamento') { ?>
+        <?php if (!empty($qrCode)) : ?>
+            <td style="width: 15%; padding: 0; text-align: center;">
+                <img style="margin: 12px 0px 0px 0px" src="<?php echo base_url(); ?>assets/img/logo_pix.png" width="64px" alt="QR Code de Pagamento" /><br>
+                <img style="margin: 5px 0px 0px 0px" width="94px" src="<?= htmlspecialchars($qrCode, ENT_QUOTES, 'UTF-8'); ?>" alt="QR Code de Pagamento" /><br>
+                <?php echo '<span style="margin:0px; font-size: 80%; text-align:center;">Chave PIX: ' . htmlspecialchars($chaveFormatada, ENT_QUOTES, 'UTF-8') . '</span><hr>'; ?>
+            </td>
+        <?php endif; ?>
+    <?php } ?>
+</table>
+
                     <table class="table table-bordered table-condensed" style="font-size: 15px">
                         <tbody>
                             <tr>
