@@ -87,7 +87,7 @@
 
             <div class="botton-content">
                 <li class="">
-                    <a class="tip-bottom" title="" href="<?= site_url('login/sair'); ?>">
+                    <a class="tip-bottom" title="" href="<?= site_url('login'); ?>">
                         <i class='bx bx-log-out-circle iconX'></i>
                         <span class="title">Sair</span></a>
                 </li>
