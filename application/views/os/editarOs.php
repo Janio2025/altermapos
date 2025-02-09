@@ -239,25 +239,24 @@
                                     </div>
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
-
                                         <div class="span3">
                                             <label for="ucProdutoOs">UNIDADE CONSUMIDORA</label>
                                             <input name="ucProdutoOs" class="span12" type="text" id="ucProdutoOs"
                                                 value="<?php echo $result->ucProdutoOs ?>"
-                                                onChange="javascript:this.value=this.value.toUpperCase();" />
+                                                oninput="limparOutroCampo(this, 'contrato_seguradora')" 
+                                                onchange="this.value = this.value.toUpperCase();" />
                                         </div>
 
                                         <div class="span3">
                                             <label for="contrato_seguradora">NÚMERO DO SEGURO</label>
                                             <input name="contrato_seguradora" class="span12" type="text" id="contrato_seguradora"
                                                 value="<?php echo $result->contrato_seguradora ?>"
-                                                onChange="javascript:this.value=this.value.toUpperCase();" />
+                                                oninput="limparOutroCampo(this, 'ucProdutoOs')" 
+                                                onchange="this.value = this.value.toUpperCase();" />
                                         </div>
-
-
                                     </div>
 
-
+                                    
                                     <div class="span12" style="padding: 1%; margin-left: 0">
 
                                         <div class="span6">
@@ -1418,5 +1417,12 @@
         });
     });
 </script>
+
+<script>
+    function limparOutroCampo(atual, outroId) {
+        document.getElementById(outroId).value = "";
+    }
+</script>
+
 
 
