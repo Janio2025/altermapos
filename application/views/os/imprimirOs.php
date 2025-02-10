@@ -38,21 +38,6 @@
                         <span style="font-weight: bold;">Tel: <?= $emitente->telefone ?></span></br>
                         <span style="font-weight: bold;"><?= $emitente->email ?></span></br>
                         <span style="word-break: break-word;">Responsável: <b><?= $result->nome ?></b></span>
-                                    <?php if ($result->ucProdutoOs) : ?>
-                                        <div class="dados">
-                                            <div style="font-weight: bold;"> UC: 
-                                                <?= htmlspecialchars_decode($result->ucProdutoOs) ?>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <?php if ($result->contrato_seguradora) : ?>
-                                        <div class="dados">
-                                            <div style="font-weight: bold;"> Nº Seguro: 
-                                                <?= htmlspecialchars_decode($result->contrato_seguradora) ?>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </header>
@@ -108,6 +93,21 @@
                         <span><?= $result->rua.', '.$result->numero.', '.$result->bairro ?></span><br />
                         <span><?= $result->complemento.' - '.$result->cidade.' - '.$result->estado ?></span><br />
                         <span>CEP: <?= $result->cep ?></span><br />
+                                    <?php if ($result->ucProdutoOs) : ?>
+                                        <div class="">
+                                            <div style="font-weight: bold;"> UC: 
+                                                <?= htmlspecialchars_decode($result->ucProdutoOs) ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($result->contrato_seguradora) : ?>
+                                        <div class="">
+                                            <div style="font-weight: bold;"> Nº Seguro: 
+                                                <?= htmlspecialchars_decode($result->contrato_seguradora) ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                     </div>
                 </div>
 
