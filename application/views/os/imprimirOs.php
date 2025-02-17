@@ -166,7 +166,7 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr class="table-secondary">
-                                    <th>PRODUTO(S)</th>
+                                    <th>PEÇA / PRODUTO(S)</th>
                                     <th>MARCA</th>
                                     <th>MODELO</th>
                                     <th class="text-center" width="10%">QTD</th>

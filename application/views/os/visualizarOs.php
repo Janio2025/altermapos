@@ -24,7 +24,8 @@
                     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
                         $this->load->model('os_model');
                         $zapnumber = preg_replace("/[^0-9]/", "", $result->celular_cliente);
-                        $troca = [$result->nomeCliente, $result->idOs, $result->status, 'R$ ' . ($result->desconto != 0 && $result->valor_desconto != 0 ? number_format($result->valor_desconto, 2, ',', '.') : number_format($totalProdutos + $totalServico, 2, ',', '.')), strip_tags($result->descricaoProduto), ($emitente ? $emitente->nome : ''), ($emitente ? $emitente->telefone : ''), strip_tags($result->observacoes), strip_tags($result->defeito), strip_tags($result->laudoTecnico), date('d/m/Y', strtotime($result->dataFinal)), date('d/m/Y', strtotime($result->dataInicial)), $result->garantia . ' dias'];
+                        $troca = [$result->nomeCliente, $result->idOs, $result->status, 'R$ ' . ($result->desconto != 0 && $result->valor_desconto != 0 ? number_format($result->valor_desconto, 2, ',', '.') : number_format($totalProdutos + $totalServico, 2, ',', '.')), strip_tags($result->descricaoProduto), 
+                        strip_tags($result->marcaProdutoOs), strip_tags($result->modeloProdutoOs), strip_tags($result->nsProdutoOs), ($emitente ? $emitente->nome : ''), ($emitente ? $emitente->telefone : ''), strip_tags($result->observacoes), strip_tags($result->defeito), strip_tags($result->laudoTecnico), date('d/m/Y', strtotime($result->dataFinal)), date('d/m/Y', strtotime($result->dataInicial)), $result->garantia . ' dias'];
                         $texto_de_notificacao = $this->os_model->criarTextoWhats($texto_de_notificacao, $troca);
                         if (!empty($zapnumber)) {
                             echo '<a title="Enviar Por WhatsApp" class="button btn btn-mini btn-success" id="enviarWhatsApp" target="_blank" href="https://api.whatsapp.com/send?phone=55' . $zapnumber . '&text=' . $texto_de_notificacao . '">
@@ -172,30 +173,26 @@
                                 </tr>
                                 <?php } ?>
 
-                                <?php if ($result->descricaoProduto != null) { ?>
-                                <tr>
-                                    <td colspan="">
-                                        <b>DESCRIÇÃO: </b>
-                                        <?php echo htmlspecialchars_decode($result->descricaoProduto) ?>
-                                    </td>
+                                <?php if (!empty($result->descricaoProduto) || !empty($result->marcaProdutoOs) || !empty($result->modeloProdutoOs) || !empty($result->nsProdutoOs)) { ?>
+                                    <tr>
+                                        <?php if (!empty($result->descricaoProduto)) { ?>
+                                            <td><b>DESCRIÇÃO:</b> <?php echo htmlspecialchars_decode($result->descricaoProduto); ?></td>
+                                        <?php } ?>
 
-                                    <td colspan="">
-                                        <b>MARCA: </b>
-                                        <?php echo htmlspecialchars_decode($result->marcaProdutoOs) ?>
-                                    </td>
+                                        <?php if (!empty($result->marcaProdutoOs)) { ?>
+                                            <td><b>MARCA:</b> <?php echo htmlspecialchars_decode($result->marcaProdutoOs); ?></td>
+                                        <?php } ?>
 
-                                    <td colspan="">
-                                        <b>MODELO: </b>
-                                        <?php echo htmlspecialchars_decode($result->modeloProdutoOs) ?>
-                                    </td>
+                                        <?php if (!empty($result->modeloProdutoOs)) { ?>
+                                            <td><b>MODELO:</b> <?php echo htmlspecialchars_decode($result->modeloProdutoOs); ?></td>
+                                        <?php } ?>
 
-                                    <td colspan="">
-                                        <b>Número de Série: </b>
-                                        <?php echo htmlspecialchars_decode($result->nsProdutoOs) ?>
-                                    </td>
-                                </tr>
-
+                                        <?php if (!empty($result->nsProdutoOs)) { ?>
+                                            <td><b>Número de Série:</b> <?php echo htmlspecialchars_decode($result->nsProdutoOs); ?></td>
+                                        <?php } ?>
+                                    </tr>
                                 <?php } ?>
+
 
 
 
@@ -274,7 +271,7 @@
                                             echo '<tr>';
                                             echo '<td>' . $p->descricao . '</td>';
                                             echo '<td>' . $p->marcaProduto . '</td>';
-                                            echo '<td>' . $p->modeloProduto . '</td>';
+                                            echo '<td>' . $p->nomeModelo . '</td>';
                                             echo '<td>' . $p->quantidade . '</td>';
                                             echo '<td>' . $p->preco ?: $p->precoVenda . '</td>';
                                             echo '<td>R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';

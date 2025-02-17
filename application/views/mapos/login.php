@@ -211,9 +211,6 @@ $parse_cpfcnpj = $this->input->get('c');
     
 </body>
 
-
-
-
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
 <script src="<?php echo base_url() ?>assets/js/sweetalert2.all.min.js"></script>
   <script src="<?= base_url() ?>assets/js/jquery-1.12.4.min.js"></script>
@@ -405,15 +402,6 @@ changeTab("loginAdmin");
 
         });
     </script>
-
-
-
-
-
-
-
-
-
 
 </html>
 

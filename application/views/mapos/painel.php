@@ -1141,6 +1141,8 @@
         <div id="modalGarantia" class="modal-Garantia"></div>
         <div id="modalStatus" class="modal-Status"></div>
         <div id="modalDescription" class="modal-Description"></div>
+        <div id="modalMarcaProdutoOs" class="modal-MarcaProdutoOs"></div>
+        <div id="modalModeloProdutoOs" class="modal-ModeloProdutoOs"></div>
         <div id="modalDefeito" class="modal-Defeito"></div>
         <div id="modalObservacoes" class="modal-Observacoes"></div>
         <div id="modalTotal" class="modal-Total"></div>
@@ -1285,6 +1287,8 @@
                 $('#modalGarantia').html(eventObj.garantia);
                 $('#modalStatus').html(eventObj.status);
                 $('#modalDescription').html(eventObj.description);
+                $('#modalMarcaProdutoOs').html(eventObj.marcaProdutoOs);
+                $('#modalModeloProdutoOs').html(eventObj.modeloProdutoOs);
                 $('#modalDefeito').html(eventObj.defeito);
                 $('#modalObservacoes').html(eventObj.observacoes);
                 $('#modalTotal').html(eventObj.total);

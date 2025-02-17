@@ -591,20 +591,35 @@ class Mapos extends MY_Controller {
                 'color' => $cor,
                 'extendedProps' => [
                     'id' => $os->idOs,
-                    'cliente' => '<b>Cliente:</b> ' . $os->nomeCliente,
-                    'dataInicial' => '<b>Data Inicial:</b> ' . date('d/m/Y', strtotime($os->dataInicial)),
-                    'dataFinal' => '<b>Data Final:</b> ' . date('d/m/Y', strtotime($os->dataFinal)),
-                    'garantia' => '<b>Garantia:</b> ' . $os->garantia . ' dias',
-                    'status' => '<b>Status da OS:</b> ' . $os->status,
-                    'description' => '<b>Descrição/Produto:</b> ' . strip_tags(html_entity_decode($os->descricaoProduto)),
-                    'defeito' => '<b>Defeito:</b> ' . strip_tags(html_entity_decode($os->defeito)),
-                    'observacoes' => '<b>Observações:</b> ' . strip_tags(html_entity_decode($os->observacoes)),
-                    'total' => '<b>Valor Total:</b> R$ ' . number_format($os->totalProdutos + $os->totalServicos, 2, ',', '.'),
-                    'desconto' => '<b>Desconto: </b>R$ ' . number_format($this->desconto(floatval($os->valorTotal), floatval($os->desconto), strval($os->tipo_desconto)), 2, ',', '.'),
-                    'valorFaturado' => '<b>Valor Faturado:</b> ' . ($os->faturado ? 'R$ ' . number_format($os->valorTotal - $this->desconto(floatval($os->valorTotal), floatval($os->desconto), strval($os->tipo_desconto)), 2, ',', '.') : 'PENDENTE'),
+                    'cliente' => "<b>Cliente:</b> {$os->nomeCliente}<br><br>",
+                    'dataInicial' => "<b>Data Inicial:</b> " . date('d/m/Y', strtotime($os->dataInicial)) . "<br>",
+                    'dataFinal' => "<b>Data Final:</b> " . date('d/m/Y', strtotime($os->dataFinal)) . "<br><br>",
+                    'garantia' => "<b>Garantia:</b> {$os->garantia} dias<br>",
+                    'status' => "<b>Status da OS:</b> {$os->status}<br><br>",
+                    'description' => "<b>Produto:</b> " . strip_tags(html_entity_decode($os->descricaoProduto)) . "<br>",
+                    'marcaProdutoOs' => "<b>Marca:</b> " . strip_tags(html_entity_decode($os->marcaProdutoOs)) . "<br>",
+                    'modeloProdutoOs' => "<b>Modelo:</b> " . strip_tags(html_entity_decode($os->modeloProdutoOs)) . "<br><br>",
+                    'defeito' => "<b>Defeito:</b> " . strip_tags(html_entity_decode($os->defeito)) . "<br>",
+                    'observacoes' => "<b>Observações:</b> " . strip_tags(html_entity_decode($os->observacoes)) . "<br><br>",
+                    'total' => "<b>Valor Total:</b> R$ " . number_format($os->totalProdutos + $os->totalServicos, 2, ',', '.') . "<br>",
+                    'desconto' => "<b>Desconto:</b> R$ " . number_format(
+                        $this->desconto(floatval($os->valorTotal), floatval($os->desconto), strval($os->tipo_desconto)),
+                        2,
+                        ',',
+                        '.'
+                    ) . "<br>",
+                    'valorFaturado' => "<b>Valor Faturado:</b> " . 
+                        ($os->faturado ? 
+                            "R$ " . number_format(
+                                $os->valorTotal - $this->desconto(floatval($os->valorTotal), floatval($os->desconto), strval($os->tipo_desconto)),
+                                2,
+                                ',',
+                                '.'
+                            ) : "PENDENTE") . "<br><br>",
                     'editar' => $this->os_model->isEditable($os->idOs),
                 ],
             ];
+            
         }, $allOs);
 
         return $this->output
