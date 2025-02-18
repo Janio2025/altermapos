@@ -44,7 +44,7 @@
             <section>
                 <div class="title">
                     <?php if ($configuration['control_2vias']) : ?><span class="via">Via cliente</span><?php endif; ?>
-                    ORDEM DE SERVIÇO #<?= str_pad($result->idOs, 4, 0, STR_PAD_LEFT) ?>
+                    LAUDO TÉCNICO - OS #<?= str_pad($result->idOs, 4, 0, STR_PAD_LEFT) ?>
                     <span class="emissao">Emissão: <?= date('d/m/Y H:i:s') ?></span>
                 </div>
 
@@ -134,26 +134,9 @@
                     </div>
                 <?php endif; ?>
 
-                <?php if ($result->defeito) : ?>
-                    <div class="subtitle">DEFEITO APRESENTADO</div>
-                    <div class="dados">
-                        <div style="text-align: justify;">
-                            <?= htmlspecialchars_decode($result->defeito) ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($result->observacoes) : ?>
-                    <div class="subtitle">OBSERVAÇÕES</div>
-                    <div class="dados">
-                        <div style="text-align: justify;">
-                            <?= htmlspecialchars_decode($result->observacoes) ?>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
+               
                 <?php if ($result->laudoTecnico) : ?>
-					<div class="subtitle">LAUDO TÉCNICO</div>
+					<div class="subtitle">LAUDO</div>
 							<div class="dados">
 									<div style="text-align: justify;">
 						<?= htmlspecialchars_decode($result->laudoTecnico) ?>
@@ -161,132 +144,12 @@
 						</div>
 					<?php endif; ?>
 
-                <?php if ($produtos) : ?>
-                    <div class="tabela">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-secondary">
-                                    <th>PEÇA / PRODUTO(S)</th>
-                                    <th>MARCA</th>
-                                    <th>MODELO</th>
-                                    <th class="text-center" width="10%">QTD</th>
-                                    <th class="text-center" width="10%">UNT</th>
-                                    <th class="text-end" width="15%" >SUBTOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($produtos as $p) :
-                                    $totalProdutos = $totalProdutos + $p->subTotal;
-                                    echo '<tr>';
-                                    echo '  <td>' . $p->descricao . '</td>';
-                                    echo '  <td>' . $p->marcaProduto . '</td>';
-                                    echo '  <td>' . $p->nomeModelo . '</td>';
-                                    echo '  <td class="text-center">' . $p->quantidade . '</td>';
-                                    echo '  <td class="text-center">' . number_format($p->preco ?: $p->precoVenda, 2, ',', '.') . '</td>';
-                                    echo '  <td class="text-end">R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';
-                                    echo '</tr>';
-                                endforeach; ?>
-                                <tr>
-                                    <td colspan="5" class="text-end"><b>TOTAL PRODUTOS:</b></td>
-                                    <td class="text-end"><b>R$ <?= number_format($totalProdutos, 2, ',', '.') ?></b></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
                 
-                <?php if ($servicos) : ?>
-                    <div class="tabela">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr class="table-secondary">
-                                    <th>SERVIÇO(S)</th>
-                                    <th class="text-center" width="10%">QTD</th>
-                                    <th class="text-center" width="10%">UNT</th>
-                                    <th class="text-end" width="15%" >SUBTOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                    setlocale(LC_MONETARY, 'en_US'); 
-                                    foreach ($servicos as $s) :
-                                        $preco = $s->preco ?: $s->precoVenda;
-                                        $subtotal = $preco * ($s->quantidade ?: 1);
-                                        $totalServico = $totalServico + $subtotal;
-                                        echo '<tr>';
-                                        echo '  <td>' . $s->nome . '</td>';
-                                        echo '  <td class="text-center">' . ($s->quantidade ?: 1) . '</td>';
-                                        echo '  <td class="text-center">' . number_format($preco, 2, ',', '.') . '</td>';
-                                        echo '  <td class="text-end">R$ ' . number_format($subtotal, 2, ',', '.') . '</td>';
-                                        echo '</tr>';
-                                    endforeach; ?>
-                                <tr>
-                                    <td colspan="3" class="text-end"><b>TOTAL SERVIÇOS:</b></td>
-                                    <td class="text-end"><b>R$ <?= number_format($totalServico, 2, ',', '.') ?></b></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
-                    <div class="pagamento">
-                        <div class="qrcode">
-                            <?php if ($this->data['configuration']['pix_key']) : ?>
-                                <div><img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></div>
-                                <div style="display: flex; flex-wrap: wrap; align-content: center;">
-                                    <div style="width: 100%; text-align:center;"><i class="fas fa-camera"></i><br />Escaneie o QRCode ao lado para pagar por Pix</div>
-                                    <div class="chavePix">Chave Pix: <b><?= $chaveFormatada ?></b></div>
-                                </div>
-                            <?php else: ?>
-                                <div></div>
-                                <div></div>
-                            <?php endif; ?>
-                        </div>
-                        <div>
-                            <div class="tabela">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr class="table-secondary">
-                                            <th colspan="2">RESUMO DOS VALORES</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if ($result->valor_desconto != 0) : ?>
-                                            <tr>
-                                                <td width="65%">SUBTOTAL</td>
-                                                <td>R$ <b><?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></b></td>
-                                            </tr>
-                                            <tr>
-                                                <td>DESCONTO</td>
-                                                <td>R$ <b><?= number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') ?></b></td>
-                                            </tr>
-                                            <tr>
-                                                <td>TOTAL</td>
-                                                <td>R$ <?= number_format($result->valor_desconto, 2, ',', '.') ?></td>
-                                            </tr>
-                                        <?php else : ?>
-                                            <tr>
-                                                <td style="width:290px">TOTAL</td>
-                                                <td>R$ <?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        
-                    </div>
-
-                    
-                <?php endif; ?>
-
-
             </section>
             <footer>
                 <div class="detalhes">
                     <span>Data inicial: <b><?= date('d/m/Y', strtotime($result->dataInicial)) ?></b></span>
-                    <span>ORDEM DE SERVIÇO <b>#<?= str_pad($result->idOs, 4, 0, STR_PAD_LEFT) ?></b></span>
+                    <span>LAUDO ORDEM DE SERVIÇO <b>#<?= str_pad($result->idOs, 4, 0, STR_PAD_LEFT) ?></b></span>
                     <span>Data final: <b><?= $result->dataFinal ? date('d/m/Y', strtotime($result->dataFinal)) : '' ?></b></span>
                 </div>
                 <div class="assinaturas">
@@ -329,7 +192,7 @@
                         <!-- VIA EMPRESA  -->
                         <?php $totalServico = 0; $totalProdutos = 0; ?>
                         <?php if ($configuration['control_2vias']) : ?><span class="via">Via Empresa</span><?php endif; ?>
-                        ORDEM DE SERVIÇO #<?= str_pad($result->idOs, 4, 0, STR_PAD_LEFT) ?>
+                        LAUDO ORDEM DE SERVIÇO #<?= str_pad($result->idOs, 4, 0, STR_PAD_LEFT) ?>
                         <span class="emissao">Emissão: <?= date('d/m/Y') ?></span>
                     </div>
 
@@ -382,153 +245,37 @@
                     </div>
 
                     <?php if ($result->descricaoProduto) : ?>
-                        <div class="subtitle">DESCRIÇÃO</div>
-                        <div class="dados">
-                            <div>
-                                <?= htmlspecialchars_decode($result->descricaoProduto) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+                    <div class="tabela table-bordered">
+                        <table class="table ">
+                            <thead>
+                                <tr class="table-secondary">
+                                    <th class="text-center">PRODUTO</th>
+                                    <th class="text-center">MARCA</th>
+                                    <th class="text-center">MODELO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center"><?= $result->descricaoProduto ?></td>
+                                    <td class="text-center"><?= $result->marcaProdutoOs ?></td>
+                                    <td class="text-center"><?= $result->modeloProdutoOs ?></td>
+                                    
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
 
-                    <?php if ($result->defeito) : ?>
-                        <div class="subtitle">DEFEITO APRESENTADO</div>
-                        <div class="dados">
-                            <div>
-                                <?= htmlspecialchars_decode($result->defeito) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
+               
+                <?php if ($result->laudoTecnico) : ?>
+					<div class="subtitle">LAUDO</div>
+							<div class="dados">
+									<div style="text-align: justify;">
+						<?= htmlspecialchars_decode($result->laudoTecnico) ?>
+						</div>
+						</div>
+					<?php endif; ?>
 
-                    <?php if ($result->observacoes) : ?>
-                        <div class="subtitle">OBSERVAÇÕES</div>
-                        <div class="dados">
-                            <div>
-                                <?= htmlspecialchars_decode($result->observacoes) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($result->laudoTecnico) : ?>
-                        <div class="subtitle">PARECER TÉCNICO</div>
-                        <div class="dados">
-                            <div>
-                                <?= htmlspecialchars_decode($result->laudoTecnico) ?>
-                            </div>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($produtos) : ?>
-                        <div class="tabela">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr class="table-secondary">
-                                        <th>PRODUTO(S)</th>
-                                        <th class="text-center" width="10%">QTD</th>
-                                        <th class="text-center" width="10%">UNT</th>
-                                        <th class="text-end" width="15%" >SUBTOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($produtos as $p) :
-                                        $totalProdutos = $totalProdutos + $p->subTotal;
-                                        echo '<tr>';
-                                        echo '  <td>' . $p->descricao . '</td>';
-                                        echo '  <td class="text-center">' . $p->quantidade . '</td>';
-                                        echo '  <td class="text-center">' . number_format($p->preco ?: $p->precoVenda, 2, ',', '.') . '</td>';
-                                        echo '  <td class="text-end">R$ ' . number_format($p->subTotal, 2, ',', '.') . '</td>';
-                                        echo '</tr>';
-                                    endforeach; ?>
-                                    <tr>
-                                        <td colspan="3" class="text-end"><b>TOTAL PRODUTOS:</b></td>
-                                        <td class="text-end"><b>R$ <?= number_format($totalProdutos, 2, ',', '.') ?></b></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <?php if ($servicos) : ?>
-                        <div class="tabela">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr class="table-secondary">
-                                        <th>SERVIÇO(S)</th>
-                                        <th class="text-center" width="10%">QTD</th>
-                                        <th class="text-center" width="10%">UNT</th>
-                                        <th class="text-end" width="15%" >SUBTOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php 
-                                        setlocale(LC_MONETARY, 'en_US'); 
-                                        foreach ($servicos as $s) :
-                                            $preco = $s->preco ?: $s->precoVenda;
-                                            $subtotal = $preco * ($s->quantidade ?: 1);
-                                            $totalServico = $totalServico + $subtotal;
-                                            echo '<tr>';
-                                            echo '  <td>' . $s->nome . '</td>';
-                                            echo '  <td class="text-center">' . ($s->quantidade ?: 1) . '</td>';
-                                            echo '  <td class="text-center">' . number_format($preco, 2, ',', '.') . '</td>';
-                                            echo '  <td class="text-end">R$ ' . number_format($subtotal, 2, ',', '.') . '</td>';
-                                            echo '</tr>';
-                                        endforeach; ?>
-                                    <tr>
-                                        <td colspan="3" class="text-end"><b>TOTAL SERVIÇOS:</b></td>
-                                        <td class="text-end"><b>R$ <?= number_format($totalServico, 2, ',', '.') ?></b></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
-                        <div class="pagamento">
-                            <div class="qrcode">
-                                <?php if ($this->data['configuration']['pix_key']) : ?>
-                                    <div><img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></div>
-                                    <div style="display: flex; flex-wrap: wrap; align-content: center;">
-                                        <div style="width: 100%; text-align:center;"><i class="fas fa-camera"></i><br />Escaneie o QRCode ao lado para pagar por Pix</div>
-                                        <div class="chavePix">Chave Pix: <b><?= $chaveFormatada ?></b></div>
-                                    </div>
-                                <?php else: ?>
-                                    <div></div>
-                                    <div></div>
-                                <?php endif; ?>
-                            </div>
-                            <div>
-                                <div class="tabela">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr class="table-secondary">
-                                                <th colspan="2">RESUMO DOS VALORES</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if ($result->valor_desconto != 0) : ?>
-                                                <tr>
-                                                    <td width="65%">SUBTOTAL</td>
-                                                    <td>R$ <b><?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></b></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>DESCONTO</td>
-                                                    <td>R$ <b><?= number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') ?></b></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>TOTAL</td>
-                                                    <td>R$ <?= number_format($result->valor_desconto, 2, ',', '.') ?></td>
-                                                </tr>
-                                            <?php else : ?>
-                                                <tr>
-                                                    <td style="width:290px">TOTAL</td>
-                                                    <td>R$ <?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></td>
-                                                </tr> 
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endif; ?>
                 </section>
                 <footer>
                     <div class="detalhes">
