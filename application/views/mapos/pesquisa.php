@@ -174,7 +174,8 @@
                         <th>#</th>
                         <th>Data Inicial</th>
                         <th>Descrição</th>
-                        <th>Defeito</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
                         <th></th>
                     </tr>
                     </thead>
@@ -190,7 +191,8 @@
             echo '<td>' . $r->idOs . '</td>';
             echo '<td>' . $dataInicial . '</td>';
             echo '<td>' . $r->descricaoProduto . '</td>';
-            echo '<td>' . $r->defeito . '</td>';
+            echo '<td>' . $r->marcaProdutoOs . '</td>';
+            echo '<td>' . $r->modeloProdutoOs . '</td>';
             echo '<td>';
             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
                 echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/os/visualizar/' . $r->idOs . '" class="btn-nwe" title="Ver mais detalhes"><i class="bx bx-show"></i></a>';
