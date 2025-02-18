@@ -26,6 +26,8 @@
                         <tr>
                             <th>#</th>
                             <th>Nome</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
                             <th>Preço</th>
                             <th>Estoque</th>
                             <th></th>
@@ -40,6 +42,8 @@
                             echo '<tr>';
                             echo '<td>' . $r->idProdutos . '</td>';
                             echo '<td>' . $r->descricao . '</td>';
+                            echo '<td>' . $r->marcaProduto . '</td>';
+                            echo '<td>' . $r->nomeModelo . '</td>';
                             echo '<td>' . $r->precoVenda . '</td>';
                             echo '<td>' . $r->estoque . '</td>';
                             echo '<td>';

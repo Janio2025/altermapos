@@ -65,10 +65,21 @@ class Mapos_model extends CI_Model
         $data['os'] = $this->db->get('os')->result();
 
         // buscando produtos
-        $this->db->like('codDeBarra', $termo);
-        $this->db->or_like('descricao', $termo);
-        $this->db->limit(50);
-        $data['produtos'] = $this->db->get('produtos')->result();
+        // Buscando produtos pelo nomeModelo ou modeloCompativel
+        $this->db->select('produtos.*, modelo.nomeModelo, compativeis.modeloCompativel');
+        $this->db->from('produtos');
+        $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo');  // Junção com a tabela modelo
+        $this->db->join('produto_compativel', 'produto_compativel.idProduto = produtos.idProdutos');  // Junção com a tabela produto_compativel
+        $this->db->join('compativeis', 'compativeis.idCompativel = produto_compativel.idCompativel');  // Junção com a tabela compativeis
+        $this->db->group_start();  // Início do bloco de pesquisa
+        $this->db->like('modelo.nomeModelo', $termo);  // Pesquisando pelo nomeModelo
+        $this->db->or_like('compativeis.modeloCompativel', $termo);  // Pesquisando pelo modeloCompativel
+        $this->db->or_like('produtos.codDeBarra', $termo);  // Pesquisando também por codDeBarra
+        $this->db->or_like('produtos.descricao', $termo);  // Pesquisando também por descrição
+        $this->db->group_end();  // Fim do bloco de pesquisa
+        $this->db->limit(50);  // Limita a 50 resultados
+        $data['produtos'] = $this->db->get()->result();  // Executa a consulta e armazena os resultados
+
 
         //buscando serviços
         $this->db->like('nome', $termo);
