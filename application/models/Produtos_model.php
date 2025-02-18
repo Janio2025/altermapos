@@ -29,6 +29,7 @@ class Produtos_model extends CI_Model
     {
         $this->db->select('
             produtos.*, 
+            modelo.idModelo, 
             modelo.nomeModelo, 
             condicoes.descricaoCondicao, 
             direcao.descricaoDirecao

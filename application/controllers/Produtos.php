@@ -188,7 +188,6 @@ public function adicionar()
 
 public function editar()
 {
-    // Verificação do ID e permissão do usuário
     if (!$this->uri->segment(3) || !is_numeric($this->uri->segment(3))) {
         $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
         redirect('mapos');
@@ -202,22 +201,25 @@ public function editar()
     $this->load->library('form_validation');
     $this->data['custom_error'] = '';
 
-    // Verificar se as validações de formulário falharam
     if ($this->form_validation->run('produtos') == false) {
         $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
     } else {
-        // Tratamento dos preços (compra e venda)
-        $precoCompra = $this->input->post('precoCompra');
-        $precoCompra = str_replace(',', '', $precoCompra);
-        $precoVenda = $this->input->post('precoVenda');
-        $precoVenda = str_replace(',', '', $precoVenda);
+        // Tratamento de preços
+        $precoCompra = str_replace(',', '', $this->input->post('precoCompra'));
+        $precoVenda = str_replace(',', '', $this->input->post('precoVenda'));
 
-        // Atualização de dados do produto
-        $data = [
+        // Capturar valores do formulário
+        $idProduto = $this->input->post('idProdutos');
+        $idModelo = $this->input->post('idModelo'); // ID do modelo
+        $nomeModelo = strtoupper($this->input->post('nomeModelo')); // Nome do modelo
+        $marcaProduto = strtoupper($this->input->post('marcaProduto'));
+
+        // Atualiza a tabela `produtos`
+        $dataProduto = [
             'codDeBarra' => set_value('codDeBarra'),
             'descricao' => $this->input->post('descricao'),
-            'marcaProduto' => $this->input->post('marcaProduto'),
-            'idModelo' => $this->input->post('idModelo'),
+            'marcaProduto' => $marcaProduto,
+            'idModelo' => $idModelo, // Mantém a referência ao modelo correto
             'nsProduto' => $this->input->post('nsProduto'),
             'codigoPeca' => $this->input->post('codigoPeca'),
             'localizacaoProduto' => $this->input->post('localizacaoProduto'),
@@ -235,15 +237,19 @@ public function editar()
             'numeroPeca' => $this->input->post('numeroPeca')
         ];
 
-        // Atualizar o produto
-        if ($this->produtos_model->edit('produtos', $data, 'idProdutos', $this->input->post('idProdutos')) == true) {
+        // Atualiza o produto
+        $produtoAtualizado = $this->produtos_model->edit('produtos', $dataProduto, 'idProdutos', $idProduto);
 
-            // Verificar se há arquivos de imagem para atualizar
+        // Atualiza o nome do modelo na tabela `modelo`
+        $modeloAtualizado = $this->produtos_model->edit('modelo', ['nomeModelo' => $nomeModelo], 'idModelo', $idModelo);
+
+        if ($produtoAtualizado || $modeloAtualizado) {
+            // Atualiza imagens se necessário
             if (!empty($_FILES['userfile']['name'][0])) {
-                $this->imgAnexar($this->input->post('idProdutos'));
+                $this->imgAnexar($idProduto);
             }
 
-            // Atualizar modelos compatíveis, se houver
+            // Atualiza modelos compatíveis
             $modelosCompativeis = $this->input->post('compativelProduto');
             if (is_array($modelosCompativeis)) {
                 $modelosCompativeisArray = [];
@@ -253,26 +259,22 @@ public function editar()
                         'modeloCompativel' => $modeloCompativel
                     ];
                 }
-                $this->produtos_model->update_modelos_compativeis($this->input->post('idProdutos'), $modelosCompativeisArray);
+                $this->produtos_model->update_modelos_compativeis($idProduto, $modelosCompativeisArray);
             }
 
-            // Mensagem de sucesso e redirecionamento
-            $this->session->set_flashdata('success', 'Produto editado com sucesso!');
-            log_info('Alterou um produto. ID: ' . $this->input->post('idProdutos'));
-            redirect(site_url('produtos/editar/') . $this->input->post('idProdutos'));
+            // Mensagem de sucesso
+            $this->session->set_flashdata('success', 'Produto e modelo editados com sucesso!');
+            log_info('Alterou um produto e modelo. ID: ' . $idProduto);
+            redirect(site_url('produtos/editar/') . $idProduto);
         } else {
-            $this->data['custom_error'] = '<div class="form_error"><p>Ocorreu um erro ao editar o produto.</p></div>';
+            $this->data['custom_error'] = '<div class="form_error"><p>Ocorreu um erro ao editar o produto ou modelo.</p></div>';
         }
     }
 
-    // Recuperar o ID do produto da URI
+    // Buscar os dados do produto
     $produtoId = $this->uri->segment(3);
-
-    // Recuperar os dados do produto e modelos compatíveis
     $this->data['result'] = $this->produtos_model->getById($produtoId);
     $this->data['modelos_compativeis'] = $this->produtos_model->get_modelos_compativeis($produtoId);
-
-    // Buscar imagens do produto
     $this->data['imagensProduto'] = $this->produtos_model->getImagensProduto($produtoId);
     
     $this->data['view'] = 'produtos/editarProduto';
