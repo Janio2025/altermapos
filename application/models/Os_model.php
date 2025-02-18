@@ -323,7 +323,7 @@ public function autoCompleteProdutoSaida($q)
 
     public function criarTextoWhats($textoBase, $troca)
     {
-        $procura = ['{CLIENTE_NOME}', '{NUMERO_OS}', '{STATUS_OS}', '{VALOR_OS}', '{DESCRI_PRODUTOS}', '{EMITENTE}', '{TELEFONE_EMITENTE}', '{OBS_OS}', '{DEFEITO_OS}', '{LAUDO_OS}', '{DATA_FINAL}', '{DATA_INICIAL}', '{DATA_GARANTIA}'];
+        $procura = ['{CLIENTE_NOME}', '{NUMERO_OS}', '{STATUS_OS}', '{VALOR_OS}', '{DESCRI_PRODUTOS}', '{MARCA_OS_PRODUTOS}', '{MODELO_OS_PRODUTOS}', '{EMITENTE}', '{TELEFONE_EMITENTE}', '{OBS_OS}', '{DEFEITO_OS}', '{LAUDO_OS}', '{DATA_FINAL}', '{DATA_INICIAL}', '{DATA_GARANTIA}'];
         $textoBase = str_replace($procura, $troca, $textoBase);
         $textoBase = strip_tags($textoBase);
         $textoBase = htmlentities(urlencode($textoBase));

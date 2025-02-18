@@ -315,6 +315,8 @@
                                     <option value="{STATUS_OS}">Status da OS</option>
                                     <option value="{VALOR_OS}">Valor da OS</option>
                                     <option value="{DESCRI_PRODUTOS}">Descrição produtos</option>
+                                    <option value="{MARCA_OS_PRODUTOS}">Marca produto os</option>
+                                    <option value="{MODELO_OS_PRODUTOS}">Modelo produto os</option>
                                     <option value="{EMITENTE}">Nome emitente</option>
                                     <option value="{TELEFONE_EMITENTE}">Telefone emitente</option>
                                     <option value="{OBS_OS}">Observações</option>

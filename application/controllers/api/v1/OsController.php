@@ -145,6 +145,8 @@ class OsController extends REST_Controller
             'garantia' => $this->post('garantia', true),
             'garantias_id' => $termoGarantiaId,
             'descricaoProduto' => $this->post('descricaoProduto', true),
+            'marcaProdutoOs' => $this->post('marcaProdutoOs', true),
+            'modeloProdutoOs' => $this->post('modeloProdutoOs', true),
             'defeito' => $this->post('defeito', true),
             'status' => $this->post('status', true),
             'observacoes' => $this->post('observacoes', true),
@@ -263,6 +265,8 @@ class OsController extends REST_Controller
             'garantia' => $this->put('garantia', true),
             'garantias_id' => $termoGarantiaId,
             'descricaoProduto' => $this->put('descricaoProduto', true),
+            'marcaProdutoOs' => $this->put('marcaProdutoOs', true),
+            'modeloProdutoOs' => $this->put('modeloProdutoOs', true),
             'defeito' => $this->put('defeito', true),
             'status' => $this->put('status', true),
             'observacoes' => $this->put('observacoes', true),
@@ -1005,6 +1009,8 @@ class OsController extends REST_Controller
             $os->status,
             'R$ ' . ($os->desconto != 0 && $os->valor_desconto != 0 ? number_format($os->valor_desconto, 2, ',', '.') : number_format($totalProdutos + $totalServico, 2, ',', '.')),
             strip_tags($os->descricaoProduto),
+            strip_tags($os->marcaProdutoOs),
+            strip_tags($os->modeloProdutoOs),
             ($emitente ? $emitente->nome : ''),
             ($emitente ? $emitente->telefone : ''),
             strip_tags($os->observacoes),
@@ -1019,7 +1025,7 @@ class OsController extends REST_Controller
 
         $textoBase = $this->getConfig('notifica_whats');
 
-        $procura = ['{CLIENTE_NOME}', '{NUMERO_OS}', '{STATUS_OS}', '{VALOR_OS}', '{DESCRI_PRODUTOS}', '{EMITENTE}', '{TELEFONE_EMITENTE}', '{OBS_OS}', '{DEFEITO_OS}', '{LAUDO_OS}', '{DATA_FINAL}', '{DATA_INICIAL}', '{DATA_GARANTIA}'];
+        $procura = ['{CLIENTE_NOME}', '{NUMERO_OS}', '{STATUS_OS}', '{VALOR_OS}', '{DESCRI_PRODUTOS}', '{MARCA_OS_PRODUTOS}', '{MODELO_OS_PRODUTOS}', '{EMITENTE}', '{TELEFONE_EMITENTE}', '{OBS_OS}', '{DEFEITO_OS}', '{LAUDO_OS}', '{DATA_FINAL}', '{DATA_INICIAL}', '{DATA_GARANTIA}'];
         $textoFinal = str_replace($procura, $troca, $textoBase);
         $textoFinal = strip_tags($textoFinal);
 
