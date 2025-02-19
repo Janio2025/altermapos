@@ -346,9 +346,8 @@ class Migration_create_base extends CI_Migration
                 'type' => 'BOOLEAN',
                 'default' => true,
                 'null' => false,
-            ]
+            ],
         ]);
-
         $this->dbforge->add_key('id', true);
         $this->dbforge->create_table('organizadores', true);
         $this->db->query('ALTER TABLE `organizadores` ENGINE = InnoDB'); 
@@ -375,9 +374,8 @@ class Migration_create_base extends CI_Migration
                 'type' => 'BOOLEAN',
                 'default' => true,
                 'null' => false,
-            ]
+            ],
         ]);
-
         $this->dbforge->add_key('id', true);
         $this->dbforge->add_field('CONSTRAINT FOREIGN KEY (organizador_id) REFERENCES organizadores(id) ON DELETE CASCADE');
         $this->dbforge->create_table('compartimentos', true);
