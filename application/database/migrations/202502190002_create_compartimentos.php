@@ -26,7 +26,7 @@ class Migration_Create_Compartimentos extends CI_Migration {
                 'type' => 'BOOLEAN',
                 'default' => true,
                 'null' => false,
-            ]
+            ],
         ]);
 
         $this->dbforge->add_key('id', true);
