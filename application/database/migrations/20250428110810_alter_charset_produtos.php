@@ -1,6 +1,6 @@
 <?php
 
-class Migration_alter_charset_configuracoes extends CI_Migration
+class Migration_alter_charset_produtos extends CI_Migration
 {
     public function up()
     {
