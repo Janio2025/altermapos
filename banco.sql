@@ -348,10 +348,13 @@ CREATE TABLE IF NOT EXISTS `produtos` (
   FOREIGN KEY (`idModelo`) REFERENCES `modelo`(`idModelo`),
   FOREIGN KEY (`idCondicao`) REFERENCES `condicoes`(`idCondicao`),
   FOREIGN KEY (`idDirecao`) REFERENCES `direcao`(`idDirecao`),
-  FOREIGN KEY (`idCompativel`) REFERENCES `compativeis`(`idCompativel`)
+  FOREIGN KEY (`idCompativel`) REFERENCES `compativeis`(`idCompativel`),
+  FOREIGN KEY (`organizador_id`) REFERENCES `organizadores`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`compartimento_id`) REFERENCES `compartimentos`(`id`) ON DELETE SET NULL
 ) ENGINE = InnoDB
   AUTO_INCREMENT = 1
   DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
 
 -- -----------------------------------------------------
 -- Table `organizadores`
