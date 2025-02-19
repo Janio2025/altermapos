@@ -21,65 +21,52 @@ class Produtos extends MY_Controller
     }
 
     public function gerenciar()
-    {
-        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vProduto')) {
-            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar produtos.');
-            redirect(base_url());
-        }
-
-        $pesquisa = $this->input->get('pesquisa');
-        
-        $this->load->library('pagination');
-        
-        $this->data['configuration']['base_url'] = site_url('produtos/gerenciar/');
-        $this->data['configuration']['total_rows'] = $this->produtos_model->count('produtos');
-        
-        if ($pesquisa) {
-            $this->data['configuration']['suffix'] = "?pesquisa={$pesquisa}";
-            $this->data['configuration']['first_url'] = base_url("index.php/produtos")."?pesquisa={$pesquisa}";
-        }
-        
-        $this->pagination->initialize($this->data['configuration']);
-        
-        // Alteração no SELECT para buscar os produtos relacionados aos modelos compatíveis
-        $this->db->select('
-            produtos.*, 
-            modelo.nomeModelo, 
-            condicoes.descricaoCondicao, 
-            direcao.descricaoDirecao, 
-            GROUP_CONCAT(compativeis.modeloCompativel SEPARATOR ", ") as modelosCompativeis,
-            (SELECT GROUP_CONCAT(imagens_produto.anexo) FROM imagens_produto WHERE imagens_produto.produto_id = produtos.idProdutos) as imagens
-        ');
-        $this->db->from('produtos');
-        $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo', 'left');
-        $this->db->join('condicoes', 'condicoes.idCondicao = produtos.idCondicao', 'left');
-        $this->db->join('direcao', 'direcao.idDirecao = produtos.idDirecao', 'left');
-        $this->db->join('produto_compativel', 'produto_compativel.idProduto = produtos.idProdutos');
-        $this->db->join('compativeis', 'compativeis.idCompativel = produto_compativel.idCompativel');
-        
-        if ($pesquisa) {
-            $this->db->group_start(); // Abre um bloco de condições (para usar OR)
-            // Pesquisar por nome do produto, nome do modelo, e modelo compatível
-            $this->db->like('produtos.nome', $pesquisa);
-            $this->db->or_like('modelo.nomeModelo', $pesquisa);
-            $this->db->or_like('compativeis.modeloCompativel', $pesquisa);
-            $this->db->group_end(); // Fecha o bloco
-        }
-        
-        // Agrupar pela ID do produto para evitar duplicação
-        $this->db->group_by('produtos.idProdutos');
-        // Limitar a quantidade de resultados por página
-        $this->db->limit($this->data['configuration']['per_page'], $this->uri->segment(3));
-
-        // Executar a query e obter os resultados
-        $this->data['results'] = $this->db->get()->result();
-        
-        // Definir a view
-        $this->data['view'] = 'produtos/produtos';
-        
-        // Retornar a página com os resultados
-        return $this->layout();
+{
+    if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vProduto')) {
+        $this->session->set_flashdata('error', 'Você não tem permissão para visualizar produtos.');
+        redirect(base_url());
     }
+
+    $pesquisa = $this->input->get('pesquisa');
+    
+    $this->load->library('pagination');
+    
+    $this->data['configuration']['base_url'] = site_url('produtos/gerenciar/');
+    $this->data['configuration']['total_rows'] = $this->produtos_model->count('produtos');
+    
+    if ($pesquisa) {
+        $this->data['configuration']['suffix'] = "?pesquisa={$pesquisa}";
+        $this->data['configuration']['first_url'] = base_url("index.php/produtos")."?pesquisa={$pesquisa}";
+    }
+    
+    $this->pagination->initialize($this->data['configuration']);
+    
+    // Ajuste a consulta para incluir as novas colunas e tabelas relacionadas
+    $this->db->select('
+        produtos.*, 
+        modelo.nomeModelo, 
+        condicoes.descricaoCondicao, 
+        direcao.descricaoDirecao, 
+        compativeis.modeloCompativel,
+        (SELECT GROUP_CONCAT(imagens_produto.anexo) FROM imagens_produto WHERE imagens_produto.produto_id = produtos.idProdutos) as imagens
+    ');
+    $this->db->from('produtos');
+    $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo');
+    $this->db->join('condicoes', 'condicoes.idCondicao = produtos.idCondicao', 'left');
+    $this->db->join('direcao', 'direcao.idDirecao = produtos.idDirecao', 'left');
+    $this->db->join('compativeis', 'compativeis.idCompativel = produtos.idCompativel', 'left');
+    
+    if ($pesquisa) {
+        $this->db->like('produtos.nome', $pesquisa);
+    }
+    
+    $this->db->limit($this->data['configuration']['per_page'], $this->uri->segment(3));
+    $this->data['results'] = $this->db->get()->result();
+    
+    $this->data['view'] = 'produtos/produtos';
+    
+    return $this->layout();
+}
 
 
 

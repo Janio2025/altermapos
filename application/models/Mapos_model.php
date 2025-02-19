@@ -48,46 +48,47 @@ class Mapos_model extends CI_Model
     }
 
     public function pesquisar($termo)
-    {
-        $data = [];
-        // buscando clientes
-        $this->db->like('nomeCliente', $termo);
-        $this->db->or_like('telefone', $termo);
-        $this->db->or_like('celular', $termo);
-        $this->db->or_like('documento', $termo);
-        $this->db->limit(15);
-        $data['clientes'] = $this->db->get('clientes')->result();
+{
+    $data = [];
+    
+    // buscando clientes
+    $this->db->like('nomeCliente', $termo);
+    $this->db->or_like('telefone', $termo);
+    $this->db->or_like('celular', $termo);
+    $this->db->or_like('documento', $termo);
+    $this->db->limit(15);
+    $data['clientes'] = $this->db->get('clientes')->result();
 
-        // buscando os
-        $this->db->like('idOs', $termo);
-        $this->db->or_like('descricaoProduto', $termo);
-        $this->db->limit(15);
-        $data['os'] = $this->db->get('os')->result();
+    // buscando os
+    $this->db->like('idOs', $termo);
+    $this->db->or_like('descricaoProduto', $termo);
+    $this->db->limit(15);
+    $data['os'] = $this->db->get('os')->result();
 
-        // buscando produtos
-        // Buscando produtos pelo nomeModelo ou modeloCompativel
-        $this->db->select('produtos.*, modelo.nomeModelo, compativeis.modeloCompativel');
-        $this->db->from('produtos');
-        $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo');  // Junção com a tabela modelo
-        $this->db->join('produto_compativel', 'produto_compativel.idProduto = produtos.idProdutos');  // Junção com a tabela produto_compativel
-        $this->db->join('compativeis', 'compativeis.idCompativel = produto_compativel.idCompativel');  // Junção com a tabela compativeis
-        $this->db->group_start();  // Início do bloco de pesquisa
-        $this->db->like('modelo.nomeModelo', $termo);  // Pesquisando pelo nomeModelo
-        $this->db->or_like('compativeis.modeloCompativel', $termo);  // Pesquisando pelo modeloCompativel
-        $this->db->or_like('produtos.codDeBarra', $termo);  // Pesquisando também por codDeBarra
-        $this->db->or_like('produtos.descricao', $termo);  // Pesquisando também por descrição
-        $this->db->group_end();  // Fim do bloco de pesquisa
-        $this->db->limit(50);  // Limita a 50 resultados
-        $data['produtos'] = $this->db->get()->result();  // Executa a consulta e armazena os resultados
+    // buscando produtos
+    // Buscando produtos pelo nomeModelo ou modeloCompativel
+    $this->db->select('produtos.*, modelo.nomeModelo, compativeis.modeloCompativel');
+    $this->db->from('produtos');
+    $this->db->join('modelo', 'modelo.idModelo = produtos.idModelo', 'left');  // LEFT JOIN para permitir produtos sem modelo
+    $this->db->join('produto_compativel', 'produto_compativel.idProduto = produtos.idProdutos', 'left');  // LEFT JOIN para evitar exclusão
+    $this->db->join('compativeis', 'compativeis.idCompativel = produto_compativel.idCompativel', 'left');  // LEFT JOIN para permitir produtos sem modeloCompativel
+    $this->db->group_start();  // Início do bloco de pesquisa
+    $this->db->like('modelo.nomeModelo', $termo);  // Pesquisando pelo nomeModelo
+    $this->db->or_like('compativeis.modeloCompativel', $termo);  // Pesquisando pelo modeloCompativel
+    $this->db->or_like('produtos.codDeBarra', $termo);  // Pesquisando também por codDeBarra
+    $this->db->or_like('produtos.descricao', $termo);  // Pesquisando também por descrição
+    $this->db->group_end();  // Fim do bloco de pesquisa
+    $this->db->limit(50);  // Limita a 50 resultados
+    $data['produtos'] = $this->db->get()->result();  // Executa a consulta e armazena os resultados
 
+    // buscando serviços
+    $this->db->like('nome', $termo);
+    $this->db->limit(15);
+    $data['servicos'] = $this->db->get('servicos')->result();
 
-        //buscando serviços
-        $this->db->like('nome', $termo);
-        $this->db->limit(15);
-        $data['servicos'] = $this->db->get('servicos')->result();
+    return $data;
+}
 
-        return $data;
-    }
 
     public function add($table, $data)
     {
