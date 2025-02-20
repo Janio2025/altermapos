@@ -13,7 +13,8 @@
                     <div class="control-group">
                         <label for="nome" class="control-label">Nome<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="nome" type="text" name="nome" value="<?php echo set_value('nome'); ?>" />
+                            <input id="nome" type="text" name="nome" value="<?php echo set_value('nome'); ?>" 
+                            onChange="javascript:this.value=this.value.toUpperCase();" />
                         </div>
                     </div>
                     <div class="control-group">
@@ -25,7 +26,8 @@
                     <div class="control-group">
                         <label for="descricao" class="control-label">Descrição</label>
                         <div class="controls">
-                            <input id="descricao" type="text" name="descricao" value="<?php echo set_value('descricao'); ?>" />
+                            <input id="descricao" type="text" name="descricao" value="<?php echo set_value('descricao'); ?>" 
+                            onChange="javascript:this.value=this.value.toUpperCase();" />
                         </div>
                     </div>
                     <div class="form-actions">
