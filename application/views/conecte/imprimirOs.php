@@ -22,7 +22,7 @@
                     </div>
                 <?php else : ?>
                     <div class="imgLogo" class="align-middle">
-                        <img src="<?= $emitente->url_logo ?>" class="img-fluid" style="width:140px;">
+                        <img src="<?= $emitente->url_logo ?>" class="img-fluid" style="width:100px;">
                     </div>
                     <div class="emitente">
                         <span style="font-size: 16px;"><b><?= $emitente->nome ?></b></span></br>
