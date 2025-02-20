@@ -6,7 +6,7 @@ class Migration_alter_charset_produtos extends CI_Migration
     {
         
         // Adição de colunas na tabela produtos
-        $this->db->query('ALTER TABLE `produtos` ADD `organizador_id` INT NOT NULL, ADD `compartimento_id` INT NULL;');
+        $this->db->query('ALTER TABLE `produtos` ADD `organizador_id` INT(11) NULL, ADD `compartimento_id` INT(11) NULL;');
         
         // Adiciona as chaves estrangeiras
         $this->db->query('ALTER TABLE `produtos` 
