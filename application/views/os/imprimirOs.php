@@ -236,7 +236,7 @@
                                 <div><img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></div>
                                 <div style="display: flex; flex-wrap: wrap; align-content: center;">
                                     <div style="width: 100%; text-align:center;"><i class="fas fa-camera"></i><br />Escaneie o QRCode ao lado para pagar por Pix</div>
-                                    <div class="chavePix">Chave Pix: <b><?= $chaveFormatada ?></b></div>
+                                    <div class="chavePix"> Pix: <b><?= $chaveFormatada ?></b></div>
                                 </div>
                             <?php else: ?>
                                 <div></div>
@@ -488,7 +488,7 @@
                                     <div><img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></div>
                                     <div style="display: flex; flex-wrap: wrap; align-content: center;">
                                         <div style="width: 100%; text-align:center;"><i class="fas fa-camera"></i><br />Escaneie o QRCode ao lado para pagar por Pix</div>
-                                        <div class="chavePix">Chave Pix: <b><?= $chaveFormatada ?></b></div>
+                                        <div class="chavePix"> Pix: <b><?= $chaveFormatada ?></b></div>
                                     </div>
                                 <?php else: ?>
                                     <div></div>
