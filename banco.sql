@@ -827,7 +827,7 @@ INSERT IGNORE INTO `configuracoes` (`idConfig`, `config`, `valor`) VALUES
 (4, 'per_page', '10'),
 (5, 'os_notification', 'cliente'),
 (6, 'control_estoque', '1'),
-(7, 'notifica_whats', 'Prezado(a), {CLIENTE_NOME} a OS de nº {NUMERO_OS} teve o status alterado para: {STATUS_OS} segue a descrição {DESCRI_PRODUTOS} com valor total de {VALOR_OS}! Para mais informações entre em contato conosco. Atenciosamente, {EMITENTE} {TELEFONE_EMITENTE}.'),
+(7, 'notifica_whats', 'Prezado(a), {CLIENTE_NOME} a OS de nº {NUMERO_OS} - {DESCRI_PRODUTOS} - {MARCA_OS_PRODUTOS} - Teve seu status alterado para: {STATUS_OS},  Valor: {VALOR_OS}, Atenciosamente: {TELEFONE_EMITENTE}.'),
 (8, 'control_baixa', '0'),
 (9, 'control_editos', '1'),
 (10, 'control_datatable', '1'),
