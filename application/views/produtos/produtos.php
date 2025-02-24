@@ -87,7 +87,7 @@
           echo '<td data-label="Marca">' . $r->marcaProduto . '</td>';
           echo '<td data-label="Modelo">' . $r->nomeModelo . '</td>';
           echo '<td data-label="Estoque">' . $r->estoque . '</td>';
-          echo '<td data-label="Preço">' . number_format($r->precoVenda, 2, ',', '.') . '</td>';
+          echo '<td data-label="Preço">R$ ' . number_format($r->precoVenda, 2, ',', '.') . '</td>';
           echo '<td data-label="Ações">';
           if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vProduto')) {
             echo '<a style="margin-right: 1%" href="' . base_url() . 'index.php/produtos/visualizar/' . $r->idProdutos . '" class="btn-nwe" title="Visualizar Produto"><i class="bx bx-show bx-xs"></i></a>  ';

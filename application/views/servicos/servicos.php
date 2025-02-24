@@ -90,7 +90,7 @@
             echo '<tr>';
             echo '<td data-label="Cod.">' . $r->idServicos . '</td>';
             echo '<td data-label="Nome">' . $r->nome . '</td>';
-            echo '<td data-label="Preço">' . number_format($r->preco, 2, ',', '.') . '</td>';
+            echo '<td data-label="Preço">R$ ' . number_format($r->preco, 2, ',', '.') . '</td>';
             echo '<td data-label="Descrição">' . $r->descricao . '</td>';
             echo '<td data-label="Ações">';
             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'eServico')) {
