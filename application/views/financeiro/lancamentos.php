@@ -29,48 +29,80 @@ $periodo = $this->input->get('periodo');
     }
 
     .btn-despesa {
-    background-color:rgb(226, 20, 17);
-    color: white; 
-    transition: background-color 0.3s ease;
+        background-color: rgb(226, 20, 17);
+        color: white;
+        transition: background-color 0.3s ease;
     }
 
     .btn-despesa:hover {
-        background-color:rgb(190, 64, 62);
+        background-color: rgb(190, 64, 62);
         color: white;
     }
 
+    /* Estilos para a tabela em telas pequenas */
+    @media (max-width: 768px) {
+        table#divLancamentos thead {
+            display: none;
+        }
 
+        table#divLancamentos tbody tr {
+            display: block;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        table#divLancamentos tbody tr td {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            border: none;
+        }
+
+        table#divLancamentos tbody tr td::before {
+            content: attr(data-label);
+            font-weight: bold;
+            color: #666;
+            margin-right: 10px;
+            flex: 1;
+        }
+
+        table#divLancamentos tbody tr td:last-child {
+            display: flex;
+            justify-content: flex-start;
+            gap: 5px;
+        }
+    }
 </style>
 
 <div class="new122">
     <div class="widget-title">
-                <span class="icon">
-                    <i class="fas fa-hand-holding-usd"></i>
-                </span>
-                <h5>Lançamentos Financeiros</h5>
+        <span class="icon">
+            <i class="fas fa-hand-holding-usd"></i>
+        </span>
+        <h5>Lançamentos Financeiros</h5>
     </div>
-    
-    <div class="span12" >
-        <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) { ?>
-        <div class="span12">
-        <div style="display: flex; flex-wrap: wrap; ">
-                <div class="">
-                    <a href="#modalReceita" data-toggle="modal" data-tipo="receita" role="button" class="button btn btn-mini btn-success" style="width: 160px">
-                        <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova receita"> Receita</span>
-                    </a>
-                </div>
 
-                <div class="">
-                    <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" role="button" class="button btn btn-mini btn-danger" style="width: 160px">
-                        <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova despesa"> Despesa</span>
-                    </a>
+    <div class="span12">
+        <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) { ?>
+            <div class="span12">
+                <div style="display: flex; flex-wrap: wrap;">
+                    <div class="">
+                        <a href="#modalReceita" data-toggle="modal" data-tipo="receita" role="button" class="button btn btn-mini btn-success" style="width: 160px">
+                            <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova receita"> Receita</span>
+                        </a>
+                    </div>
+
+                    <div class="">
+                        <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" role="button" class="button btn btn-mini btn-danger" style="width: 160px">
+                            <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova despesa"> Despesa</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
-    <?php } ?>
-
+        <?php } ?>
     </div>
-
 
     <div class="span12" style="margin-left: 0;margin-top: 1rem;">
         <form action="<?php echo current_url(); ?>" method="get">
@@ -101,10 +133,8 @@ $periodo = $this->input->get('periodo');
                 <label>Tipo</label>
                 <select name="tipo" class="span12">
                     <option value="">Todos</option>
-                    <option value="receita" <?= $this->input->get('tipo') === 'receita' ? 'selected' : '' ?>>Receita
-                    </option>
-                    <option value="despesa" <?= $this->input->get('tipo') === 'despesa' ? 'selected' : '' ?>>Despesa
-                    </option>
+                    <option value="receita" <?= $this->input->get('tipo') === 'receita' ? 'selected' : '' ?>>Receita</option>
+                    <option value="despesa" <?= $this->input->get('tipo') === 'despesa' ? 'selected' : '' ?>>Despesa</option>
                 </select>
             </div>
 
@@ -124,18 +154,15 @@ $periodo = $this->input->get('periodo');
 
             <div class="span2 pull-right">
                 <button type="submit" class="button btn btn-primary btn-sm" style="min-width: 120px">
-                    <span class="button__icon"><i class='bx bx-filter-alt'></i></span><span class="button__text2">Filtrar</span></a></button>
+                    <span class="button__icon"><i class='bx bx-filter-alt'></i></span><span class="button__text2">Filtrar</span></button>
             </div>
         </form>
     </div>
 
     <div>
         <div class="widget-box">
-
             <div class="widget-content nopadding tab-content">
-
-
-                <table class="table table-bordered " id="divLancamentos">
+                <table class="table table-bordered" id="divLancamentos">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -154,15 +181,14 @@ $periodo = $this->input->get('periodo');
                     </thead>
                     <tbody>
                         <?php
-
                         if (!$results) {
                             echo '<tr>
-              <td colspan="9" >Nenhum lançamento encontrado</td>
-            </tr>';
+                                    <td colspan="12">Nenhum lançamento encontrado</td>
+                                  </tr>';
                         }
                         foreach ($results as $r) {
                             $vencimento = date(('d/m/Y'), strtotime($r->data_vencimento));
-                           
+
                             if ($r->baixado == 0) {
                                 $status = 'Pendente';
                             } else {
@@ -174,19 +200,18 @@ $periodo = $this->input->get('periodo');
                                 $label = 'important';
                             }
                             echo '<tr>';
-                            echo '<td>' . $r->idLancamentos . '</td>';
-                            echo '<td><span class="label label-' . $label . '">' . ucfirst($r->tipo) . '</span></td>';
-                            echo '<td>' . $r->cliente_fornecedor . '</td>';
-                            echo '<td>' . $r->descricao . '</td>';
-                            echo '<td>' . $vencimento . '</td>';
-                            echo '<td>' . $status . '</td>';
-                            echo '<td>' . $r->observacoes . '</td>';
-                            echo '<td>' . $r->forma_pgto . '</td>';
-                            echo '<td> R$ ' . number_format($r->valor, 2, ',', '.') . '</td>'; //valor total sem o desconto
-                            echo  $r->tipo_desconto == "real" ? '<td>' . "R$ ".$r->desconto . '</td>' : ($r->tipo_desconto == "porcento" ? '<td>' . $r->desconto." %" . '</td>' : '<td>' . "0" . '</td>'); // valor do desconto
-                            echo $r->valor_desconto != 0 ? '<td> R$ ' . number_format($r->valor_desconto, 2, ',', '.') . '</td>' : '<td> R$ ' . number_format($r->valor, 2, ',', '.') . '</td>'; // valor total  com o desconto
-                           
-                            echo '<td>';
+                            echo '<td data-label="#">' . $r->idLancamentos . '</td>';
+                            echo '<td data-label="Tipo"><span class="label label-' . $label . '">' . ucfirst($r->tipo) . '</span></td>';
+                            echo '<td data-label="Cliente / Fornecedor">' . $r->cliente_fornecedor . '</td>';
+                            echo '<td data-label="Descrição">' . $r->descricao . '</td>';
+                            echo '<td data-label="Vencimento">' . $vencimento . '</td>';
+                            echo '<td data-label="Status">' . $status . '</td>';
+                            echo '<td data-label="Observações">' . $r->observacoes . '</td>';
+                            echo '<td data-label="Forma de Pagamento">' . $r->forma_pgto . '</td>';
+                            echo '<td data-label="Valor (+)">R$ ' . number_format($r->valor, 2, ',', '.') . '</td>';
+                            echo $r->tipo_desconto == "real" ? '<td data-label="Desconto (-)">' . "R$ " . $r->desconto . '</td>' : ($r->tipo_desconto == "porcento" ? '<td data-label="Desconto (-)">' . $r->desconto . " %" . '</td>' : '<td data-label="Desconto (-)">' . "0" . '</td>');
+                            echo $r->valor_desconto != 0 ? '<td data-label="Valor Total (=)">R$ ' . number_format($r->valor_desconto, 2, ',', '.') . '</td>' : '<td data-label="Valor Total (=)">R$ ' . number_format($r->valor, 2, ',', '.') . '</td>';
+                            echo '<td data-label="Ações">';
                             if ($r->data_pagamento == "0000-00-00") {
                                 $data_pagamento = "";
                             } else {
@@ -199,11 +224,18 @@ $periodo = $this->input->get('periodo');
                             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dLancamento')) {
                                 echo '<a href="#modalExcluir" data-toggle="modal" role="button" idLancamento="' . $r->idLancamentos . '" class="btn-nwe4 excluir" title="Excluir OS"><i class="bx bx-trash-alt"></i></a>';
                             }
-
                             echo '</td>';
                             echo '</tr>';
                         } ?>
                     </tbody>
+
+                    </table>
+
+                    <table class="table table-bordered" id="divLancamentos">
+           
+</div>
+
+
                     <tfoot>
                         <tr>
                             <td colspan="6" style="text-align: right; color: green"><strong>Total Receitas:</strong></td>
@@ -519,85 +551,6 @@ echo number_format($soma_descontos_pagos, 2, ',', '.')?></strong></td>
         </div>
     </form>
 </div>
-
-<!-- Modal nova despesa (NAO É UTILIZADO MAIS ESSE MODAL)
-<div id="modalDespesa" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <form id="formDespesa" action="<?php // echo base_url()?>index.php/financeiro/adicionarDespesa" method="post">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel">MapOS - Adicionar Despesa</h3>
-        </div>
-        <div class="modal-body">
-            <div class="span12 alert alert-info" style="margin-left: 0"> Obrigatório o preenchimento dos campos com
-                asterisco.
-            </div>
-            <div class="span12" style="margin-left: 0">
-                <label for="descricao">Descrição*</label>
-                <input class="span12" id="descricao" type="text" name="descricao" />
-                <input id="urlAtual" type="hidden" name="urlAtual" value="<?php  // echo current_url()?>" />
-            </div>
-            <div class="span12" style="margin-left: 0">
-                <div class="span12" style="margin-left: 0">
-                    <label for="fornecedor">Fornecedor / Empresa*</label>
-                    <input class="span12" id="fornecedor" type="text" name="fornecedor" />
-                    <input class="span12" id="idFornecedor" type="hidden" name="idFornecedor" />
-                </div>
-
-                <div class="span12" style="margin-left: 0">
-                    <label for="observacoes">Observações</label>
-                    <textarea class="span12" id="observacoes" name="observacoes"></textarea>
-                </div>
-
-            </div>
-            <div class="span12" style="margin-left: 0">
-                <div class="span4" style="margin-left: 0">
-                    <label for="valor">Valor*</label>
-                    <input type="hidden" name="tipo" value="despesa" />
-                    <input class="span12 money" type="text" name="valor" data-affixes-stay="true" data-thousands="" data-decimal="." />
-                </div>
-                <div class="span4">
-                    <label for="vencimento">Data Vencimento*</label>
-                    <input class="span12 datepicker" autocomplete="off" type="text" name="vencimento" />
-                </div>
-
-            </div>
-            <div class="span12" style="margin-left: 0">
-                <div class="span4" style="margin-left: 0">
-                    <label for="pago">Foi Pago?</label>
-                    &nbsp &nbsp &nbsp &nbsp<input id="pago" type="checkbox" name="pago" value="1" />
-                </div>
-                <div id="divPagamento" class="span8" style=" display: none">
-                    <div class="span6">
-                        <label for="pagamento">Data Pagamento</label>
-                        <input class="span12 datepicker" autocomplete="off" id="pagamento" type="text" name="pagamento" />
-                    </div>
-
-                    <div class="span6">
-                        <label for="formaPgto">Forma Pgto</label>
-                        <select name="formaPgto" class="span12">
-                            <option value="Dinheiro">Dinheiro</option>
-                            <option value="Cartão de Crédito">Cartão de Crédito</option>
-                            <option value="Cheque">Cheque</option>
-                            <option value="Boleto">Boleto</option>
-                            <option value="Depósito">Depósito</option>
-                            <option value="Débito">Débito</option>
-                            <option value="Pix">Pix</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-        <div class="modal-footer" style="display:flex;justify-content: center">
-            <button class="button btn btn-warning" data-dismiss="modal" aria-hidden="true">
-                <span class="button__icon"><i class="bx bx-x"></i></span><span class="button__text2">Cancelar</span></button>
-            <button class="button btn btn-danger" id="submitDespesa">
-                <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Adicionar Despesa</span></button>
-        </div>
-    </form>
-</div>
- -->
 
 <!-- Modal editar lançamento -->
 <div id="modalEditar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
