@@ -51,17 +51,17 @@ $periodo = $this->input->get('periodo');
     </div>
     
     <div class="span12" >
-    <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) { ?>
+        <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) { ?>
         <div class="span12">
-            <div style="display:flex">
-                <div>
-                    <a href="#modalReceita" data-toggle="modal" data-tipo="receita" role="button" class="button btn btn-mini btn-success" style="width: 160px">
+        <div style="display: flex; flex-wrap: wrap; ">
+                <div class="">
+                    <a href="#modalReceita" data-toggle="modal" data-tipo="receita" role="button" class="button btn btn-mini btn-success" style="width: 230px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova receita"> Receita</span>
                     </a>
                 </div>
 
-                <div>
-                    <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" role="button" class="button btn btn-mini btn-danger" style="width: 160px">
+                <div class="">
+                    <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" role="button" class="button btn btn-mini btn-danger" style="width: 230px">
                         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova despesa"> Despesa</span>
                     </a>
                 </div>
