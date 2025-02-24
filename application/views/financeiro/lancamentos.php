@@ -16,6 +16,10 @@ $periodo = $this->input->get('periodo');
         border-color: #b94a48;
     }
 
+    failid {
+        border-color: #b94a48;
+    }
+
     input.valid {
         border-color: #5bb75b;
     }
@@ -23,6 +27,19 @@ $periodo = $this->input->get('periodo');
     textarea {
         resize: vertical;
     }
+
+    .btn-despesa {
+    background-color:rgb(226, 20, 17);
+    color: white; 
+    transition: background-color 0.3s ease;
+    }
+
+    .btn-despesa:hover {
+        background-color:rgb(190, 64, 62);
+        color: white;
+    }
+
+
 </style>
 
 <div class="new122">
@@ -32,12 +49,25 @@ $periodo = $this->input->get('periodo');
                 </span>
                 <h5>Lançamentos Financeiros</h5>
     </div>
+    
     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) { ?>
-        <div class="" style="display:flex">
-            <a href="#modalReceita" data-toggle="modal" role="button" class="button btn btn-mini btn-success" style="width: 230px">
-                <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova receita ou despesa"> Receita/Despesa</span></a>
+        <div class="span12">
+            <div style="display:flex">
+                <div>
+                    <a href="#modalReceita" data-toggle="modal" data-tipo="receita" role="button" class="button btn btn-mini btn-success" style="width: 230px">
+                        <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova receita"> Receita</span>
+                    </a>
+                </div>
+
+                <div>
+                    <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" role="button" class="button btn btn-mini btn-danger" style="width: 230px">
+                        <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova despesa"> Despesa</span>
+                    </a>
+                </div>
+            </div>
         </div>
     <?php } ?>
+
 
     <div class="span12" style="margin-left: 0;margin-top: 1rem;">
         <form action="<?php echo current_url(); ?>" method="get">
@@ -1137,3 +1167,14 @@ echo number_format($soma_descontos_pagos, 2, ',', '.')?></strong></td>
 		});
     });
 </script>
+
+<script>
+    $(document).ready(function() {
+        // Evento de clique nos botões
+        $('[data-toggle="modal"]').click(function() {
+            var tipo = $(this).data('tipo'); // Pega o tipo do botão clicado
+            $('#tipo').val(tipo); // Define o valor do select no modal
+        });
+    });
+</script>
+

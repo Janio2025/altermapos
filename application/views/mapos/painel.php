@@ -23,6 +23,11 @@
     <div></div>
 </div>
 
+<?php $situacao = $this->input->get('situacao');
+$periodo = $this->input->get('periodo');
+?>
+
+
 <!--Action boxes-->
 <ul class="cardBox">
     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCliente')) : ?>
