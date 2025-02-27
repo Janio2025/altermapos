@@ -624,3 +624,20 @@
         }
     }
 </script>
+
+<script type="text/javascript">
+    function corrigirPrecoMobile() {
+        if (window.matchMedia('(max-width: 768px)').matches) {
+            document.querySelectorAll('.money').forEach(function(input) {
+                input.addEventListener('input', function() {
+                    let valor = this.value.replace(/,/g, '.');
+                    if (!isNaN(valor) && valor !== '') {
+                        this.value = parseFloat(valor).toFixed(2);
+                    }
+                });
+            });
+        }
+    }
+    
+    document.addEventListener("DOMContentLoaded", corrigirPrecoMobile);
+</script>
