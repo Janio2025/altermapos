@@ -388,7 +388,24 @@
     });
 
     $(document).ready(function() {
-        $(".money").maskMoney();
+        $(".money").maskMoney({
+            // Opções adicionais do maskMoney para atualização imediata (teste essas opções)
+            // updateOnFocus: true,
+            // selectOnKeydown: true
+        });
+
+        // Atualização imediata da máscara no evento 'input'
+        $("#precoCompra, #Lucro").on('input', function() {
+            $(this).maskMoney('mask'); // Aplica a máscara imediatamente
+            atualizarPrecoVenda();
+        });
+
+        // Removendo o evento blur pois a mascara será aplicada imediatamente com o input.
+        //$("#precoCompra, #Lucro").on('blur', function() {
+        //    $(this).maskMoney('mask');
+        //    atualizarPrecoVenda();
+        //});
+
         $.getJSON('<?php echo base_url() ?>assets/json/tabela_medidas.json', function(data) {
             for (i in data.medidas) {
                 $('#unidade').append(new Option(data.medidas[i].descricao, data.medidas[i].sigla));
