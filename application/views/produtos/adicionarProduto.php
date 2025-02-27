@@ -413,9 +413,10 @@
     }
     
     function atualizarPrecoVenda() {
-        var precoCompra = Number($("#precoCompra").val());
-        var lucro = Number($("#Lucro").val());
-        
+        // Usando parseFloat para converter a string em número, e limpando a string antes da conversão
+        var precoCompra = parseFloat($("#precoCompra").val().replace(/[^0-9.]/g, '')) || 0;
+        var lucro = parseFloat($("#Lucro").val().replace(/[^0-9.]/g, '')) || 0;
+
         if (precoCompra > 0 && lucro >= 0) {
             $('#precoVenda').val(calcLucro(precoCompra, lucro));
         }
@@ -458,6 +459,7 @@
     });
 
     $(document).ready(function() {
+        $(".money").maskMoney({ allowZero: true });
         $(".money").maskMoney();
         $.getJSON('<?php echo base_url() ?>assets/json/tabela_medidas.json', function(data) {
             for (i in data.medidas) {
@@ -509,6 +511,14 @@
                 $(element).parents('.control-group').addClass('success');
             }
         });
+
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        document.getElementById('precoCompra').type = 'tel';
+        document.getElementById('precoVenda').type = 'tel';
+        // Adicionando o atributo inputmode para otimizar o teclado virtual
+        document.getElementById('precoCompra').inputMode = 'decimal'; 
+        document.getElementById('precoVenda').inputMode = 'decimal'; 
+    }
     });
 
 
@@ -625,19 +635,3 @@
     }
 </script>
 
-<script type="text/javascript">
-    function corrigirPrecoMobile() {
-        if (window.matchMedia('(max-width: 768px)').matches) {
-            document.querySelectorAll('.money').forEach(function(input) {
-                input.addEventListener('input', function() {
-                    let valor = this.value.replace(/,/g, '.');
-                    if (!isNaN(valor) && valor !== '') {
-                        this.value = parseFloat(valor).toFixed(2);
-                    }
-                });
-            });
-        }
-    }
-    
-    document.addEventListener("DOMContentLoaded", corrigirPrecoMobile);
-</script>
