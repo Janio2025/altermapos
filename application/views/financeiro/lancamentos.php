@@ -752,9 +752,17 @@ echo number_format($soma_descontos_pagos, 2, ',', '.')?></strong></td>
 			}
         }
 
-    jQuery(document).ready(function($) {
+        jQuery(document).ready(function($) {
+        $(".money").maskMoney({
+            // Opções adicionais do maskMoney para atualização imediata (teste essas opções)
+            // updateOnFocus: true,
+            // selectOnKeydown: true
+        });
 
-        $(".money").maskMoney();
+        // Atualização imediata da máscara nos campos 'money'
+        $(".money").on('input', function() {
+            $(this).maskMoney('mask'); // Aplica a máscara imediatamente
+        });
 
         $('#pago').click(function(event) {
             var flag = $(this).is(':checked');
@@ -764,7 +772,6 @@ echo number_format($soma_descontos_pagos, 2, ',', '.')?></strong></td>
                 $('#divPagamento').hide();
             }
         });
-
 
         $('#recebido').click(function(event) {
             var flag = $(this).is(':checked');

@@ -47,7 +47,16 @@
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $(".money").maskMoney();
+        $(".money").maskMoney({
+            // Opções adicionais do maskMoney para atualização imediata (teste essas opções)
+            // updateOnFocus: true,
+            // selectOnKeydown: true
+        });
+
+        // Atualização imediata da máscara no evento 'input'
+        $("#preco").on('input', function() {
+            $(this).maskMoney('mask'); // Aplica a máscara imediatamente
+        });
         $('#formServico').validate({
             rules: {
                 nome: {
