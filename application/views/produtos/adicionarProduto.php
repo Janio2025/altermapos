@@ -459,6 +459,14 @@
 
     $(document).ready(function() {
         $(".money").maskMoney();
+
+        // Forçar formatação ao perder o foco
+        $("#precoCompra, #Lucro").on('blur', function() {
+            $(this).maskMoney('mask'); // Força a formatação
+            atualizarPrecoVenda();
+        });
+
+
         $.getJSON('<?php echo base_url() ?>assets/json/tabela_medidas.json', function(data) {
             for (i in data.medidas) {
                 $('#unidade').append(new Option(data.medidas[i].descricao, data.medidas[i].sigla));
@@ -625,18 +633,3 @@
     }
 </script>
 
-<script type="text/javascript">
-    $(document).ready(function() {
-        $(".money").maskMoney();
-
-        // Forçar formatação ao perder o foco
-        $("#precoCompra, #Lucro").on('blur', function() {
-            $(this).maskMoney('mask'); // Força a formatação
-            atualizarPrecoVenda();
-        });
-
-        // Restante do seu código...
-    });
-
-    // ... (Suas outras funções e eventos) ...
-</script>
