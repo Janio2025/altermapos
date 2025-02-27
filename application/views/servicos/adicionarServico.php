@@ -50,6 +50,12 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $(".money").maskMoney();
+
+        $("#precoCompra, #Lucro").on('input', function() {
+            $(this).maskMoney('mask'); // Aplica a máscara imediatamente
+            atualizarPrecoVenda();
+        });
+        
         $('#formServico').validate({
             rules: {
                 nome: {
