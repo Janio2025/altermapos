@@ -49,29 +49,25 @@
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $(".money").maskMoney();
-
-        $("#precoCompra, #Lucro").on('input', function() {
-            $(this).maskMoney('mask'); // Aplica a máscara imediatamente
-            atualizarPrecoVenda();
+        $(".money").maskMoney({
+            // Opções adicionais do maskMoney para atualização imediata (teste essas opções)
+            // updateOnFocus: true,
+            // selectOnKeydown: true
         });
-        
+
+        // Atualização imediata da máscara no evento 'input'
+        $("#preco").on('input', function() {
+            $(this).maskMoney('mask'); // Aplica a máscara imediatamente
+        });
+
         $('#formServico').validate({
             rules: {
-                nome: {
-                    required: true
-                },
-                preco: {
-                    required: true
-                }
+                nome: { required: true },
+                preco: { required: true }
             },
             messages: {
-                nome: {
-                    required: 'Campo Requerido.'
-                },
-                preco: {
-                    required: 'Campo Requerido.'
-                }
+                nome: { required: 'Campo Requerido.' },
+                preco: { required: 'Campo Requerido.' }
             },
             errorClass: "help-inline",
             errorElement: "span",
