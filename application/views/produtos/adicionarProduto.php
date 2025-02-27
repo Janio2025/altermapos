@@ -625,3 +625,18 @@
     }
 </script>
 
+<script type="text/javascript">
+    $(document).ready(function() {
+        $(".money").maskMoney();
+
+        // Forçar formatação ao perder o foco
+        $("#precoCompra, #Lucro").on('blur', function() {
+            $(this).maskMoney('mask'); // Força a formatação
+            atualizarPrecoVenda();
+        });
+
+        // Restante do seu código...
+    });
+
+    // ... (Suas outras funções e eventos) ...
+</script>
