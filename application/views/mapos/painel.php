@@ -212,6 +212,22 @@ $periodo = $this->input->get('periodo');
                         </div>
                     </a>
 
+                    <a href="<?php echo base_url(); ?>index.php/os/adicionar" class="card tip-top" title="Adicionar OS">
+                        <div><i class='bx bxs-spreadsheet iconBx2'></i></div>
+                        <div>
+                            <div class="cardName2">
+                                <?php
+                                // Consulta para contar as ordens de serviço com laudo técnico preenchido
+                                $this->db->where('laudoTecnico IS NOT NULL');
+                                $this->db->where('laudoTecnico !=', ''); // Garante que o campo não esteja vazio
+                                $count = $this->db->count_all_results('os');
+                                echo $count;
+                                ?>
+                            </div>
+                            <div class="cardName">Laudo Técnico</div>
+                        </div>
+                    </a>
+
                     <a href="<?php echo base_url(); ?>index.php/garantias" class="card tip-top" title="Adicionar garantia">
                         <div><i class='bx bxs-receipt iconBx6'></i></div>
                         <div>
