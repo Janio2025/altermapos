@@ -26,8 +26,6 @@
 <?php $situacao = $this->input->get('situacao');
 $periodo = $this->input->get('periodo');
 ?>
-
-
 <!--Action boxes-->
 <ul class="cardBox">
     <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCliente')) : ?>
@@ -127,7 +125,6 @@ $periodo = $this->input->get('periodo');
     <?php endif ?>
 </ul>
 <!--End-Action boxes-->
-
 <div class="row-fluid" style="margin-top: 0; display: flex">
     <div class="Sspan12">
         <div class="widget-box2">
@@ -156,7 +153,6 @@ $periodo = $this->input->get('periodo');
                 </table>
             </div>
         </div>
-
         <!-- New widget right -->
         <div class="new-statisc">
             <div class="widget-box-new widbox-blak" style="height:100%">
@@ -165,11 +161,30 @@ $periodo = $this->input->get('periodo');
                 </div>
 
                 <div class="new-bottons">
-                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Add Clientes e Fornecedores">
+                    
+                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
                         <div><i class='bx bxs-group iconBx'></i></div>
                         <div>
-                            <div class="cardName2"><?= $this->db->count_all('clientes'); ?></div>
+                            <div class="cardName2">
+                                <?php
+                                $this->db->where('fornecedor', 0); // Filtra fornecedores
+                                echo $this->db->count_all_results('clientes'); // Conta fornecedores
+                                ?>
+                            </div>
                             <div class="cardName">Clientes</div>
+                        </div>
+                    </a>
+
+                     <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
+                        <div><i class='bx bxs-group iconBx6'></i></div>
+                        <div>
+                            <div class="cardName2">
+                                <?php
+                                $this->db->where('fornecedor', 1); // Filtra fornecedores
+                                echo $this->db->count_all_results('clientes'); // Conta fornecedores
+                                ?>
+                            </div>
+                            <div class="cardName">Fornecedores</div>
                         </div>
                     </a>
 
@@ -212,7 +227,6 @@ $periodo = $this->input->get('periodo');
                             <div class="cardName">Vendas</div>
                         </div>
                     </a>
-
                     <!-- responsavel por fazer complementar a variavel "$financeiro_mes_dia->" de receita e despesa -->
                     <?php if ($estatisticas_financeiro != null) {
                         if ($estatisticas_financeiro->total_receita != null || $estatisticas_financeiro->total_despesa != null || $estatisticas_financeiro->total_receita_pendente != null || $estatisticas_financeiro->total_despesa_pendente != null) {  ?>
@@ -229,6 +243,8 @@ $periodo = $this->input->get('periodo');
                                     </div>
                                 </a>
 
+                                
+
                                 <a href="<?php echo base_url() ?>index.php/financeiro/lancamentos" class="card tip-top" title="Adiciona despesa">
                                     <div><i class='bx bxs-down-arrow-circle iconBx8'></i></div>
                                     <div>
@@ -240,13 +256,15 @@ $periodo = $this->input->get('periodo');
 
                     <?php  }
                     } ?>
+
+
+
                 </div>
             </div>
         </div>
     </div>
 </div>
 <!-- Fim new widget right -->
-
 <?php if ($estatisticas_financeiro != null) {
     if ($estatisticas_financeiro->total_receita != null || $estatisticas_financeiro->total_despesa != null || $estatisticas_financeiro->total_receita_pendente != null || $estatisticas_financeiro->total_despesa_pendente != null) {  ?>
 
