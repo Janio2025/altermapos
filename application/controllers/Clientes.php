@@ -69,6 +69,14 @@ class Clientes extends MY_Controller
         if ($this->form_validation->run('clientes') == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
         } else {
+            $fornecedor = 0; // Valor padrão (Cliente Normal)
+
+            if (set_value('fornecedor') == true) {
+                $fornecedor = 1; // Fornecedor
+            } elseif (set_value('colaborador') == true) {
+                $fornecedor = 2; // Colaborador
+            }
+
             $data = [
                 'nomeCliente' => set_value('nomeCliente'),
                 'contato' => set_value('contato'),
@@ -86,7 +94,7 @@ class Clientes extends MY_Controller
                 'estado' => set_value('estado'),
                 'cep' => set_value('cep'),
                 'dataCadastro' => date('Y-m-d'),
-                'fornecedor' => (set_value('fornecedor') == true ? 1 : 0),
+                'fornecedor' => $fornecedor, // Novo valor (0, 1 ou 2)
             ];
 
             if ($this->clientes_model->add('clientes', $data) == true) {
@@ -125,6 +133,14 @@ class Clientes extends MY_Controller
             if ($senha != null) {
                 $senha = password_hash($senha, PASSWORD_DEFAULT);
 
+                $fornecedor = 0; // Valor padrão (Cliente Normal)
+
+                if (set_value('fornecedor') == true) {
+                    $fornecedor = 1; // Fornecedor
+                } elseif (set_value('colaborador') == true) {
+                    $fornecedor = 2; // Colaborador
+                }
+
                 $data = [
                     'nomeCliente' => $this->input->post('nomeCliente'),
                     'contato' => $this->input->post('contato'),
@@ -132,7 +148,6 @@ class Clientes extends MY_Controller
                     'telefone' => $this->input->post('telefone'),
                     'celular' => $this->input->post('celular'),
                     'email' => $this->input->post('email'),
-                    'senha' => $senha,
                     'rua' => $this->input->post('rua'),
                     'numero' => $this->input->post('numero'),
                     'complemento' => $this->input->post('complemento'),
@@ -140,9 +155,17 @@ class Clientes extends MY_Controller
                     'cidade' => $this->input->post('cidade'),
                     'estado' => $this->input->post('estado'),
                     'cep' => $this->input->post('cep'),
-                    'fornecedor' => (set_value('fornecedor') == true ? 1 : 0),
+                    'fornecedor' => $fornecedor, // Novo valor (0, 1 ou 2)
                 ];
             } else {
+                $fornecedor = 0; // Valor padrão (Cliente Normal)
+
+                if (set_value('fornecedor') == true) {
+                    $fornecedor = 1; // Fornecedor
+                } elseif (set_value('colaborador') == true) {
+                    $fornecedor = 2; // Colaborador
+                }
+
                 $data = [
                     'nomeCliente' => $this->input->post('nomeCliente'),
                     'contato' => $this->input->post('contato'),
@@ -157,7 +180,7 @@ class Clientes extends MY_Controller
                     'cidade' => $this->input->post('cidade'),
                     'estado' => $this->input->post('estado'),
                     'cep' => $this->input->post('cep'),
-                    'fornecedor' => (set_value('fornecedor') == true ? 1 : 0),
+                    'fornecedor' => $fornecedor, // Novo valor (0, 1 ou 2)
                 ];
             }
 

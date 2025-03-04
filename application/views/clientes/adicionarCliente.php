@@ -140,14 +140,21 @@
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label">Tipo de Cliente</label>
-                            <div class="controls">
-                                <label for="fornecedor" class="btn btn-default">Fornecedor
-                                    <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="0">
-                                    <span class="badge">&check;</span>
-                                </label>
-                            </div>
-                        </div>
+    <label class="control-label">Tipo de Cliente</label>
+    <div class="controls">
+        <!-- Fornecedor (valor 1) -->
+        <label for="fornecedor" class="btn btn-default">Fornecedor
+            <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1">
+            <span class="badge">&check;</span>
+        </label>
+
+        <!-- Colaborador (valor 2) -->
+        <label for="colaborador" class="btn btn-default">Colaborador
+            <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2">
+            <span class="badge">&check;</span>
+        </label>
+    </div>
+</div>
                     </div>
 
                     <div class="span6">
@@ -275,5 +282,25 @@ document.getElementById('documento').addEventListener('input', function() {
         contatoGroup.style.display = 'none';
         nomeClienteLabel.innerHTML = 'Nome<span class="required">*</span>';
     }
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fornecedorCheckbox = document.getElementById('fornecedor');
+    const colaboradorCheckbox = document.getElementById('colaborador');
+
+    fornecedorCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            colaboradorCheckbox.checked = false;
+        }
+    });
+
+    colaboradorCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            fornecedorCheckbox.checked = false;
+        }
+    });
 });
 </script>

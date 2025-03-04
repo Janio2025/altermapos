@@ -65,56 +65,60 @@
     </div>
 
     <div class="widget-box">
-        <h5 style="padding: 11px 0"></h5>
-        <div class="widget-content nopadding tab-content">
-            <table id="tabela" class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Cod.</th>
-                        <th>Nome</th>
-                        <th>Contato</th>
-                        <th>CPF/CNPJ</th>
-                        <th>Telefone</th>
-                        <th>Celular</th>
-                        <th>Email</th>
-                        <th>Tipo</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    if (!$results) {
-                        echo '<tr><td colspan="9">Nenhum Cliente Cadastrado</td></tr>';
-                    }
-                    foreach ($results as $r) {
-                        echo '<tr>';
-                        echo '<td data-label="Cod.">' . $r->idClientes . '</td>';
-                        echo '<td data-label="Nome"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '">' . $r->nomeCliente . '</a></td>';
-                        echo '<td data-label="Contato">' . $r->contato . '</td>';
-                        echo '<td data-label="CPF/CNPJ">' . $r->documento . '</td>';
-                        echo '<td data-label="Telefone">' . $r->telefone . '</td>';
-                        echo '<td data-label="Celular">' . $r->celular . '</td>';
-                        echo '<td data-label="Email">' . $r->email . '</td>';
-                        echo '<td data-label="Tipo">' . ($r->fornecedor == 1 ? '<span class="label label-primary">Fornecedor</span>' : '<span class="label label-success">Cliente</span>') . '</td>';
+    <h5 style="padding: 11px 0"></h5>
+    <div class="widget-content nopadding tab-content">
+        <table id="tabela" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Cod.</th>
+                    <th>Nome</th>
+                    <th>Contato</th>
+                    <th>CPF/CNPJ</th>
+                    <th>Telefone</th>
+                    <th>Celular</th>
+                    <th>Email</th>
+                    <th>Tipo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                if (!$results) {
+                    echo '<tr><td colspan="9">Nenhum Cliente Cadastrado</td></tr>';
+                }
+                foreach ($results as $r) {
+                    echo '<tr>';
+                    echo '<td data-label="Cod.">' . $r->idClientes . '</td>';
+                    echo '<td data-label="Nome"><a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '">' . $r->nomeCliente . '</a></td>';
+                    echo '<td data-label="Contato">' . $r->contato . '</td>';
+                    echo '<td data-label="CPF/CNPJ">' . $r->documento . '</td>';
+                    echo '<td data-label="Telefone">' . $r->telefone . '</td>';
+                    echo '<td data-label="Celular">' . $r->celular . '</td>';
+                    echo '<td data-label="Email">' . $r->email . '</td>';
+                    echo '<td data-label="Tipo">' . 
+                        ($r->fornecedor == 1 ? '<span class="label label-primary">Fornecedor</span>' : 
+                        ($r->fornecedor == 2 ? '<span class="label label-warning">Colaborador</span>' : 
+                        '<span class="label label-success">Cliente</span>')) . 
+                    '</td>';
 
-                        echo '<td data-label="Ações">';
-                        if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCliente')) {
-                            echo '<a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '" class="btn-nwe" title="Ver mais detalhes"><i class="bx bx-show bx-xs"></i></a>';
-                            echo '<a href="' . base_url() . 'index.php/mine?e=' . $r->email . '" target="new" class="btn-nwe2" title="Área do cliente"><i class="bx bx-key bx-xs"></i></a>';
-                        }
-                        if ($this->permission->checkPermission($this->session->userdata('permissao'), 'eCliente')) {
-                            echo '<a href="' . base_url() . 'index.php/clientes/editar/' . $r->idClientes . '" class="btn-nwe3" title="Editar Cliente"><i class="bx bx-edit bx-xs"></i></a>';
-                        }
-                        if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dCliente')) {
-                            echo '<a href="#modal-excluir" role="button" data-toggle="modal" cliente="' . $r->idClientes . '" class="btn-nwe4" title="Excluir Cliente"><i class="bx bx-trash-alt bx-xs"></i></a>';
-                        }
-                        echo '</td>';
-                        echo '</tr>';
-                    } ?>
-                </tbody>
-            </table>
-        </div>
+                    echo '<td data-label="Ações">';
+                    if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCliente')) {
+                        echo '<a href="' . base_url() . 'index.php/clientes/visualizar/' . $r->idClientes . '" class="btn-nwe" title="Ver mais detalhes"><i class="bx bx-show bx-xs"></i></a>';
+                        echo '<a href="' . base_url() . 'index.php/mine?e=' . $r->email . '" target="new" class="btn-nwe2" title="Área do cliente"><i class="bx bx-key bx-xs"></i></a>';
+                    }
+                    if ($this->permission->checkPermission($this->session->userdata('permissao'), 'eCliente')) {
+                        echo '<a href="' . base_url() . 'index.php/clientes/editar/' . $r->idClientes . '" class="btn-nwe3" title="Editar Cliente"><i class="bx bx-edit bx-xs"></i></a>';
+                    }
+                    if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dCliente')) {
+                        echo '<a href="#modal-excluir" role="button" data-toggle="modal" cliente="' . $r->idClientes . '" class="btn-nwe4" title="Excluir Cliente"><i class="bx bx-trash-alt bx-xs"></i></a>';
+                    }
+                    echo '</td>';
+                    echo '</tr>';
+                } ?>
+            </tbody>
+        </table>
     </div>
+</div>
 </div>
 
 <?php echo $this->pagination->create_links(); ?>

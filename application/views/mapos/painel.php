@@ -161,7 +161,7 @@ $periodo = $this->input->get('periodo');
                 </div>
 
                 <div class="new-bottons">
-                    
+
                     <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
                         <div><i class='bx bxs-group iconBx'></i></div>
                         <div>
@@ -175,8 +175,8 @@ $periodo = $this->input->get('periodo');
                         </div>
                     </a>
 
-                     <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
-                        <div><i class='bx bxs-group iconBx6'></i></div>
+                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
+                        <div><i class='bx bxs-user-detail iconBx6'></i></div>
                         <div>
                             <div class="cardName2">
                                 <?php
@@ -185,6 +185,19 @@ $periodo = $this->input->get('periodo');
                                 ?>
                             </div>
                             <div class="cardName">Fornecedores</div>
+                        </div>
+                    </a>
+
+                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
+                        <div><i class='bx bxs-id-card iconBx5'></i></div>
+                        <div>
+                            <div class="cardName2">
+                                <?php
+                                $this->db->where('fornecedor', 2); // Filtra fornecedores
+                                echo $this->db->count_all_results('clientes'); // Conta fornecedores
+                                ?>
+                            </div>
+                            <div class="cardName">Colaboradores</div>
                         </div>
                     </a>
 
@@ -228,14 +241,6 @@ $periodo = $this->input->get('periodo');
                         </div>
                     </a>
 
-                    <a href="<?php echo base_url(); ?>index.php/garantias" class="card tip-top" title="Adicionar garantia">
-                        <div><i class='bx bxs-receipt iconBx6'></i></div>
-                        <div>
-                            <div class="cardName2"><?= $this->db->count_all('garantias'); ?></div>
-                            <div class="cardName">Garantias</div>
-                        </div>
-                    </a>
-
                     <a href="<?php echo base_url() ?>index.php/vendas/adicionar" class="card tip-top" title="Adicionar Vendas">
                         <div><i class='bx bxs-cart-alt iconBx5'></i></div>
                         <div>
@@ -272,8 +277,6 @@ $periodo = $this->input->get('periodo');
 
                     <?php  }
                     } ?>
-
-
 
                 </div>
             </div>
