@@ -139,6 +139,12 @@
                         <div class="control-group">
                             <label class="control-label">Tipo de Cliente</label>
                             <div class="controls">
+                                <!-- Fornecedor (valor 0) -->
+                                <label for="cliente" class="btn btn-default">Cliente
+                                    <input type="checkbox" id="cliente" name="cliente" class="badgebox" value="0" <?= ($result->fornecedor == 0) ? 'checked' : '' ?>>
+                                    <span class="badge">&check;</span>
+                                </label>
+
                                 <!-- Fornecedor (valor 1) -->
                                 <label for="fornecedor" class="btn btn-default">Fornecedor
                                     <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1" <?= ($result->fornecedor == 1) ? 'checked' : '' ?>>
@@ -267,22 +273,34 @@
     });
 </script>
 
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const clienteCheckbox = document.getElementById('cliente');
     const fornecedorCheckbox = document.getElementById('fornecedor');
     const colaboradorCheckbox = document.getElementById('colaborador');
 
+    clienteCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            colaboradorCheckbox.checked = false;
+            fornecedorCheckbox.checked = false;
+        } 
+    });
+
+    
     fornecedorCheckbox.addEventListener('change', function() {
         if (this.checked) {
             colaboradorCheckbox.checked = false;
+            clienteCheckbox.checked = false;
         }
     });
 
     colaboradorCheckbox.addEventListener('change', function() {
         if (this.checked) {
             fornecedorCheckbox.checked = false;
+            clienteCheckbox.checked = false;
         }
     });
 });
 </script>
+
+

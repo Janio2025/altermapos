@@ -162,7 +162,7 @@ $periodo = $this->input->get('periodo');
 
                 <div class="new-bottons">
 
-                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
+                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Clientes">
                         <div><i class='bx bxs-group iconBx'></i></div>
                         <div>
                             <div class="cardName2">
@@ -188,7 +188,7 @@ $periodo = $this->input->get('periodo');
                         </div>
                     </a>
 
-                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
+                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Colaboradores">
                         <div><i class='bx bxs-id-card iconBx5'></i></div>
                         <div>
                             <div class="cardName2">

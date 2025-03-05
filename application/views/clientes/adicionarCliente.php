@@ -112,8 +112,6 @@
                         <input class="contato" type="text" name="contato" value="<?php echo set_value('contato'); ?>" />
                     </div>
                 </div>
-
-            
                         <div class="control-group">
                             <label for="telefone" class="control-label">Telefone</label>
                             <div class="controls">
@@ -140,21 +138,27 @@
                             </div>
                         </div>
                         <div class="control-group">
-    <label class="control-label">Tipo de Cliente</label>
-    <div class="controls">
-        <!-- Fornecedor (valor 1) -->
-        <label for="fornecedor" class="btn btn-default">Fornecedor
-            <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1">
-            <span class="badge">&check;</span>
-        </label>
+                            <label class="control-label">Tipo de Cliente</label>
+                                <div class="controls">
+                                    <!-- Cliente (valor 0) -->
+                                    <label for="cliente" class="btn btn-default">Cliente
+                                        <input type="checkbox" id="cliente" name="cliente" class="badgebox" value="0" checked>
+                                        <span class="badge">&check;</span>
+                                    </label>
 
-        <!-- Colaborador (valor 2) -->
-        <label for="colaborador" class="btn btn-default">Colaborador
-            <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2">
-            <span class="badge">&check;</span>
-        </label>
-    </div>
-</div>
+                                    <!-- Fornecedor (valor 1) -->
+                                    <label for="fornecedor" class="btn btn-default">Fornecedor
+                                        <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1">
+                                        <span class="badge">&check;</span>
+                                    </label>
+
+                                    <!-- Colaborador (valor 2) -->
+                                    <label for="colaborador" class="btn btn-default">Colaborador
+                                        <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2">
+                                        <span class="badge">&check;</span>
+                                    </label>
+                                </div>
+                            </div>
                     </div>
 
                     <div class="span6">
@@ -288,18 +292,30 @@ document.getElementById('documento').addEventListener('input', function() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const clienteCheckbox = document.getElementById('cliente');
     const fornecedorCheckbox = document.getElementById('fornecedor');
     const colaboradorCheckbox = document.getElementById('colaborador');
 
-    fornecedorCheckbox.addEventListener('change', function() {
+    clienteCheckbox.addEventListener('change', function() {
         if (this.checked) {
             colaboradorCheckbox.checked = false;
+            fornecedorCheckbox.checked = false;
+        } 
+    });
+
+    
+    fornecedorCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+
+            colaboradorCheckbox.checked = false;
+            clienteCheckbox.checked = false;
         }
     });
 
     colaboradorCheckbox.addEventListener('change', function() {
         if (this.checked) {
             fornecedorCheckbox.checked = false;
+            clienteCheckbox.checked = false;
         }
     });
 });
