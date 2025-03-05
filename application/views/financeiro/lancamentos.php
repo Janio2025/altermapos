@@ -156,6 +156,25 @@ $periodo = $this->input->get('periodo');
                 <button type="submit" class="button btn btn-primary btn-sm" style="min-width: 120px">
                     <span class="button__icon"><i class='bx bx-filter-alt'></i></span><span class="button__text2">Filtrar</span></button>
             </div>
+
+            <div class="span2 pull-right">
+                <div type="" class="button btn btn-mini btn-success" style="min-width: 120px">
+                <span class="button__text2">RECEITAS:<i class=''></i></span>
+                    <span class="button__text2"><strong> R$ <?php echo number_format($totals['receitas'], 2, ',', '.') ?></strong></span></div>
+            </div>
+
+            <div class="span2 pull-right">
+                <div type="" class="button btn btn-mini btn-danger" style="min-width: 120px">
+                <span class="button__text2">DESPESAS:<i class=''></i></span>
+                    <span class="button__text2"><strong>R$ <?php echo number_format($totals['despesas'], 2, ',', '.') ?></strong></span></div>
+            </div>
+
+            <div class="span2 pull-right">
+                <div type="" class="button btn btn-mini btn-success" style="min-width: 120px">
+                <span class="button__text2">SALDO:<i class=''></i></span>
+                    <span class="button__text2"><strong>R$ <?php echo number_format($totals['receitas'] - $totals['despesas'], 2, ',', '.') ?></strong></span></div>
+            </div>
+
         </form>
     </div>
 
@@ -235,9 +254,10 @@ $periodo = $this->input->get('periodo');
            
 </div>
 
-
                     <tfoot>
-                        <tr>
+                        <td></td>
+
+                    <!-- <tr>
                             <td colspan="6" style="text-align: right; color: green"><strong>Total Receitas:</strong></td>
                             <td colspan="6" style="text-align: left; color: green">
                                 <strong>R$ <?php echo number_format($totals['receitas'], 2, ',', '.') ?></strong>
@@ -254,7 +274,10 @@ $periodo = $this->input->get('periodo');
                             <td colspan="6" style="text-align: left;">
                                 <strong>R$ <?php echo number_format($totals['receitas'] - $totals['despesas'], 2, ',', '.') ?></strong>
                             </td>
-                        </tr>
+                        </tr> -->
+
+
+                        
                     
                         <tr>
                             <td colspan="7" style="text-align: left;"><strong>Estatísticas Gerais do Financeiro:</strong></td>

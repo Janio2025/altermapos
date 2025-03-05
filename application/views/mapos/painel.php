@@ -13,9 +13,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+<link href="<?= base_url(); ?>assets/arquivosbaixados/css/roboto.css" rel="stylesheet" />
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script src='<?= base_url(); ?>assets/arquivosbaixados/js/chart.min.js'></script>
+
 
 <!-- New Bem-vindos -->
 <div id="content-bemv">
