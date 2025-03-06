@@ -164,44 +164,47 @@ $periodo = $this->input->get('periodo');
 
                 <div class="new-bottons">
 
-                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Clientes">
-                        <div><i class='bx bxs-group iconBx'></i></div>
-                        <div>
-                            <div class="cardName2">
-                                <?php
-                                $this->db->where('fornecedor', 0); // Filtra fornecedores
-                                echo $this->db->count_all_results('clientes'); // Conta fornecedores
-                                ?>
-                            </div>
-                            <div class="cardName">Clientes</div>
-                        </div>
-                    </a>
+                   <!-- Botão Cliente -->
+<a href="<?php echo base_url(); ?>index.php/clientes/adicionar?tipo=cliente" class="card tip-top" title="Clientes">
+    <div><i class='bx bxs-group iconBx'></i></div>
+    <div>
+        <div class="cardName2">
+            <?php
+            $this->db->where('fornecedor', 0); // Filtra fornecedores
+            echo $this->db->count_all_results('clientes'); // Conta fornecedores
+            ?>
+        </div>
+        <div class="cardName">Clientes</div>
+    </div>
+</a>
 
-                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Fornecedores">
-                        <div><i class='bx bxs-user-detail iconBx6'></i></div>
-                        <div>
-                            <div class="cardName2">
-                                <?php
-                                $this->db->where('fornecedor', 1); // Filtra fornecedores
-                                echo $this->db->count_all_results('clientes'); // Conta fornecedores
-                                ?>
-                            </div>
-                            <div class="cardName">Fornecedores</div>
-                        </div>
-                    </a>
+<!-- Botão Fornecedor -->
+<a href="<?php echo base_url(); ?>index.php/clientes/adicionar?tipo=fornecedor" class="card tip-top" title="Fornecedores">
+    <div><i class='bx bxs-user-detail iconBx6'></i></div>
+    <div>
+        <div class="cardName2">
+            <?php
+            $this->db->where('fornecedor', 1); // Filtra fornecedores
+            echo $this->db->count_all_results('clientes'); // Conta fornecedores
+            ?>
+        </div>
+        <div class="cardName">Fornecedores</div>
+    </div>
+</a>
 
-                    <a href="<?php echo base_url(); ?>index.php/clientes/adicionar" class="card tip-top" title="Colaboradores">
-                        <div><i class='bx bxs-id-card iconBx5'></i></div>
-                        <div>
-                            <div class="cardName2">
-                                <?php
-                                $this->db->where('fornecedor', 2); // Filtra fornecedores
-                                echo $this->db->count_all_results('clientes'); // Conta fornecedores
-                                ?>
-                            </div>
-                            <div class="cardName">Colaboradores</div>
-                        </div>
-                    </a>
+<!-- Botão Colaborador -->
+<a href="<?php echo base_url(); ?>index.php/clientes/adicionar?tipo=colaborador" class="card tip-top" title="Colaboradores">
+    <div><i class='bx bxs-id-card iconBx5'></i></div>
+    <div>
+        <div class="cardName2">
+            <?php
+            $this->db->where('fornecedor', 2); // Filtra fornecedores
+            echo $this->db->count_all_results('clientes'); // Conta fornecedores
+            ?>
+        </div>
+        <div class="cardName">Colaboradores</div>
+    </div>
+</a>
 
                     <a href="<?php echo base_url(); ?>index.php/produtos/adicionar" class="card tip-top" title="Adicionar Produtos">
                         <div><i class='bx bxs-package iconBx2'></i></div>

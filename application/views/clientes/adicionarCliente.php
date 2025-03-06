@@ -76,6 +76,11 @@
         }
     }
 </style>
+
+<?php
+$tipoCliente = $this->input->get('tipo') ?? 'cliente'; // Define 'cliente' como valor padrão
+?>
+
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
         <div class="widget-box">
@@ -138,27 +143,27 @@
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label">Tipo de Cliente</label>
-                                <div class="controls">
-                                    <!-- Cliente (valor 0) -->
-                                    <label for="cliente" class="btn btn-default">Cliente
-                                        <input type="checkbox" id="cliente" name="cliente" class="badgebox" value="0" checked>
-                                        <span class="badge">&check;</span>
-                                    </label>
+    <label class="control-label">Tipo de Cliente</label>
+    <div class="controls">
+        <!-- Cliente (valor 0) -->
+        <label for="cliente" class="btn btn-default">Cliente
+            <input type="checkbox" id="cliente" name="cliente" class="badgebox" value="0" <?php echo ($tipoCliente == 'cliente') ? 'checked' : ''; ?>>
+            <span class="badge">&check;</span>
+        </label>
 
-                                    <!-- Fornecedor (valor 1) -->
-                                    <label for="fornecedor" class="btn btn-default">Fornecedor
-                                        <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1">
-                                        <span class="badge">&check;</span>
-                                    </label>
+        <!-- Fornecedor (valor 1) -->
+        <label for="fornecedor" class="btn btn-default">Fornecedor
+            <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1" <?php echo ($tipoCliente == 'fornecedor') ? 'checked' : ''; ?>>
+            <span class="badge">&check;</span>
+        </label>
 
-                                    <!-- Colaborador (valor 2) -->
-                                    <label for="colaborador" class="btn btn-default">Colaborador
-                                        <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2">
-                                        <span class="badge">&check;</span>
-                                    </label>
-                                </div>
-                            </div>
+        <!-- Colaborador (valor 2) -->
+        <label for="colaborador" class="btn btn-default">Colaborador
+            <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2" <?php echo ($tipoCliente == 'colaborador') ? 'checked' : ''; ?>>
+            <span class="badge">&check;</span>
+        </label>
+    </div>
+</div>
                     </div>
 
                     <div class="span6">
