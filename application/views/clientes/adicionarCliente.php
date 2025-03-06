@@ -129,6 +129,7 @@ $tipoCliente = $this->input->get('tipo') ?? 'cliente'; // Define 'cliente' como 
                                 <input id="celular" type="text" name="celular" value="<?php echo set_value('celular'); ?>" />
                             </div>
                         </div>
+                        
                         <div class="control-group">
                             <label for="email" class="control-label">Email</label>
                             <div class="controls">
