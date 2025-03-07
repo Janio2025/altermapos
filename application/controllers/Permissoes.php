@@ -1,6 +1,6 @@
 <?php
 
-if (! defined('BASEPATH')) {
+if (!defined('BASEPATH')) {
     exit('No direct script access allowed');
 }
 
@@ -10,7 +10,7 @@ class Permissoes extends MY_Controller
     {
         parent::__construct();
 
-        if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'cPermissao')) {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'cPermissao')) {
             $this->session->set_flashdata('error', 'Você não tem permissão para configurar as permissões no sistema.');
             redirect(base_url());
         }
@@ -55,7 +55,13 @@ class Permissoes extends MY_Controller
             $situacao = 1;
 
             $permissoes = [
+                // Permissões de Organizadores
+                'vOrganizador' => $this->input->post('vOrganizador'),
+                'aOrganizador' => $this->input->post('aOrganizador'),
+                'eOrganizador' => $this->input->post('eOrganizador'),
+                'dOrganizador' => $this->input->post('dOrganizador'),
 
+                // Outras permissões existentes
                 'aCliente' => $this->input->post('aCliente'),
                 'eCliente' => $this->input->post('eCliente'),
                 'dCliente' => $this->input->post('dCliente'),
@@ -156,7 +162,13 @@ class Permissoes extends MY_Controller
             $nomePermissao = $this->input->post('nome');
             $situacao = $this->input->post('situacao');
             $permissoes = [
+                // Permissões de Organizadores
+                'vOrganizador' => $this->input->post('vOrganizador'),
+                'aOrganizador' => $this->input->post('aOrganizador'),
+                'eOrganizador' => $this->input->post('eOrganizador'),
+                'dOrganizador' => $this->input->post('dOrganizador'),
 
+                // Outras permissões existentes
                 'aCliente' => $this->input->post('aCliente'),
                 'eCliente' => $this->input->post('eCliente'),
                 'dCliente' => $this->input->post('dCliente'),
@@ -221,7 +233,6 @@ class Permissoes extends MY_Controller
                 'eCobranca' => $this->input->post('eCobranca'),
                 'dCobranca' => $this->input->post('dCobranca'),
                 'vCobranca' => $this->input->post('vCobranca'),
-
             ];
             $permissoes = serialize($permissoes);
 
@@ -236,7 +247,7 @@ class Permissoes extends MY_Controller
                 log_info('Alterou uma permissão. ID: ' . $this->input->post('idPermissao'));
                 redirect(site_url('permissoes/editar/') . $this->input->post('idPermissao'));
             } else {
-                $this->data['custom_error'] = '<div class="form_error"><p>Ocorreu um errro.</p></div>';
+                $this->data['custom_error'] = '<div class="form_error"><p>Ocorreu um erro.</p></div>';
             }
         }
 
@@ -250,7 +261,7 @@ class Permissoes extends MY_Controller
     public function desativar()
     {
         $id = $this->input->post('id');
-        if (! $id) {
+        if (!$id) {
             $this->session->set_flashdata('error', 'Erro ao tentar desativar permissão.');
             redirect(site_url('permissoes/gerenciar/'));
         }

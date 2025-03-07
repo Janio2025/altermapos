@@ -107,6 +107,24 @@ $config = [
             'rules' => 'trim',
         ],
     ],
+    'organizadores' => [
+    [
+        'field' => 'nome_organizador',
+        'label' => 'Nome do Organizador',
+        'rules' => 'required|trim',
+    ],
+    [
+        'field' => 'localizacao',
+        'label' => 'Localização',
+        'rules' => 'trim',
+    ],
+    [
+        'field' => 'ativa',
+        'label' => 'Status',
+        'rules' => 'required|in_list[0,1]',
+    ],
+    // REMOVA A REGRA PARA nome_compartimento[]
+    ],
     'usuarios' => [
         [
             'field' => 'nome',

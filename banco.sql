@@ -367,10 +367,6 @@ CREATE TABLE IF NOT EXISTS `organizadores` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
-
--- -----------------------------------------------------
--- Table `compartimentos`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `compartimentos` (
   `id` INT AUTO_INCREMENT,
   `organizador_id` INT NOT NULL,

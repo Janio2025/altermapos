@@ -22,6 +22,54 @@
                         <br />
                     </div>
                     <div class="accordion" id="collapse-group">
+
+                    <div class="accordion-group widget-box">
+                            <div class="accordion-heading">
+                                <div class="widget-title">
+                                    <a data-parent="#collapse-group" href="#collapseGOrganizadores" data-toggle="collapse">
+                                        <span><i class='bx bx-box icon-cli'></i></span>
+                                        <h5 style="padding-left: 28px">Organizadores</h5>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="collapse accordion-body" id="collapseGOrganizadores">
+                                <div class="widget-content">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <label>
+                                                        <input name="vOrganizador" class="marcar" type="checkbox" checked="checked" value="1" />
+                                                        <span class="lbl"> Visualizar Organizadores</span>
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <label>
+                                                        <input name="aOrganizador" class="marcar" type="checkbox" value="1" />
+                                                        <span class="lbl"> Adicionar Organizadores</span>
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <label>
+                                                        <input name="eOrganizador" class="marcar" type="checkbox" value="1" />
+                                                        <span class="lbl"> Editar Organizadores</span>
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <label>
+                                                        <input name="dOrganizador" class="marcar" type="checkbox" value="1" />
+                                                        <span class="lbl"> Excluir Organizadores</span>
+                                                    </label>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fim da Seção de Organizadores -->
+
+
                         <div class="accordion-group widget-box">
                             <div class="accordion-heading">
                                 <div class="widget-title">

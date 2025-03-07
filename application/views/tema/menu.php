@@ -49,7 +49,7 @@
                             <span class="title-tooltip">Clientes</span>
                         </a>
                     </li>
-                <?php } ?>
+                <?php } ?>               
 
                 <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vProduto')) { ?>
                     <li class="<?php if (isset($menuProdutos)) {
@@ -137,6 +137,18 @@
                         </a>
                     </li>
                 <?php } ?>
+
+                <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOrganizador')) { ?>
+                    <li class="<?php if (isset($menuOrganizadores)) {
+                        echo 'active';
+                    }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('organizadores') ?>"><i class='bx bx-box iconX'></i>
+                            <span class="title">Organizadores</span>
+                            <span class="title-tooltip">Organizadores</span>
+                        </a>
+                    </li>
+                <?php } ?>
+
             </ul>
         </div>
 

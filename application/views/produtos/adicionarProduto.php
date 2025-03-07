@@ -1,3 +1,21 @@
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- jQuery (versão 3.6.0) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- jQuery UI (versão 1.12.1) -->
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<!-- Outros scripts da página -->
+<script src="<?php echo base_url(); ?>assets/js/funcoes.js"></script> <!-- Se houver outros scripts -->
+<script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
+
 <style>
     /* Hiding the checkbox, but allowing it to be focused */
     .badgebox {
@@ -49,6 +67,18 @@
         text-align-last: left;
         font-size: 2em;
         font-weight: 500;
+    }
+
+    /* Estilo para os itens do Select2 */
+    .select2-container--default .select2-results__option {
+        padding: 8px 12px; /* Espaçamento interno */
+        margin: 2px 0; /* Espaçamento entre os itens */
+    }
+
+    /* Estilo para o dropdown do Select2 */
+    .select2-container--default .select2-dropdown {
+        border-radius: 4px; /* Bordas arredondadas */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra */
     }
 
     @media (max-width: 480px) {
@@ -117,9 +147,6 @@
         /* Adiciona um espaço de 5% abaixo de cada div */
     }
 </style>
-
-
-
 
 
 
@@ -247,13 +274,14 @@
                                         </div>
                                     </div>
                                     <div class="control-group">
-                                        <label for="localizacaoProduto" class="control-label">Localização<span
-                                                class="required">*</span></label>
+                                        <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
                                         <div class="controls">
-                                            <input id="localizacaoProduto" class="span12" type="text"
-                                                name="localizacaoProduto"
-                                                value="<?php echo set_value('localizacaoProduto'); ?>"
-                                                onChange="javascript:this.value=this.value.toUpperCase();" />
+                                            <!-- Campo de busca de organizadores -->
+                                            <input id="buscarOrganizador" class="span12" type="text" placeholder="Buscar organizador..." />
+                                            <!-- Dropdown para exibir os compartimentos -->
+                                            <select id="compartimentosDisponiveis" class="span12" name="localizacaoProduto" multiple="multiple">
+                                                <!-- Os compartimentos serão carregados dinamicamente aqui -->
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -396,8 +424,8 @@
     </div>
 </div>
 </div>
-<script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
-<script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
+
+
 <script type="text/javascript">
     function calcLucro(precoCompra, Lucro) {
         var lucroTipo = $('#selectLucro').val();
@@ -528,6 +556,64 @@
                 $(element).parents('.control-group').addClass('success');
             }
         });
+
+        // Autocomplete para buscar organizadores
+    $("#buscarOrganizador").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "<?php echo site_url('organizadores/buscarOrganizadores'); ?>",
+                dataType: "json",
+                data: {
+                    term: request.term
+                },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2, // Número mínimo de caracteres para iniciar a busca
+        select: function(event, ui) {
+            // Quando um organizador é selecionado, carregar seus compartimentos
+            carregarCompartimentos(ui.item.id);
+        }
+    });
+
+    // Função para carregar os compartimentos de um organizador
+    function carregarCompartimentos(organizadorId) {
+        $.ajax({
+            url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
+            dataType: "json",
+            data: {
+                organizador_id: organizadorId
+            },
+            success: function(data) {
+                // Limpar o dropdown de compartimentos
+                $("#compartimentosDisponiveis").empty();
+
+                // Adicionar os compartimentos ao dropdown
+                if (data.length > 0) {
+                    $.each(data, function(index, compartimento) {
+                        $("#compartimentosDisponiveis").append(
+                            `<option value="${compartimento.id}">${compartimento.nome_compartimento}</option>`
+                        );
+                    });
+                } else {
+                    $("#compartimentosDisponiveis").append(
+                        `<option value="">Nenhum compartimento disponível</option>`
+                    );
+                }
+            }
+        });
+    }
+
+    // Quando o formulário for enviado, salvar os compartimentos selecionados
+    $("#formProduto").on("submit", function() {
+        var compartimentosSelecionados = $("#compartimentosDisponiveis").val();
+        if (compartimentosSelecionados) {
+            $("#localizacaoProduto").val(compartimentosSelecionados.join(","));
+        }
+    });
+    
     });
 
 
@@ -642,5 +728,67 @@
             document.getElementById('preview').src = images[currentImageIndex];
         }
     }
+</script>
+
+
+
+<script>
+$(document).ready(function() {
+    // Autocomplete para buscar organizadores
+    $("#buscarOrganizador").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "<?php echo site_url('organizadores/buscarOrganizadores'); ?>",
+                dataType: "json",
+                data: {
+                    term: request.term
+                },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2, // Número mínimo de caracteres para iniciar a busca
+        select: function(event, ui) {
+            // Quando um organizador é selecionado, carregar seus compartimentos
+            carregarCompartimentos(ui.item.id);
+        }
+    });
+
+    // Inicializar o Select2
+    $('#compartimentosDisponiveis').select2({
+            placeholder: "Selecione os compartimentos", // Texto de placeholder
+            allowClear: true, // Permite limpar a seleção
+            width: '100%' // Define a largura do dropdown
+        });
+
+    // Função para carregar os compartimentos de um organizador
+    function carregarCompartimentos(organizadorId) {
+        $.ajax({
+            url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
+            dataType: "json",
+            data: {
+                organizador_id: organizadorId
+            },
+            success: function(data) {
+                // Limpar o dropdown de compartimentos
+                $("#compartimentosDisponiveis").empty();
+
+                // Adicionar os compartimentos ao dropdown
+                if (data.length > 0) {
+                    $.each(data, function(index, compartimento) {
+                        $("#compartimentosDisponiveis").append(
+                            `<option value="${compartimento.id}">${compartimento.nome_compartimento}</option>`
+                        );
+                    });
+                } else {
+                    $("#compartimentosDisponiveis").append(
+                        `<option value="">Nenhum compartimento disponível</option>`
+                    );
+                }
+            }
+        });
+    }
+});
 </script>
 
