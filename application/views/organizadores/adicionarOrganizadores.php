@@ -109,15 +109,6 @@
                             </div>
                         </div>
 
-                        <div class="control-group">
-                            <label for="localizacao" class="control-label">Localização</label>
-                            <div class="controls">
-                                <input id="localizacao" type="text" name="localizacao" value="<?php echo set_value('localizacao'); ?>" />
-                            </div>
-                        </div>
-
-                        
-
                         <!-- Campo para adicionar compartimentos -->
                         <div class="control-group">
                             <label for="nome_compartimento" class="control-label">Compartimento</label>
