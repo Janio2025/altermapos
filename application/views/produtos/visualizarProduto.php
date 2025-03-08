@@ -112,7 +112,14 @@
 
 </style>
 <!-- #st -->
-
+<?php
+// Processar o campo localizacaoProduto para remover o ID
+$localizacaoProduto = isset($result->localizacaoProduto) ? $result->localizacaoProduto : 'N/A';
+if ($localizacaoProduto !== 'N/A') {
+    $localizacao = explode(',', $localizacaoProduto);
+    $localizacaoProduto = implode(',', array_slice($localizacao, 1)); // Remove o ID
+}
+?>
 
 
 <div class="accordion" id="collapse-group">
@@ -181,7 +188,7 @@
                     <tbody>
                         <tr>
                             <td><strong>Localização</strong></td>
-                            <td><?php echo isset($result->localizacaoProduto) ? $result->localizacaoProduto : 'N/A'; ?></td>
+                            <td><?php echo $localizacaoProduto; ?></td>
                         </tr>
                         <tr>
                             <td><strong>Unidade</strong></td>

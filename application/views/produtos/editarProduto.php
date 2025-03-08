@@ -1,3 +1,5 @@
+
+
 <style>
     /* Hiding the checkbox, but allowing it to be focused */
     .badgebox {
@@ -76,6 +78,24 @@
         /* Adiciona um espaço de 5% abaixo de cada div */
     }
 </style>
+
+<?php
+// Divide a string salva no banco de dados
+$localizacao = explode(',', $result->localizacaoProduto);
+
+// Remove o primeiro valor (ID) e junta o restante
+$localizacaoExibida = implode(',', array_slice($localizacao, 1));
+?>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<!-- Outros scripts da página -->
+<script src="<?php echo base_url(); ?>assets/js/funcoes.js"></script> <!-- Se houver outros scripts -->
+<script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
         <div class="widget-box">
@@ -201,12 +221,18 @@
 
 
                     <div class="control-group">
-                        <label for="localizacaoProduto" class="control-label">Localização<span class=""></span></label>
+                        <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
                         <div class="controls">
-                            <input id="localizacaoProduto" type="text" name="localizacaoProduto" value="<?php echo $result->localizacaoProduto; ?>" onChange="javascript:this.value=this.value.toUpperCase();"/>
+                            <!-- Campo de busca de organizadores -->
+                            <input id="buscarOrganizador" class="span12" type="text" value="<?php echo $localizacaoExibida; ?>" />
+                            <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
+                            <select id="compartimentosDisponiveis" class="span12" name="compartimentosDisponiveis">
+                                <!-- Os compartimentos serão carregados dinamicamente aqui -->
+                            </select>
+                            <!-- Campo oculto para salvar o valor final -->
+                            <input type="hidden" id="localizacaoProduto" name="localizacaoProduto" value="<?php echo $result->localizacaoProduto; ?>" />
                         </div>
                     </div>
-
                     <div class="control-group">
                         <label class="control-label">Tipo de Movimento</label>
                         <div class="controls">
@@ -342,8 +368,7 @@
 
 
 
-<script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
-<script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
+
 <script type="text/javascript">
     function calcLucro(precoCompra, margemLucro) {
     var precoVenda = (precoCompra * margemLucro / 100 + precoCompra).toFixed(2);
@@ -690,3 +715,123 @@ $(document).ready(function() {
 });
 </script>
 
+<script>
+
+$(document).ready(function() {
+    // Autocomplete para buscar organizadores
+    $("#buscarOrganizador").autocomplete({
+        source: function(request, response) {
+            $.ajax({
+                url: "<?php echo site_url('organizadores/buscarOrganizadores'); ?>",
+                dataType: "json",
+                data: {
+                    term: request.term
+                },
+                success: function(data) {
+                    response(data);
+                }
+            });
+        },
+        minLength: 2, // Número mínimo de caracteres para iniciar a busca
+        select: function(event, ui) {
+            // Quando um organizador é selecionado, carregar seus compartimentos
+            carregarCompartimentos(ui.item.id, ui.item.value); // Passar o nome do organizador
+        }
+    });
+
+    // Inicializar o Select2 com seleção única
+    $('#compartimentosDisponiveis').select2({
+        placeholder: "Selecione um compartimento", // Texto de placeholder
+        allowClear: true, // Permite limpar a seleção
+        width: '100%', // Define a largura do dropdown
+        maximumSelectionLength: 1 // Permite selecionar apenas um item
+    });
+
+    // Função para carregar os compartimentos de um organizador
+    function carregarCompartimentos(organizadorId, organizadorNome) {
+        $.ajax({
+            url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
+            dataType: "json",
+            data: {
+                organizador_id: organizadorId
+            },
+            success: function(data) {
+                // Limpar o dropdown de compartimentos
+                $("#compartimentosDisponiveis").empty();
+
+                // Adicionar os compartimentos ao dropdown
+                if (data.length > 0) {
+                    $.each(data, function(index, compartimento) {
+                        $("#compartimentosDisponiveis").append(
+                            `<option value="${compartimento.id}">${compartimento.nome_compartimento}</option>`
+                        );
+                    });
+                } else {
+                    $("#compartimentosDisponiveis").append(
+                        `<option value="">Nenhum compartimento disponível</option>`
+                    );
+                }
+
+                // Quando um compartimento é selecionado, preencher o campo oculto
+                $('#compartimentosDisponiveis').on('change', function() {
+                    const compartimentoId = $(this).val();
+                    const compartimentoNome = $(this).find('option:selected').text();
+
+                    // Preencher o campo oculto com o ID do organizador, nome do organizador e compartimento
+                    $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},${compartimentoNome}`);
+                });
+            }
+        });
+    }
+
+    // Carregar dados já salvos (se existirem)
+    const localizacaoSalva = "<?php echo $result->localizacaoProduto; ?>";
+    if (localizacaoSalva) {
+        const [organizadorId, organizadorNome, compartimentoNome] = localizacaoSalva.split(',');
+
+        // Buscar o organizador no banco de dados
+        $.ajax({
+            url: "<?php echo site_url('organizadores/buscarOrganizadorPorId'); ?>",
+            dataType: "json",
+            data: {
+                id: organizadorId
+            },
+            success: function(data) {
+                if (data) {
+                    // Preencher o campo de busca de organizadores
+                    $("#buscarOrganizador").val(data.nome);
+
+                    // Carregar os compartimentos do organizador
+                    carregarCompartimentos(organizadorId, data.nome);
+
+                    // Selecionar o compartimento salvo
+                    setTimeout(function() {
+                        $('#compartimentosDisponiveis').val(compartimentoNome).trigger('change');
+                    }, 500);
+                }
+            }
+        });
+    }
+});
+</script>
+
+<script>
+    $(document).ready(function() {
+    // Valor formatado (sem o ID)
+    const valorFormatado = "<?php echo $localizacaoExibida; ?>";
+
+    // Limpar o campo ao clicar nele
+    $('#buscarOrganizador').on('focus', function() {
+        if ($(this).val() === valorFormatado) {
+            $(this).val(''); // Limpa o campo se o valor for o mesmo que o salvo
+        }
+    });
+
+    // Restaurar o valor original se o campo for deixado em branco
+    $('#buscarOrganizador').on('blur', function() {
+        if ($(this).val() === '') {
+            $(this).val(valorFormatado); // Restaura o valor formatado
+        }
+    });
+});
+</script>

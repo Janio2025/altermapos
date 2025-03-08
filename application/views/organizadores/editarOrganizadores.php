@@ -119,8 +119,8 @@
 
                         <!-- Campo para editar/adicionar compartimentos -->
                         <div class="control-group">
-                            <label for="nome_compartimento" class="control-label">Compartimentos<span class="required">*</span></label>
-                            <div class="controls">
+                           
+                            <div class="">
                                 <?php
                                 // Recupera os compartimentos do organizador
                                 $compartimentos = $this->Organizadores_model->get_compartimentos_by_organizador($result->id);
@@ -128,22 +128,24 @@
                                     foreach ($compartimentos as $compartimento) {
                                         echo '
                                         <div class="control-group">
+                                        <label for="nome_compartimento" class="control-label">Compartimento</label>
                                             <div class="controls">
-                                                <input class="span10" type="text" name="nome_compartimento[]"
+                                                <input class="" type="text" name="nome_compartimento[]"
                                                     value="' . $compartimento->nome_compartimento . '"
                                                     onChange="javascript:this.value=this.value.toUpperCase();" />
-                                                <button type="button" class="span2 btn btn-danger removeCompartimento">x</button>
+                                                <button type="button" class=" btn btn-danger removeCompartimento">x</button>
                                             </div>
                                         </div>';
                                     }
                                 }
                                 ?>
                                 <div class="control-group">
-                                    <div class="controls">
-                                        <input id="nome_compartimento" class="span10" type="text" name="nome_compartimento[]"
+                                    <div class="">
+                                    <label for="nome_compartimento" class="control-label">Add Compartimento</label>
+                                        <input id="nome_compartimento" class="" type="text" name="nome_compartimento[]"
                                             value=""
                                             onChange="javascript:this.value=this.value.toUpperCase();" />
-                                        <button type="button" id="addCompartimento" class="span2 btn btn-primary">+</button>
+                                        <button type="button" id="addCompartimento" class=" btn btn-primary">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -213,11 +215,12 @@
             const newInput = document.createElement('div');
             newInput.className = 'control-group';
             newInput.innerHTML = `
-                <div class="controls">
-                    <input class="span10" type="text" name="nome_compartimento[]"
+                <div class="">
+                <label for="nome_compartimento" class="control-label">Compartimento</label>
+                    <input class="" type="text" name="nome_compartimento[]"
                         value=""
                         onChange="javascript:this.value=this.value.toUpperCase();" />
-                    <button type="button" class="span2 btn btn-danger removeCompartimento">x</button>
+                    <button type="button" class=" btn btn-danger removeCompartimento">x</button>
                 </div>
             `;
             document.getElementById('additionalCompartimentos').appendChild(newInput);

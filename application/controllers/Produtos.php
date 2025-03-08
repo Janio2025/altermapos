@@ -172,6 +172,22 @@ public function adicionar()
     return $this->layout();
 }
 
+public function buscarOrganizadorPorId() {
+    if (!$this->input->is_ajax_request()) {
+        exit('Acesso não permitido');
+    }
+
+    $id = $this->input->get('id');
+    $this->db->where('id', $id);
+    $organizador = $this->db->get('organizadores')->row();
+
+    if ($organizador) {
+        echo json_encode($organizador);
+    } else {
+        echo json_encode([]);
+    }
+}
+
 
 public function editar()
 {
@@ -263,12 +279,21 @@ public function editar()
     $this->data['result'] = $this->produtos_model->getById($produtoId);
     $this->data['modelos_compativeis'] = $this->produtos_model->get_modelos_compativeis($produtoId);
     $this->data['imagensProduto'] = $this->produtos_model->getImagensProduto($produtoId);
+
+    // Processar o campo localizacaoProduto
+    if (!empty($this->data['result']->localizacaoProduto)) {
+        $localizacao = explode(',', $this->data['result']->localizacaoProduto);
+        if (count($localizacao) >= 3) {
+            $this->data['organizadorId'] = $localizacao[0];
+            $this->data['organizadorNome'] = $localizacao[1];
+            $this->data['compartimentoNome'] = $localizacao[2];
+        }
+    }
     
     $this->data['view'] = 'produtos/editarProduto';
 
     return $this->layout();
 }
-
 
 
 public function visualizar()

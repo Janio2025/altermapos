@@ -274,16 +274,18 @@
                                         </div>
                                     </div>
                                     <div class="control-group">
-                                        <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
-                                        <div class="controls">
-                                            <!-- Campo de busca de organizadores -->
-                                            <input id="buscarOrganizador" class="span12" type="text" placeholder="Buscar organizador..." />
-                                            <!-- Dropdown para exibir os compartimentos -->
-                                            <select id="compartimentosDisponiveis" class="span12" name="localizacaoProduto" multiple="multiple">
-                                                <!-- Os compartimentos serão carregados dinamicamente aqui -->
-                                            </select>
-                                        </div>
-                                    </div>
+    <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
+    <div class="controls">
+        <!-- Campo de busca de organizadores -->
+        <input id="buscarOrganizador" class="span12" type="text" placeholder="Buscar organizador..." />
+        <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
+        <select id="compartimentosDisponiveis" class="span12" name="compartimentosDisponiveis">
+            <!-- Os compartimentos serão carregados dinamicamente aqui -->
+        </select>
+        <!-- Campo oculto para salvar o valor final -->
+        <input type="hidden" id="localizacaoProduto" name="localizacaoProduto" />
+    </div>
+</div>
                                 </div>
                             </div>
                             <div class="span3 div-bord" style="padding: 1%; margin-left: 1">
@@ -751,19 +753,20 @@ $(document).ready(function() {
         minLength: 2, // Número mínimo de caracteres para iniciar a busca
         select: function(event, ui) {
             // Quando um organizador é selecionado, carregar seus compartimentos
-            carregarCompartimentos(ui.item.id);
+            carregarCompartimentos(ui.item.id, ui.item.value); // Passar o nome do organizador
         }
     });
 
-    // Inicializar o Select2
+    // Inicializar o Select2 com seleção única
     $('#compartimentosDisponiveis').select2({
-            placeholder: "Selecione os compartimentos", // Texto de placeholder
-            allowClear: true, // Permite limpar a seleção
-            width: '100%' // Define a largura do dropdown
-        });
+        placeholder: "Selecione um compartimento", // Texto de placeholder
+        allowClear: true, // Permite limpar a seleção
+        width: '100%', // Define a largura do dropdown
+        maximumSelectionLength: 1 // Permite selecionar apenas um item
+    });
 
     // Função para carregar os compartimentos de um organizador
-    function carregarCompartimentos(organizadorId) {
+    function carregarCompartimentos(organizadorId, organizadorNome) {
         $.ajax({
             url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
             dataType: "json",
@@ -786,6 +789,15 @@ $(document).ready(function() {
                         `<option value="">Nenhum compartimento disponível</option>`
                     );
                 }
+
+                // Quando um compartimento é selecionado, preencher o campo oculto
+                $('#compartimentosDisponiveis').on('change', function() {
+                    const compartimentoId = $(this).val();
+                    const compartimentoNome = $(this).find('option:selected').text();
+
+                    // Preencher o campo oculto com o ID do organizador, nome do organizador e compartimento
+                    $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},${compartimentoNome}`);
+                });
             }
         });
     }
