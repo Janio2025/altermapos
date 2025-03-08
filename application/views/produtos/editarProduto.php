@@ -224,9 +224,9 @@ $localizacaoExibida = implode(',', array_slice($localizacao, 1));
                         <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
                         <div class="controls">
                             <!-- Campo de busca de organizadores -->
-                            <input id="buscarOrganizador" class="span12" type="text" value="<?php echo $localizacaoExibida; ?>" />
+                           <input id="buscarOrganizador" class="span8" type="text" value="<?php echo $localizacaoExibida; ?>" />
                             <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
-                            <select id="compartimentosDisponiveis" class="span12" name="compartimentosDisponiveis">
+                            <select id="compartimentosDisponiveis" class="span4" name="compartimentosDisponiveis">
                                 <!-- Os compartimentos serão carregados dinamicamente aqui -->
                             </select>
                             <!-- Campo oculto para salvar o valor final -->

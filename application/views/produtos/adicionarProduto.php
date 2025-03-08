@@ -274,18 +274,18 @@
                                         </div>
                                     </div>
                                     <div class="control-group">
-    <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
-    <div class="controls">
-        <!-- Campo de busca de organizadores -->
-        <input id="buscarOrganizador" class="span12" type="text" placeholder="Buscar organizador..." />
-        <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
-        <select id="compartimentosDisponiveis" class="span12" name="compartimentosDisponiveis">
-            <!-- Os compartimentos serão carregados dinamicamente aqui -->
-        </select>
-        <!-- Campo oculto para salvar o valor final -->
-        <input type="hidden" id="localizacaoProduto" name="localizacaoProduto" />
-    </div>
-</div>
+                                        <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
+                                        <div class="controls">
+                                            <!-- Campo de busca de organizadores -->
+                                            <input id="buscarOrganizador" class="span12" type="text" placeholder="Buscar organizador..." />
+                                            <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
+                                            <select id="compartimentosDisponiveis" class="span12" name="compartimentosDisponiveis">
+                                                <!-- Os compartimentos serão carregados dinamicamente aqui -->
+                                            </select>
+                                            <!-- Campo oculto para salvar o valor final -->
+                                            <input type="hidden" id="localizacaoProduto" name="localizacaoProduto" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="span3 div-bord" style="padding: 1%; margin-left: 1">
