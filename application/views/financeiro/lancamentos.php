@@ -213,7 +213,7 @@ $periodo = $this->input->get('periodo');
 
     .filters-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
         gap: 15px;
         margin-bottom: 20px;
     }
@@ -259,7 +259,7 @@ $periodo = $this->input->get('periodo');
 
     .summary-cards {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
         margin-top: 20px;
     }
