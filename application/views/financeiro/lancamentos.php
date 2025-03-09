@@ -556,47 +556,41 @@ $periodo = $this->input->get('periodo');
                     </tbody>
                 </table>
 
-                
-
                 <div class="financial-stats-container">
-                    <h5></h5>
-
-                    <div class="summary-cards">
-                    <div class="stat-card receita span4">
-                        <h4>Total Receitas (Pagas)</h4>
-                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita, 2, ',', '.'); ?></div>
-                    </div>
+                    <h3 class="mb-4"></h3>
                     
-                    <div class="stat-card despesa span4">
-                        <h4>Total Despesas (Pagas)</h4>
-                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa, 2, ',', '.'); ?></div>
-                    </div>
-                    
-                    <div class="stat-card total span4">
-                        <h4>Saldo Líquido</h4>
-                        <div class="value">R$ <?php $sub_receita_despesa = $estatisticas_financeiro->total_receita - $estatisticas_financeiro->total_despesa;
-    echo number_format($sub_receita_despesa, 2, ',', '.'); ?></div>
-                    </div>
-                </div>
+                    <div class="stats-grid">
+                        <div class="stat-card receita">
+                            <h4>Total Receitas (Pagas)</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita, 2, ',', '.'); ?></div>
+                        </div>
+                        
+                        <div class="stat-card despesa">
+                            <h4>Total Despesas (Pagas)</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa, 2, ',', '.'); ?></div>
+                        </div>
+                        
+                        <div class="stat-card total">
+                            <h4>Saldo Líquido</h4>
+                            <div class="value">R$ <?php $sub_receita_despesa = $estatisticas_financeiro->total_receita - $estatisticas_financeiro->total_despesa;
+echo number_format($sub_receita_despesa, 2, ',', '.'); ?></div>
+                        </div>
 
-                <div class="summary-cards">
-                    <div class="stat-card receita span4">
-                        <h4>Receitas Pendentes</h4>
-                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita_pendente, 2, ',', '.'); ?></div>
-                    </div>
+                        <div class="stat-card receita">
+                            <h4>Receitas Pendentes</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita_pendente, 2, ',', '.'); ?></div>
+                        </div>
 
-                    <div class="stat-card despesa span4">
-                        <h4>Despesas Pendentes</h4>
-                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa_pendente, 2, ',', '.'); ?></div>
-                    </div>
+                        <div class="stat-card despesa">
+                            <h4>Despesas Pendentes</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa_pendente, 2, ',', '.'); ?></div>
+                        </div>
 
-                    <div class="stat-card total span4">
-                        <h4>Saldo Pendente</h4>
-                        <div class="value">R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente - $estatisticas_financeiro->total_despesa_pendente;
-    echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
-                    </div>
-                </div>
-                    
+                        <div class="stat-card total">
+                            <h4>Saldo Pendente</h4>
+                            <div class="value">R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente - $estatisticas_financeiro->total_despesa_pendente;
+echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
+                        </div>
                     </div>
 
                     <div class="charts-container">
