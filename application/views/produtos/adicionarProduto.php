@@ -274,13 +274,15 @@
                                         </div>
                                     </div>
                                     <div class="control-group">
-                                        <label for="organizador_id" class="control-label">Organizador</label>
+                                        <label for="organizador_id" class="control-label">Organizador<span class="required">*</span></label>
                                         <div class="controls">
                                             <select id="organizador_id" name="organizador_id" class="span12 select2">
                                                 <option value="">Buscar organizador...</option>
                                                 <?php foreach ($organizadores as $organizador) : ?>
                                                     <option value="<?php echo $organizador->id; ?>">
                                                         <?php echo $organizador->nome_organizador; ?>
+                                                        <label for="">-</label> 
+                                                        <?php echo $organizador->localizacao; ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
@@ -537,6 +539,9 @@
                 },
                 estoque: {
                     required: true
+                },
+                organizador_id: {
+                    required: true
                 }
             },
             messages: {
@@ -554,6 +559,9 @@
                 },
                 estoque: {
                     required: 'Campo Requerido.'
+                },
+                organizador_id: {
+                    required: 'Selecione um organizador.'
                 }
             },
             errorClass: "help-inline",
@@ -830,7 +838,6 @@ $(document).ready(function() {
             
             // Limpar o select de compartimentos
             compartimento_select.empty();
-            compartimento_select.append('<option value="">Selecione um compartimento</option>');
             
             if (organizador_id) {
                 // Carregar compartimentos via AJAX
@@ -840,14 +847,26 @@ $(document).ready(function() {
                     data: { organizador_id: organizador_id },
                     dataType: 'json',
                     success: function(data) {
-                        // Adicionar os compartimentos ao select
-                        $.each(data, function(index, item) {
-                            compartimento_select.append(
-                                $('<option></option>').val(item.id).text(item.nome_compartimento)
-                            );
-                        });
+                        if (data && data.length > 0) {
+                            // Se houver compartimentos, adiciona a opção de selecionar
+                            compartimento_select.append('<option value="">Selecione um compartimento</option>');
+                            // Adicionar os compartimentos ao select
+                            $.each(data, function(index, item) {
+                                compartimento_select.append(
+                                    $('<option></option>').val(item.id).text(item.nome_compartimento)
+                                );
+                            });
+                        } else {
+                            // Se não houver compartimentos, mostra mensagem apropriada
+                            compartimento_select.append('<option value="">Organizador sem compartimentos</option>');
+                        }
+                    },
+                    error: function() {
+                        compartimento_select.append('<option value="">Erro ao carregar compartimentos</option>');
                     }
                 });
+            } else {
+                compartimento_select.append('<option value="">Selecione primeiro um organizador</option>');
             }
         });
     });

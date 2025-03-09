@@ -126,6 +126,12 @@ public function adicionar()
             }
         }
     
+        // Tratar o compartimento_id para ser NULL quando não houver compartimento
+        $compartimento_id = $this->input->post('compartimento_id');
+        if (empty($compartimento_id)) {
+            $compartimento_id = null;
+        }
+    
         $data = [
             'codDeBarra' => set_value('codDeBarra'),
             'descricao' => set_value('descricao'),
@@ -134,7 +140,7 @@ public function adicionar()
             'nsProduto' => set_value('nsProduto'),
             'codigoPeca' => set_value('codigoPeca'),
             'organizador_id' => $this->input->post('organizador_id'),
-            'compartimento_id' => $this->input->post('compartimento_id'),
+            'compartimento_id' => $compartimento_id,
             'unidade' => set_value('unidade'),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,

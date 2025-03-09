@@ -194,6 +194,7 @@ if ($localizacaoProduto !== 'N/A') {
                                     $organizador = $this->db->where('id', $result->organizador_id)->get('organizadores')->row();
                                     $compartimento = $this->db->where('id', $result->compartimento_id)->get('compartimentos')->row();
                                     echo $organizador ? $organizador->nome_organizador : '';
+                                    echo $organizador ? ' - ' . $organizador->localizacao : '';
                                     echo $compartimento ? ' - ' . $compartimento->nome_compartimento : '';
                                 } else {
                                     echo 'Não definida';

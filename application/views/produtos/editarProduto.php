@@ -228,6 +228,8 @@ $localizacaoExibida = implode(',', array_slice($localizacao, 1));
                                 <?php foreach ($organizadores as $organizador) : ?>
                                     <option value="<?php echo $organizador->id; ?>" <?php echo ($result->organizador_id == $organizador->id) ? 'selected' : ''; ?>>
                                         <?php echo $organizador->nome_organizador; ?>
+                                        <label for="">-</label> 
+                                        <?php echo $organizador->localizacao; ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
