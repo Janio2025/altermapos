@@ -718,9 +718,6 @@ $(document).ready(function() {
 <script>
 
 $(document).ready(function() {
-    // Variáveis globais para armazenar o ID e o nome do organizador
-    let organizadorId, organizadorNome;
-
     // Autocomplete para buscar organizadores
     $("#buscarOrganizador").autocomplete({
         source: function(request, response) {
@@ -737,12 +734,8 @@ $(document).ready(function() {
         },
         minLength: 2, // Número mínimo de caracteres para iniciar a busca
         select: function(event, ui) {
-            // Armazenar o ID e o nome do organizador selecionado
-            organizadorId = ui.item.id;
-            organizadorNome = ui.item.value;
-
-            // Carregar os compartimentos do organizador selecionado
-            carregarCompartimentos(organizadorId, organizadorNome);
+            // Quando um organizador é selecionado, carregar seus compartimentos
+            carregarCompartimentos(ui.item.id, ui.item.value); // Passar o nome do organizador
         }
     });
 
@@ -773,58 +766,47 @@ $(document).ready(function() {
                             `<option value="${compartimento.id}">${compartimento.nome_compartimento}</option>`
                         );
                     });
-
-                    // Se houver apenas um compartimento, selecione-o automaticamente
-                    if (data.length === 1) {
-                        $("#compartimentosDisponiveis").val(data[0].id).trigger('change');
-                    }
                 } else {
-                    // Se não houver compartimentos, preencha o campo oculto apenas com o organizador
-                    $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},`);
                     $("#compartimentosDisponiveis").append(
                         `<option value="">Nenhum compartimento disponível</option>`
                     );
                 }
+
+                // Quando um compartimento é selecionado, preencher o campo oculto
+                $('#compartimentosDisponiveis').on('change', function() {
+                    const compartimentoId = $(this).val();
+                    const compartimentoNome = $(this).find('option:selected').text();
+
+                    // Preencher o campo oculto com o ID do organizador, nome do organizador e compartimento
+                    $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},${compartimentoNome}`);
+                });
             }
         });
     }
 
-    // Evento para preencher o campo oculto ao selecionar um compartimento
-    $('#compartimentosDisponiveis').on('change', function() {
-        const compartimentoId = $(this).val();
-        const compartimentoNome = $(this).find('option:selected').text();
-
-        // Preencher o campo oculto com o ID do organizador, nome do organizador e compartimento
-        $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},${compartimentoNome}`);
-    });
-
     // Carregar dados já salvos (se existirem)
     const localizacaoSalva = "<?php echo $result->localizacaoProduto; ?>";
     if (localizacaoSalva) {
-        const [organizadorIdSalvo, organizadorNomeSalvo, compartimentoNomeSalvo] = localizacaoSalva.split(',');
+        const [organizadorId, organizadorNome, compartimentoNome] = localizacaoSalva.split(',');
 
         // Buscar o organizador no banco de dados
         $.ajax({
             url: "<?php echo site_url('organizadores/buscarOrganizadorPorId'); ?>",
             dataType: "json",
             data: {
-                id: organizadorIdSalvo
+                id: organizadorId
             },
             success: function(data) {
                 if (data) {
                     // Preencher o campo de busca de organizadores
                     $("#buscarOrganizador").val(data.nome);
 
-                    // Armazenar o ID e o nome do organizador
-                    organizadorId = organizadorIdSalvo;
-                    organizadorNome = data.nome;
-
                     // Carregar os compartimentos do organizador
                     carregarCompartimentos(organizadorId, data.nome);
 
                     // Selecionar o compartimento salvo
                     setTimeout(function() {
-                        $('#compartimentosDisponiveis').val(compartimentoNomeSalvo).trigger('change');
+                        $('#compartimentosDisponiveis').val(compartimentoNome).trigger('change');
                     }, 500);
                 }
             }

@@ -767,38 +767,40 @@ $(document).ready(function() {
 
     // Função para carregar os compartimentos de um organizador
     function carregarCompartimentos(organizadorId, organizadorNome) {
-    $.ajax({
-        url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
-        dataType: "json",
-        data: {
-            organizador_id: organizadorId
-        },
-        success: function(data) {
-            // Limpar o dropdown de compartimentos
-            $("#compartimentosDisponiveis").empty();
+        $.ajax({
+            url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
+            dataType: "json",
+            data: {
+                organizador_id: organizadorId
+            },
+            success: function(data) {
+                // Limpar o dropdown de compartimentos
+                $("#compartimentosDisponiveis").empty();
 
-            // Adicionar os compartimentos ao dropdown
-            if (data.length > 0) {
-                $.each(data, function(index, compartimento) {
+                // Adicionar os compartimentos ao dropdown
+                if (data.length > 0) {
+                    $.each(data, function(index, compartimento) {
+                        $("#compartimentosDisponiveis").append(
+                            `<option value="${compartimento.id}">${compartimento.nome_compartimento}</option>`
+                        );
+                    });
+                } else {
                     $("#compartimentosDisponiveis").append(
-                        `<option value="${compartimento.id}">${compartimento.nome_compartimento}</option>`
+                        `<option value="">Nenhum compartimento disponível</option>`
                     );
-                });
-
-                // Se houver apenas um compartimento, selecione-o automaticamente
-                if (data.length === 1) {
-                    $("#compartimentosDisponiveis").val(data[0].id).trigger('change');
                 }
-            } else {
-                // Se não houver compartimentos, preencha o campo oculto apenas com o organizador
-                $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},`);
-                $("#compartimentosDisponiveis").append(
-                    `<option value="">Nenhum compartimento disponível</option>`
-                );
+
+                // Quando um compartimento é selecionado, preencher o campo oculto
+                $('#compartimentosDisponiveis').on('change', function() {
+                    const compartimentoId = $(this).val();
+                    const compartimentoNome = $(this).find('option:selected').text();
+
+                    // Preencher o campo oculto com o ID do organizador, nome do organizador e compartimento
+                    $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},${compartimentoNome}`);
+                });
             }
-        }
-    });
-}
+        });
+    }
 });
 </script>
 
