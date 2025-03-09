@@ -496,8 +496,7 @@ $periodo = $this->input->get('periodo');
                             <th>Cliente / Fornecedor</th>
                             <th>Descrição</th>
                             <th>Vencimento</th>
-                            <th>Status</th>
-                            <th>Observações</th>
+                            <th>Status</th>                           
                             <th>Forma de Pagamento</th>
                             <th>Valor (+)</th>
                             <th>Desconto (-)</th>
@@ -532,7 +531,6 @@ $periodo = $this->input->get('periodo');
                             echo '<td data-label="Descrição">' . $r->descricao . '</td>';
                             echo '<td data-label="Vencimento">' . $vencimento . '</td>';
                             echo '<td data-label="Status">' . $status . '</td>';
-                            echo '<td data-label="Observações">' . $r->observacoes . '</td>';
                             echo '<td data-label="Forma de Pagamento">' . $r->forma_pgto . '</td>';
                             echo '<td data-label="Valor (+)">R$ ' . number_format($r->valor, 2, ',', '.') . '</td>';
                             echo $r->tipo_desconto == "real" ? '<td data-label="Desconto (-)">' . "R$ " . $r->desconto . '</td>' : ($r->tipo_desconto == "porcento" ? '<td data-label="Desconto (-)">' . $r->desconto . " %" . '</td>' : '<td data-label="Desconto (-)">' . "0" . '</td>');
