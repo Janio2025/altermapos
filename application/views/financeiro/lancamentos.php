@@ -2,6 +2,7 @@
 <script type="text/javascript" src="<?php echo base_url() ?>assets/js/jquery-ui/js/jquery-ui-1.9.2.custom.js"></script>
 <script src="<?php echo base_url() ?>assets/js/sweetalert2.all.min.js"></script>
 <script src="<?php echo base_url() ?>assets/js/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <?php $situacao = $this->input->get('situacao');
 $periodo = $this->input->get('periodo');
@@ -74,107 +75,409 @@ $periodo = $this->input->get('periodo');
             gap: 5px;
         }
     }
+
+    .financial-stats-container {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card.receita {
+        border-left: 4px solid #28a745;
+    }
+
+    .stat-card.despesa {
+        border-left: 4px solid #dc3545;
+    }
+
+    .stat-card.total {
+        border-left: 4px solid #007bff;
+    }
+
+    .stat-card h4 {
+        margin: 0 0 10px 0;
+        color: #495057;
+        font-size: 0.9em;
+        font-weight: 600;
+    }
+
+    .stat-card .value {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #212529;
+    }
+
+    .stat-card.receita .value {
+        color: #28a745;
+    }
+
+    .stat-card.despesa .value {
+        color: #dc3545;
+    }
+
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .top-actions {
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+
+    .buttons-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        border: none;
+        font-weight: 500;
+        width: 100%;
+        font-size: 0.9em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .action-button i {
+        margin-right: 8px;
+        font-size: 1.2em;
+    }
+
+    .action-button.receita {
+        background: #28a745;
+        color: white;
+    }
+
+    .action-button.despesa {
+        background: #dc3545;
+        color: white;
+    }
+
+    .action-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        max-width: 200px;
+    }
+
+    .filter-item label {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .filter-item select,
+    .filter-item input {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+        width: 100%;
+        min-height: 38px;
+        box-sizing: border-box;
+    }
+
+    .filter-item:last-child {
+        max-width: none;
+    }
+
+    .filter-item select:focus,
+    .filter-item input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        outline: none;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .summary-card {
+        padding: 15px;
+        border-radius: 8px;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .summary-card.receitas {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .summary-card.despesas {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .summary-card.saldo {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+    }
+
+    .summary-card .label {
+        font-size: 0.9em;
+        opacity: 0.9;
+        margin-bottom: 5px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.9);
+        padding: 0;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .summary-card .value {
+        font-size: 1.2em;
+        font-weight: bold;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+        .summary-cards {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 5px;
+            margin: 15px -5px;
+        }
+
+        .summary-card {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 5px;
+        }
+
+        .summary-card .label {
+            font-size: 0.8em;
+        }
+
+        .summary-card .value {
+            font-size: 1em;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .buttons-grid {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .action-button {
+            max-width: 250px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .buttons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0;
+            margin: 10px 0;
+        }
+
+        .action-button {
+            flex: 1;
+            min-width: 120px;
+            max-width: calc(50% - 4px);
+            padding: 6px 8px;
+            font-size: 0.85em;
+        }
+
+        .action-button i {
+            margin-right: 4px;
+            font-size: 1em;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .buttons-grid {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .action-button {
+            max-width: 250px;
+        }
+    }
 </style>
 
 <div class="new122">
-    <div class="widget-title">
+    <div class="widget-title" style="margin-bottom: 20px;">
         <span class="icon">
             <i class="fas fa-hand-holding-usd"></i>
         </span>
         <h5>Lançamentos Financeiros</h5>
     </div>
 
-    <div class="span12">
+    <div class="top-actions">
         <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) { ?>
-            <div class="span12">
-                <div style="display: flex; flex-wrap: wrap;">
-                    <div class="">
-                        <a href="#modalReceita" data-toggle="modal" data-tipo="receita" role="button" class="button btn btn-mini btn-success" style="width: 160px">
-                            <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova receita"> Receita</span>
-                        </a>
-                    </div>
-
-                    <div class="">
-                        <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" role="button" class="button btn btn-mini btn-danger" style="width: 160px">
-                            <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2" title="Cadastrar nova despesa"> Despesa</span>
-                        </a>
-                    </div>
-                </div>
+            <div class="buttons-grid">
+                <a href="#modalReceita" data-toggle="modal" data-tipo="receita" class="action-button receita">
+                    <i class='bx bx-plus-circle'></i>
+                    <span>Nova Receita</span>
+                </a>
+                <a href="#modalReceita" data-toggle="modal" data-tipo="despesa" class="action-button despesa">
+                    <i class='bx bx-plus-circle'></i>
+                    <span>Nova Despesa</span>
+                </a>
             </div>
         <?php } ?>
-    </div>
 
-    <div class="span12" style="margin-left: 0;margin-top: 1rem;">
         <form action="<?php echo current_url(); ?>" method="get">
-            <div class="span2" style="margin-left: 0">
-                <label>Período</label>
-                <select id="periodo" name="periodo" class="span12">
-                    <option value="dia" <?= $this->input->get('periodo') === 'dia' ? 'selected' : '' ?>>Dia</option>
-                    <option value="semana" <?= $this->input->get('periodo') === 'semana' ? 'selected' : '' ?>>Semana</option>
-                    <option value="mesAnterior" <?= $this->input->get('periodo') === 'mesAnterior' ? 'selected' : '' ?>>Mês Anterior</option>
-                    <option value="mes" <?= $this->input->get('periodo') === 'mes' ? 'selected' : '' ?>>Mês</option>
-                    <option value="mesPosterior" <?= $this->input->get('periodo') === 'mesPosterior' ? 'selected' : '' ?>>Mês Posterior</option>
-                    <option value="ano" <?= $this->input->get('periodo') === 'ano' ? 'selected' : '' ?>>Ano</option>
-                    <option value="personalizado" <?= $this->input->get('periodo') === 'personalizado' ? 'selected' : '' ?>>Personalizado</option>
-                </select>
+            <div class="filters-grid">
+                <div class="filter-item">
+                    <label>Período</label>
+                    <select id="periodo" name="periodo">
+                        <option value="dia" <?= $this->input->get('periodo') === 'dia' ? 'selected' : '' ?>>Dia</option>
+                        <option value="semana" <?= $this->input->get('periodo') === 'semana' ? 'selected' : '' ?>>Semana</option>
+                        <option value="mesAnterior" <?= $this->input->get('periodo') === 'mesAnterior' ? 'selected' : '' ?>>Mês Anterior</option>
+                        <option value="mes" <?= $this->input->get('periodo') === 'mes' ? 'selected' : '' ?>>Mês</option>
+                        <option value="mesPosterior" <?= $this->input->get('periodo') === 'mesPosterior' ? 'selected' : '' ?>>Mês Posterior</option>
+                        <option value="ano" <?= $this->input->get('periodo') === 'ano' ? 'selected' : '' ?>>Ano</option>
+                        <option value="personalizado" <?= $this->input->get('periodo') === 'personalizado' ? 'selected' : '' ?>>Personalizado</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Vencimento (de)</label>
+                    <input id="vencimento_de" type="text" class="datepicker" name="vencimento_de" value="<?= $this->input->get('vencimento_de') ? $this->input->get('vencimento_de') : date('d/m/Y') ?>">
+                </div>
+
+                <div class="filter-item">
+                    <label>Vencimento (até)</label>
+                    <input id="vencimento_ate" type="text" class="datepicker" name="vencimento_ate" value="<?= $this->input->get('vencimento_ate') ? $this->input->get('vencimento_ate') : date('d/m/Y') ?>">
+                </div>
+
+                <div class="filter-item">
+                    <label>Tipo</label>
+                    <select name="tipo">
+                        <option value="">Todos</option>
+                        <option value="receita" <?= $this->input->get('tipo') === 'receita' ? 'selected' : '' ?>>Receita</option>
+                        <option value="despesa" <?= $this->input->get('tipo') === 'despesa' ? 'selected' : '' ?>>Despesa</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Status</label>
+                    <select name="status">
+                        <option value="">Todos (Pendente e Pago)</option>
+                        <option value="0" <?= $this->input->get('status') === '0' ? 'selected' : '' ?>>Pendente</option>
+                        <option value="1" <?= $this->input->get('status') === '1' ? 'selected' : '' ?>>Pago</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Cliente/Fornecedor</label>
+                    <input id="cliente_busca" type="text" name="cliente" value="<?= $this->input->get('cliente') ?>">
+                </div>
+
+                <div class="filter-item">
+                    <label>&nbsp;</label>
+                    <button type="submit" class="action-button receita">
+                        <i class='bx bx-filter-alt'></i>
+                        <span>Filtrar</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="span2">
-                <label>Vencimento (de)</label>
-                <input id="vencimento_de" type="text" class="span12 datepicker" name="vencimento_de" value="<?= $this->input->get('vencimento_de') ? $this->input->get('vencimento_de') : date('d/m/Y') ?>">
-            </div>
+            <div class="summary-cards">
+                <div class="summary-card receitas">
+                    <div class="label">RECEITAS</div>
+                    <div class="value">R$ <?php echo number_format($totals['receitas'], 2, ',', '.') ?></div>
+                </div>
 
-            <div class="span2">
-                <label>Vencimento (até)</label>
-                <input id="vencimento_ate" type="text" class="span12 datepicker" name="vencimento_ate" value="<?= $this->input->get('vencimento_ate') ? $this->input->get('vencimento_ate') : date('d/m/Y') ?>">
-            </div>
+                <div class="summary-card despesas">
+                    <div class="label">DESPESAS</div>
+                    <div class="value">R$ <?php echo number_format($totals['despesas'], 2, ',', '.') ?></div>
+                </div>
 
-            <div class="span2">
-                <label>Tipo</label>
-                <select name="tipo" class="span12">
-                    <option value="">Todos</option>
-                    <option value="receita" <?= $this->input->get('tipo') === 'receita' ? 'selected' : '' ?>>Receita</option>
-                    <option value="despesa" <?= $this->input->get('tipo') === 'despesa' ? 'selected' : '' ?>>Despesa</option>
-                </select>
+                <div class="summary-card saldo">
+                    <div class="label">SALDO</div>
+                    <div class="value">R$ <?php echo number_format($totals['receitas'] - $totals['despesas'], 2, ',', '.') ?></div>
+                </div>
             </div>
-
-            <div class="span2">
-                <label>Status</label>
-                <select name="status" class="span12">
-                    <option value="">Todos (Pendente e Pago)</option>
-                    <option value="0" <?= $this->input->get('status') === '0' ? 'selected' : '' ?>>Pendente</option>
-                    <option value="1" <?= $this->input->get('status') === '1' ? 'selected' : '' ?>>Pago</option>
-                </select>
-            </div>
-
-            <div class="span2">
-                <label>Cliente/Fornecedor</label>
-                <input id="cliente_busca" type="text" class="span12" name="cliente" value="<?= $this->input->get('cliente') ?>">
-            </div>
-
-            <div class="span2 pull-right">
-                <button type="submit" class="button btn btn-primary btn-sm" style="min-width: 120px">
-                    <span class="button__icon"><i class='bx bx-filter-alt'></i></span><span class="button__text2">Filtrar</span></button>
-            </div>
-
-            <div class="span2 pull-right">
-                <div type="" class="button btn btn-mini btn-success" style="min-width: 120px">
-                <span class="button__text2">RECEITAS:<i class=''></i></span>
-                    <span class="button__text2"><strong> R$ <?php echo number_format($totals['receitas'], 2, ',', '.') ?></strong></span></div>
-            </div>
-
-            <div class="span2 pull-right">
-                <div type="" class="button btn btn-mini btn-danger" style="min-width: 120px">
-                <span class="button__text2">DESPESAS:<i class=''></i></span>
-                    <span class="button__text2"><strong>R$ <?php echo number_format($totals['despesas'], 2, ',', '.') ?></strong></span></div>
-            </div>
-
-            <div class="span2 pull-right">
-                <div type="" class="button btn btn-mini btn-success" style="min-width: 120px">
-                <span class="button__text2">SALDO:<i class=''></i></span>
-                    <span class="button__text2"><strong>R$ <?php echo number_format($totals['receitas'] - $totals['despesas'], 2, ',', '.') ?></strong></span></div>
-            </div>
-
         </form>
     </div>
 
@@ -247,65 +550,114 @@ $periodo = $this->input->get('periodo');
                             echo '</tr>';
                         } ?>
                     </tbody>
-
-                    </table>
-
-                    <table class="table table-bordered" id="divLancamentos">
-           
-</div>
-
-                    <tfoot>
-                        <td></td>
-
-                        <tr>
-                            <td colspan="7" style="text-align: left;"><strong>Estatísticas Gerais do Financeiro:</strong></td>
-                        </tr> 
-                        <tr>
-                      <td colspan="7" style="text-align: left; color: green">Total Receitas (Pagas): R$ <?php echo number_format($estatisticas_financeiro->total_receita, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left; color: red">Total Despesas (Pagas): R$ <?php echo number_format($estatisticas_financeiro->total_despesa, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;"><strong>Total Receitas (-) Despesas = Saldo Líquido: R$ <?php $sub_receita_despesa = $estatisticas_financeiro->total_receita - $estatisticas_financeiro->total_despesa;
-echo number_format($sub_receita_despesa, 2, ',', '.') ?></strong></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total Receitas (+) Despesas: R$ <?php $soma_receita_despesa = $estatisticas_financeiro->total_receita + $estatisticas_financeiro->total_despesa;
-echo number_format($soma_receita_despesa, 2, ',', '.') ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total Receitas Pendentes: R$ <?php  echo number_format($estatisticas_financeiro->total_receita_pendente, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total Despesas Pendentes: R$ <?php echo number_format($estatisticas_financeiro->total_despesa_pendente, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total de Receitas Pendentes (-) Despesas Pendentes: R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente - $estatisticas_financeiro->total_despesa_pendente;
-echo number_format($sub_recpendente_despependente, 2, ',', '.')?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;"><strong>Total de Receitas Pendentes (+) Despesas Pendentes: R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente + $estatisticas_financeiro->total_despesa_pendente;
-echo number_format($sub_recpendente_despependente, 2, ',', '.')?></strong></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total de Descontos aplicados á lançamentos Pagos: R$ <?php echo number_format($estatisticas_financeiro->total_valor_desconto, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total de Descontos aplicados á lançamentos Pendentes: R$ <?php echo number_format($estatisticas_financeiro->total_valor_desconto_pendente, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;"><strong>Total de descontos aplicados (pagos + pendentes): R$ <?php $soma_descontos_pagos = $estatisticas_financeiro->total_valor_desconto + $estatisticas_financeiro->total_valor_desconto_pendente;
-echo number_format($soma_descontos_pagos, 2, ',', '.')?></strong></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total de Receitas sem descontos aplicados (pagos + pendentes): R$ <?php echo number_format($estatisticas_financeiro->total_receita_sem_desconto, 2, ',', '.'); ?></td>
-                      </tr>
-                      <tr>
-                      <td colspan="7" style="text-align: left;">Total de Despesas sem descontos aplicados (pagos + pendentes): R$ <?php echo number_format($estatisticas_financeiro->total_despesa_sem_desconto, 2, ',', '.'); ?></td>
-                      </tr>
-                    </tfoot>
                 </table>
+
+                <div class="financial-stats-container">
+                    <h3 class="mb-4">Estatísticas Gerais do Financeiro</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card receita">
+                            <h4>Total Receitas (Pagas)</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita, 2, ',', '.'); ?></div>
+                        </div>
+                        
+                        <div class="stat-card despesa">
+                            <h4>Total Despesas (Pagas)</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa, 2, ',', '.'); ?></div>
+                        </div>
+                        
+                        <div class="stat-card total">
+                            <h4>Saldo Líquido</h4>
+                            <div class="value">R$ <?php $sub_receita_despesa = $estatisticas_financeiro->total_receita - $estatisticas_financeiro->total_despesa;
+echo number_format($sub_receita_despesa, 2, ',', '.'); ?></div>
+                        </div>
+
+                        <div class="stat-card receita">
+                            <h4>Receitas Pendentes</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita_pendente, 2, ',', '.'); ?></div>
+                        </div>
+
+                        <div class="stat-card despesa">
+                            <h4>Despesas Pendentes</h4>
+                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa_pendente, 2, ',', '.'); ?></div>
+                        </div>
+
+                        <div class="stat-card total">
+                            <h4>Saldo Pendente</h4>
+                            <div class="value">R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente - $estatisticas_financeiro->total_despesa_pendente;
+echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <canvas id="pendingChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Gráfico de Receitas x Despesas
+                        const ctxFinancial = document.getElementById('financialChart').getContext('2d');
+                        new Chart(ctxFinancial, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['Receitas', 'Despesas'],
+                                datasets: [{
+                                    data: [
+                                        <?php echo $estatisticas_financeiro->total_receita; ?>,
+                                        <?php echo $estatisticas_financeiro->total_despesa; ?>
+                                    ],
+                                    backgroundColor: ['#28a745', '#dc3545']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Receitas x Despesas (Pagas)'
+                                    }
+                                }
+                            }
+                        });
+
+                        // Gráfico de Pendentes
+                        const ctxPending = document.getElementById('pendingChart').getContext('2d');
+                        new Chart(ctxPending, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Receitas Pendentes', 'Despesas Pendentes'],
+                                datasets: [{
+                                    label: 'Valor',
+                                    data: [
+                                        <?php echo $estatisticas_financeiro->total_receita_pendente; ?>,
+                                        <?php echo $estatisticas_financeiro->total_despesa_pendente; ?>
+                                    ],
+                                    backgroundColor: ['#28a745', '#dc3545']
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Receitas x Despesas (Pendentes)'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>
@@ -418,7 +770,7 @@ echo number_format($soma_descontos_pagos, 2, ',', '.')?></strong></td>
                             <option value="Depósito">Depósito</option>
                             <option value="Transferência DOC">Transferência DOC</option>
                             <option value="Transferência TED">Transferência TED</option>
-                            <option value="Promissória">Promissória</option> 
+                            <option value="Promissória">Promissória</option>
                         </select>
                     </div>
                 </div>
