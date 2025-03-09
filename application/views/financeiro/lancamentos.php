@@ -407,6 +407,17 @@ $periodo = $this->input->get('periodo');
 
         <form action="<?php echo current_url(); ?>" method="get">
             <div class="filters-grid">
+                
+
+                <div class="filter-item">
+                    <label>Tipo</label>
+                    <select name="tipo">
+                        <option value="">Todos</option>
+                        <option value="receita" <?= $this->input->get('tipo') === 'receita' ? 'selected' : '' ?>>Receita</option>
+                        <option value="despesa" <?= $this->input->get('tipo') === 'despesa' ? 'selected' : '' ?>>Despesa</option>
+                    </select>
+                </div>
+
                 <div class="filter-item">
                     <label>Período</label>
                     <select id="periodo" name="periodo">
@@ -430,19 +441,12 @@ $periodo = $this->input->get('periodo');
                     <input id="vencimento_ate" type="text" class="datepicker" name="vencimento_ate" value="<?= $this->input->get('vencimento_ate') ? $this->input->get('vencimento_ate') : date('d/m/Y') ?>">
                 </div>
 
-                <div class="filter-item">
-                    <label>Tipo</label>
-                    <select name="tipo">
-                        <option value="">Todos</option>
-                        <option value="receita" <?= $this->input->get('tipo') === 'receita' ? 'selected' : '' ?>>Receita</option>
-                        <option value="despesa" <?= $this->input->get('tipo') === 'despesa' ? 'selected' : '' ?>>Despesa</option>
-                    </select>
-                </div>
+                
 
                 <div class="filter-item">
                     <label>Status</label>
                     <select name="status">
-                        <option value="">Todos (Pendente e Pago)</option>
+                        <option value="">Pendente e Pago</option>
                         <option value="0" <?= $this->input->get('status') === '0' ? 'selected' : '' ?>>Pendente</option>
                         <option value="1" <?= $this->input->get('status') === '1' ? 'selected' : '' ?>>Pago</option>
                     </select>
@@ -552,41 +556,47 @@ $periodo = $this->input->get('periodo');
                     </tbody>
                 </table>
 
+                
+
                 <div class="financial-stats-container">
-                    <h3 class="mb-4">Estatísticas Gerais do Financeiro</h3>
+                    <h5></h5>
+
+                    <div class="summary-cards">
+                    <div class="stat-card receita span4">
+                        <h4>Total Receitas (Pagas)</h4>
+                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita, 2, ',', '.'); ?></div>
+                    </div>
                     
-                    <div class="stats-grid">
-                        <div class="stat-card receita">
-                            <h4>Total Receitas (Pagas)</h4>
-                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita, 2, ',', '.'); ?></div>
-                        </div>
-                        
-                        <div class="stat-card despesa">
-                            <h4>Total Despesas (Pagas)</h4>
-                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa, 2, ',', '.'); ?></div>
-                        </div>
-                        
-                        <div class="stat-card total">
-                            <h4>Saldo Líquido</h4>
-                            <div class="value">R$ <?php $sub_receita_despesa = $estatisticas_financeiro->total_receita - $estatisticas_financeiro->total_despesa;
-echo number_format($sub_receita_despesa, 2, ',', '.'); ?></div>
-                        </div>
+                    <div class="stat-card despesa span4">
+                        <h4>Total Despesas (Pagas)</h4>
+                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa, 2, ',', '.'); ?></div>
+                    </div>
+                    
+                    <div class="stat-card total span4">
+                        <h4>Saldo Líquido</h4>
+                        <div class="value">R$ <?php $sub_receita_despesa = $estatisticas_financeiro->total_receita - $estatisticas_financeiro->total_despesa;
+    echo number_format($sub_receita_despesa, 2, ',', '.'); ?></div>
+                    </div>
+                </div>
 
-                        <div class="stat-card receita">
-                            <h4>Receitas Pendentes</h4>
-                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita_pendente, 2, ',', '.'); ?></div>
-                        </div>
+                <div class="summary-cards">
+                    <div class="stat-card receita span4">
+                        <h4>Receitas Pendentes</h4>
+                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_receita_pendente, 2, ',', '.'); ?></div>
+                    </div>
 
-                        <div class="stat-card despesa">
-                            <h4>Despesas Pendentes</h4>
-                            <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa_pendente, 2, ',', '.'); ?></div>
-                        </div>
+                    <div class="stat-card despesa span4">
+                        <h4>Despesas Pendentes</h4>
+                        <div class="value">R$ <?php echo number_format($estatisticas_financeiro->total_despesa_pendente, 2, ',', '.'); ?></div>
+                    </div>
 
-                        <div class="stat-card total">
-                            <h4>Saldo Pendente</h4>
-                            <div class="value">R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente - $estatisticas_financeiro->total_despesa_pendente;
-echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
-                        </div>
+                    <div class="stat-card total span4">
+                        <h4>Saldo Pendente</h4>
+                        <div class="value">R$ <?php $sub_recpendente_despependente = $estatisticas_financeiro->total_receita_pendente - $estatisticas_financeiro->total_despesa_pendente;
+    echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
+                    </div>
+                </div>
+                    
                     </div>
 
                     <div class="charts-container">
