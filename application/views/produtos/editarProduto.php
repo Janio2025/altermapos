@@ -221,18 +221,38 @@ $localizacaoExibida = implode(',', array_slice($localizacao, 1));
 
 
                     <div class="control-group">
-                        <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
+                        <label for="organizador_id" class="control-label">Organizador</label>
                         <div class="controls">
-                            <!-- Campo de busca de organizadores -->
-                           <input id="buscarOrganizador" class="span8" type="text" value="<?php echo $localizacaoExibida; ?>" />
-                            <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
-                            <select id="compartimentosDisponiveis" class="span4" name="compartimentosDisponiveis">
-                                <!-- Os compartimentos serão carregados dinamicamente aqui -->
+                            <select id="organizador_id" name="organizador_id" class="span12 select2">
+                                <option value="">Buscar organizador...</option>
+                                <?php foreach ($organizadores as $organizador) : ?>
+                                    <option value="<?php echo $organizador->id; ?>" <?php echo ($result->organizador_id == $organizador->id) ? 'selected' : ''; ?>>
+                                        <?php echo $organizador->nome_organizador; ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
-                            <!-- Campo oculto para salvar o valor final -->
-                            <input type="hidden" id="localizacaoProduto" name="localizacaoProduto" value="<?php echo $result->localizacaoProduto; ?>" />
                         </div>
                     </div>
+
+                    <div class="control-group">
+                        <label for="compartimento_id" class="control-label">Compartimento</label>
+                        <div class="controls">
+                            <select id="compartimento_id" name="compartimento_id" class="span12">
+                                <option value="">Selecione primeiro um organizador</option>
+                                <?php if ($result->organizador_id && $result->compartimento_id): ?>
+                                    <?php 
+                                    $compartimentos = $this->db->where('organizador_id', $result->organizador_id)->where('ativa', true)->get('compartimentos')->result();
+                                    foreach ($compartimentos as $compartimento): 
+                                    ?>
+                                        <option value="<?php echo $compartimento->id; ?>" <?php echo ($result->compartimento_id == $compartimento->id) ? 'selected' : ''; ?>>
+                                            <?php echo $compartimento->nome_compartimento; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="control-group">
                         <label class="control-label">Tipo de Movimento</label>
                         <div class="controls">
@@ -831,6 +851,72 @@ $(document).ready(function() {
     $('#buscarOrganizador').on('blur', function() {
         if ($(this).val() === '') {
             $(this).val(valorFormatado); // Restaura o valor formatado
+        }
+    });
+});
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Quando um organizador é selecionado
+        $('#organizador_id').change(function() {
+            var organizador_id = $(this).val();
+            var compartimento_select = $('#compartimento_id');
+            
+            // Limpar o select de compartimentos
+            compartimento_select.empty();
+            compartimento_select.append('<option value="">Selecione um compartimento</option>');
+            
+            if (organizador_id) {
+                // Carregar compartimentos via AJAX
+                $.ajax({
+                    url: '<?php echo site_url('produtos/buscarCompartimentos'); ?>',
+                    type: 'GET',
+                    data: { organizador_id: organizador_id },
+                    dataType: 'json',
+                    success: function(data) {
+                        // Adicionar os compartimentos ao select
+                        $.each(data, function(index, item) {
+                            compartimento_select.append(
+                                $('<option></option>').val(item.id).text(item.nome_compartimento)
+                            );
+                        });
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+<script>
+$(document).ready(function() {
+    // Inicializa o Select2 no select do organizador
+    $('#organizador_id').select2({
+        placeholder: "Buscar organizador...",
+        allowClear: true,
+        language: {
+            noResults: function() {
+                return "Nenhum resultado encontrado";
+            }
+        }
+    });
+
+    // Evento quando um organizador é selecionado
+    $('#organizador_id').on('change', function() {
+        var organizador_id = $(this).val();
+        if (organizador_id) {
+            $.get('<?php echo site_url('produtos/buscarCompartimentos'); ?>', {
+                organizador_id: organizador_id
+            }, function(data) {
+                var compartimentos = JSON.parse(data);
+                var options = '<option value="">Selecione um compartimento</option>';
+                compartimentos.forEach(function(compartimento) {
+                    options += '<option value="' + compartimento.id + '">' + compartimento.nome_compartimento + '</option>';
+                });
+                $('#compartimento_id').html(options);
+            });
+        } else {
+            $('#compartimento_id').html('<option value="">Selecione primeiro um organizador</option>');
         }
     });
 });

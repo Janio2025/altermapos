@@ -274,16 +274,24 @@
                                         </div>
                                     </div>
                                     <div class="control-group">
-                                        <label for="localizacaoProduto" class="control-label">Localização<span class="required">*</span></label>
+                                        <label for="organizador_id" class="control-label">Organizador</label>
                                         <div class="controls">
-                                            <!-- Campo de busca de organizadores -->
-                                            <input id="buscarOrganizador" class="span12" type="text" placeholder="Buscar organizador..." />
-                                            <!-- Dropdown para exibir os compartimentos (agora com seleção única) -->
-                                            <select id="compartimentosDisponiveis" class="span12" name="compartimentosDisponiveis">
-                                                <!-- Os compartimentos serão carregados dinamicamente aqui -->
+                                            <select id="organizador_id" name="organizador_id" class="span12 select2">
+                                                <option value="">Buscar organizador...</option>
+                                                <?php foreach ($organizadores as $organizador) : ?>
+                                                    <option value="<?php echo $organizador->id; ?>">
+                                                        <?php echo $organizador->nome_organizador; ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
-                                            <!-- Campo oculto para salvar o valor final -->
-                                            <input type="hidden" id="localizacaoProduto" name="localizacaoProduto" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label for="compartimento_id" class="control-label">Compartimento</label>
+                                        <div class="controls">
+                                            <select id="compartimento_id" name="compartimento_id" class="span12">
+                                                <option value="">Selecione primeiro um organizador</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
@@ -576,12 +584,12 @@
         minLength: 2, // Número mínimo de caracteres para iniciar a busca
         select: function(event, ui) {
             // Quando um organizador é selecionado, carregar seus compartimentos
-            carregarCompartimentos(ui.item.id);
+            carregarCompartimentos(ui.item.id, ui.item.value); // Passar o nome do organizador
         }
     });
 
     // Função para carregar os compartimentos de um organizador
-    function carregarCompartimentos(organizadorId) {
+    function carregarCompartimentos(organizadorId, organizadorNome) {
         $.ajax({
             url: "<?php echo site_url('organizadores/buscarCompartimentos'); ?>",
             dataType: "json",
@@ -604,6 +612,15 @@
                         `<option value="">Nenhum compartimento disponível</option>`
                     );
                 }
+
+                // Quando um compartimento é selecionado, preencher o campo oculto
+                $('#compartimentosDisponiveis').on('change', function() {
+                    const compartimentoId = $(this).val();
+                    const compartimentoNome = $(this).find('option:selected').text();
+
+                    // Preencher o campo oculto com o ID do organizador, nome do organizador e compartimento
+                    $('#localizacaoProduto').val(`${organizadorId},${organizadorNome},${compartimentoNome}`);
+                });
             }
         });
     }
@@ -802,5 +819,37 @@ $(document).ready(function() {
         });
     }
 });
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        // Quando um organizador é selecionado
+        $('#organizador_id').change(function() {
+            var organizador_id = $(this).val();
+            var compartimento_select = $('#compartimento_id');
+            
+            // Limpar o select de compartimentos
+            compartimento_select.empty();
+            compartimento_select.append('<option value="">Selecione um compartimento</option>');
+            
+            if (organizador_id) {
+                // Carregar compartimentos via AJAX
+                $.ajax({
+                    url: '<?php echo site_url('produtos/buscarCompartimentos'); ?>',
+                    type: 'GET',
+                    data: { organizador_id: organizador_id },
+                    dataType: 'json',
+                    success: function(data) {
+                        // Adicionar os compartimentos ao select
+                        $.each(data, function(index, item) {
+                            compartimento_select.append(
+                                $('<option></option>').val(item.id).text(item.nome_compartimento)
+                            );
+                        });
+                    }
+                });
+            }
+        });
+    });
 </script>
 

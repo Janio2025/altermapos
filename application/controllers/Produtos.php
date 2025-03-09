@@ -80,6 +80,9 @@ public function adicionar()
     $this->load->library('form_validation');
     $this->data['custom_error'] = '';
 
+    // Carregar organizadores para o select
+    $this->data['organizadores'] = $this->db->where('ativa', true)->get('organizadores')->result();
+
     if ($this->form_validation->run('produtos') == false) {
         $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
     } else {
@@ -130,7 +133,8 @@ public function adicionar()
             'idModelo' => $idModelo,
             'nsProduto' => set_value('nsProduto'),
             'codigoPeca' => set_value('codigoPeca'),
-            'localizacaoProduto' => set_value('localizacaoProduto'),
+            'organizador_id' => $this->input->post('organizador_id'),
+            'compartimento_id' => $this->input->post('compartimento_id'),
             'unidade' => set_value('unidade'),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,
@@ -172,6 +176,20 @@ public function adicionar()
     return $this->layout();
 }
 
+// Adicionar método para carregar compartimentos via AJAX
+public function buscarCompartimentos() {
+    if (!$this->input->is_ajax_request()) {
+        exit('Acesso não permitido');
+    }
+
+    $organizador_id = $this->input->get('organizador_id');
+    $this->db->where('organizador_id', $organizador_id);
+    $this->db->where('ativa', true);
+    $compartimentos = $this->db->get('compartimentos')->result();
+
+    echo json_encode($compartimentos);
+}
+
 public function buscarOrganizadorPorId() {
     if (!$this->input->is_ajax_request()) {
         exit('Acesso não permitido');
@@ -204,6 +222,9 @@ public function editar()
     $this->load->library('form_validation');
     $this->data['custom_error'] = '';
 
+    // Carregar organizadores para o select
+    $this->data['organizadores'] = $this->db->where('ativa', true)->get('organizadores')->result();
+
     if ($this->form_validation->run('produtos') == false) {
         $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
     } else {
@@ -225,7 +246,8 @@ public function editar()
             'idModelo' => $idModelo, // Mantém a referência ao modelo correto
             'nsProduto' => $this->input->post('nsProduto'),
             'codigoPeca' => $this->input->post('codigoPeca'),
-            'localizacaoProduto' => $this->input->post('localizacaoProduto'),
+            'organizador_id' => $this->input->post('organizador_id'),
+            'compartimento_id' => $this->input->post('compartimento_id'),
             'unidade' => $this->input->post('unidade'),
             'precoCompra' => $precoCompra,
             'precoVenda' => $precoVenda,

@@ -187,8 +187,19 @@ if ($localizacaoProduto !== 'N/A') {
                 <table class="table table-bordered">
                     <tbody>
                         <tr>
-                            <td><strong>Localização</strong></td>
-                            <td><?php echo $localizacaoProduto; ?></td>
+                            <td style="text-align: right; width: 30%"><strong>Localização</strong></td>
+                            <td>
+                                <?php 
+                                if ($result->organizador_id) {
+                                    $organizador = $this->db->where('id', $result->organizador_id)->get('organizadores')->row();
+                                    $compartimento = $this->db->where('id', $result->compartimento_id)->get('compartimentos')->row();
+                                    echo $organizador ? $organizador->nome_organizador : '';
+                                    echo $compartimento ? ' - ' . $compartimento->nome_compartimento : '';
+                                } else {
+                                    echo 'Não definida';
+                                }
+                                ?>
+                            </td>
                         </tr>
                         <tr>
                             <td><strong>Unidade</strong></td>
