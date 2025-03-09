@@ -92,8 +92,13 @@ class Financeiro extends MY_Controller
 
         $this->data['results'] = $this->financeiro_model->get('lancamentos', '*', $where, $this->data['configuration']['per_page'], $this->input->get('per_page'));
         $this->data['totals'] = $this->financeiro_model->getTotals($where);
-
         $this->data['estatisticas_financeiro'] = $this->financeiro_model->getEstatisticasFinanceiro2();
+        
+        // Adiciona os dados dos gastos mensais
+        $gastos_mensais = $this->financeiro_model->getGastosMensaisPorTipo();
+        $this->data['gastos_fornecedores'] = $gastos_mensais['gastos_fornecedores'];
+        $this->data['gastos_colaboradores'] = $gastos_mensais['gastos_colaboradores'];
+        $this->data['meses'] = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
         $this->data['view'] = 'financeiro/lancamentos';
 
@@ -514,7 +519,7 @@ class Financeiro extends MY_Controller
 
         $data = [
             'descricao' => $this->input->post('descricao'),
-            'data_vencimento' => $this->input->post('vencimento'),
+            'data_vencimento' => $pagamento,
             'data_pagamento' => $pagamento,
             'valor' => $this->input->post('valor'),
             'valor_desconto' => $this->input->post('valor_desconto_editar'),

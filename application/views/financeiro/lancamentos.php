@@ -135,9 +135,11 @@ $periodo = $this->input->get('periodo');
         color: #dc3545;
     }
 
+    
+
     .charts-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 20px;
         margin-top: 20px;
     }
@@ -147,15 +149,31 @@ $periodo = $this->input->get('periodo');
         padding: 20px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        min-height: 250px;
+        max-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chart-card canvas {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: contain;
+    }
+
+    @media (max-width: 1400px) {
+        .charts-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
     @media (max-width: 768px) {
-        .stats-grid {
+        .charts-container {
             grid-template-columns: 1fr;
         }
         
-        .charts-container {
-            grid-template-columns: 1fr;
+        .chart-card {
+            min-height: 250px;
         }
     }
 
@@ -590,13 +608,20 @@ echo number_format($sub_receita_despesa, 2, ',', '.'); ?></div>
 echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
                         </div>
                     </div>
+                    
 
                     <div class="charts-container">
-                        <div class="chart-card">
+                        <div class="chart-card financial-chart">
                             <canvas id="financialChart"></canvas>
                         </div>
-                        <div class="chart-card">
+                        <div class="chart-card pending-chart">
                             <canvas id="pendingChart"></canvas>
+                        </div>
+                        <div class="chart-card supplier-chart">
+                            <canvas id="supplierChart"></canvas>
+                        </div>
+                        <div class="chart-card employee-chart">
+                            <canvas id="employeeChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -649,6 +674,70 @@ echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
                                     title: {
                                         display: true,
                                         text: 'Receitas x Despesas (Pendentes)'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+
+                        // Gráfico de Gastos com Fornecedores (Mensais)
+                        const ctxSupplier = document.getElementById('supplierChart').getContext('2d');
+                        new Chart(ctxSupplier, {
+                            type: 'line',
+                            data: {
+                                labels: <?php echo json_encode($meses ?? ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']); ?>,
+                                datasets: [{
+                                    label: 'Gastos com Fornecedores',
+                                    data: <?php 
+                                        echo json_encode($gastos_fornecedores ?? array_fill(0, 12, 0)); 
+                                    ?>,
+                                    borderColor: '#0066cc',
+                                    backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Gastos com Fornecedores (Mensal)'
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+
+                        // Gráfico de Gastos com Colaboradores (Mensais)
+                        const ctxEmployee = document.getElementById('employeeChart').getContext('2d');
+                        new Chart(ctxEmployee, {
+                            type: 'line',
+                            data: {
+                                labels: <?php echo json_encode($meses ?? ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']); ?>,
+                                datasets: [{
+                                    label: 'Gastos com Colaboradores',
+                                    data: <?php 
+                                        echo json_encode($gastos_colaboradores ?? array_fill(0, 12, 0)); 
+                                    ?>,
+                                    borderColor: '#ff9900',
+                                    backgroundColor: 'rgba(255, 153, 0, 0.1)',
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: 'Gastos com Colaboradores (Mensal)'
                                     }
                                 },
                                 scales: {

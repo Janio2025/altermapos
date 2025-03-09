@@ -146,4 +146,44 @@ class Financeiro_model extends CI_Model
             echo json_encode($row_set);
         }
     }
+
+    public function getGastosMensaisPorTipo()
+    {
+        $ano = date('Y');
+        $sql = "SELECT 
+                    MONTH(l.data_vencimento) as mes,
+                    SUM(CASE 
+                        WHEN c.fornecedor = 1 AND l.tipo = 'despesa' AND l.baixado = 1 
+                        THEN l.valor - l.desconto 
+                        ELSE 0 
+                    END) as gastos_fornecedores,
+                    SUM(CASE 
+                        WHEN c.fornecedor = 2 AND l.tipo = 'despesa' AND l.baixado = 1 
+                        THEN l.valor - l.desconto 
+                        ELSE 0 
+                    END) as gastos_colaboradores
+                FROM lancamentos l
+                LEFT JOIN clientes c ON l.clientes_id = c.idClientes
+                WHERE YEAR(l.data_vencimento) = ?
+                GROUP BY MONTH(l.data_vencimento)
+                ORDER BY MONTH(l.data_vencimento)";
+
+        $query = $this->db->query($sql, array($ano));
+        
+        // Inicializa arrays com zeros para todos os meses
+        $gastos_fornecedores = array_fill(0, 12, 0);
+        $gastos_colaboradores = array_fill(0, 12, 0);
+        
+        // Preenche com os valores reais onde existirem
+        foreach ($query->result() as $row) {
+            $mes = $row->mes - 1; // Ajusta para índice 0-11
+            $gastos_fornecedores[$mes] = floatval($row->gastos_fornecedores);
+            $gastos_colaboradores[$mes] = floatval($row->gastos_colaboradores);
+        }
+
+        return array(
+            'gastos_fornecedores' => $gastos_fornecedores,
+            'gastos_colaboradores' => $gastos_colaboradores
+        );
+    }
 }
