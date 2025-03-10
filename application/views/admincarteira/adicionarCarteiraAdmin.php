@@ -33,36 +33,6 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
-                        <label for="comissao_fixa" class="control-label">Comissão Fixa (%)</label>
-                        <div class="controls">
-                            <div class="input-prepend">
-                                <input id="comissao_fixa" type="number" name="comissao_fixa" class="input-mini" step="0.01" min="0" max="100" />
-                                <span class="add-on">%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="data_salario" class="control-label">Dia do Pagamento<span class="required">*</span></label>
-                        <div class="controls">
-                            <div class="input-prepend">
-                                <span class="add-on"><i class="bx bx-calendar"></i></span>
-                                <input id="data_salario" type="number" name="data_salario" class="input-mini" min="1" max="31" required />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <label for="tipo_repeticao" class="control-label">Tipo de Repetição</label>
-                        <div class="controls">
-                            <select name="tipo_repeticao" id="tipo_repeticao" class="input-xlarge">
-                                <option value="mensal">Mensal</option>
-                                <option value="quinzenal">Quinzenal</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="form-actions">
                         <div class="span12">
                             <div class="span6 offset3" style="display:flex;justify-content: center">

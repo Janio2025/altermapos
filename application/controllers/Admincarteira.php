@@ -62,58 +62,34 @@ class Admincarteira extends MY_Controller {
         $this->load->library('form_validation');
         $this->form_validation->set_rules('usuario', 'Usuário', 'required');
         $this->form_validation->set_rules('salario', 'Salário', 'required');
-        $this->form_validation->set_rules('data_salario', 'Dia do Pagamento', 'required|numeric|greater_than[0]|less_than[32]');
         
         if ($this->form_validation->run() == false) {
             $this->session->set_flashdata('error', 'Campos obrigatórios não foram preenchidos.');
             redirect(base_url() . 'index.php/admincarteira/adicionar');
-            return;
-        }
-        
-        // Verifica se já existe uma carteira para este usuário
-        $usuario_id = $this->input->post('usuario');
-        $carteira_existente = $this->carteira_model->getByUsuarioId($usuario_id);
-        
-        if ($carteira_existente) {
-            $this->session->set_flashdata('error', 'Este usuário já possui uma carteira cadastrada.');
-            redirect(base_url() . 'index.php/admincarteira/adicionar');
-            return;
-        }
-        
-        $data = array(
-            'usuarios_id' => $usuario_id,
-            'saldo' => $this->input->post('salario'),
-            'ativo' => 1
-        );
-        
-        // Inicia a transação no banco
-        $this->db->trans_begin();
-        
-        try {
-            // Adiciona a carteira
+        } else {
+            // Verifica se já existe uma carteira para este usuário
+            $usuario_id = $this->input->post('usuario');
+            $carteira_existente = $this->carteira_model->getByUsuarioId($usuario_id);
+            
+            if ($carteira_existente) {
+                $this->session->set_flashdata('error', 'Este usuário já possui uma carteira cadastrada.');
+                redirect(base_url() . 'index.php/admincarteira/adicionar');
+                return;
+            }
+            
+            $data = array(
+                'usuarios_id' => $usuario_id,
+                'saldo' => $this->input->post('salario'),
+                'ativo' => 1
+            );
+            
             if ($this->carteira_model->add('carteira_usuario', $data) == TRUE) {
-                // Prepara os dados de configuração
-                $config_data = array(
-                    'carteira_usuario_id' => $this->db->insert_id(),
-                    'salario_base' => str_replace(',', '.', str_replace('.', '', $this->input->post('salario'))),
-                    'comissao_fixa' => floatval(str_replace(',', '.', $this->input->post('comissao_fixa'))),
-                    'data_salario' => $this->input->post('data_salario'),
-                    'tipo_repeticao' => $this->input->post('tipo_repeticao') ?: 'mensal'
-                );
-                
-                // Salva a configuração
-                $this->carteira_model->salvarConfiguracao($config_data);
-                
-                $this->db->trans_commit();
                 $this->session->set_flashdata('success', 'Carteira adicionada com sucesso!');
                 redirect(base_url() . 'index.php/admincarteira');
             } else {
-                throw new Exception('Erro ao adicionar carteira.');
+                $this->session->set_flashdata('error', 'Erro ao adicionar carteira.');
+                redirect(base_url() . 'index.php/admincarteira/adicionar');
             }
-        } catch (Exception $e) {
-            $this->db->trans_rollback();
-            $this->session->set_flashdata('error', $e->getMessage());
-            redirect(base_url() . 'index.php/admincarteira/adicionar');
         }
     }
     
