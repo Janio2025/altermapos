@@ -244,7 +244,6 @@ CREATE TABLE IF NOT EXISTS `configuracao_carteira` (
         ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
 
-
 -- -----------------------------------------------------
 -- Table `Garantia`
 -- -----------------------------------------------------
