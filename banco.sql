@@ -192,35 +192,58 @@ CREATE TABLE IF NOT EXISTS `forma_pagamento` (
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
--- -----------------------------------------------------
--- Table `carteira_usuario`
--- -----------------------------------------------------
+-- Criação da tabela carteira_usuario
 CREATE TABLE IF NOT EXISTS `carteira_usuario` (
-  `id_usuario` INT(11) NOT NULL AUTO_INCREMENT,
-  `saldo` DECIMAL(10,2),
-  `salario` DECIMAL(10,2),
-  `comissao` DECIMAL(10,2),
-  `bonus` DECIMAL(10,2),
-  `retirada` DECIMAL(10,2),
-  PRIMARY KEY (`id_usuario`),
-  CONSTRAINT `fk_usuarios`
-    FOREIGN KEY (`id_usuario`) 
+  `idCarteiraUsuario` INT(11) NOT NULL AUTO_INCREMENT,
+  `saldo` DECIMAL(10, 2) NULL DEFAULT 0,
+  `ativo` TINYINT(1) NULL DEFAULT 1,
+  `usuarios_id` INT(11) NOT NULL,
+  PRIMARY KEY (`idCarteiraUsuario`),
+  INDEX `fk_carteira_usuario_usuarios1_idx` (`usuarios_id` ASC),
+  CONSTRAINT `fk_carteira_usuario_usuarios1`
+    FOREIGN KEY (`usuarios_id`)
     REFERENCES `usuarios` (`idUsuarios`)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 
--- -----------------------------------------------------
--- Table `retiradas`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `retiradas` (
-  `id_retirada` INT(11) NOT NULL AUTO_INCREMENT,
-  `id_usuario` INT(11),
-  `vales` DECIMAL(10,2),
-  `descricao` VARCHAR(255),
-  `descontos` DECIMAL(10,2),
-  `data` DATE,
-  PRIMARY KEY (`id_retirada`),
-  FOREIGN KEY (`id_usuario`) REFERENCES carteira_usuario(id_usuario)
-) ENGINE = InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+-- Criação da tabela transacoes_usuario
+CREATE TABLE IF NOT EXISTS `transacoes_usuario` (
+  `idTransacoesUsuario` INT(11) NOT NULL AUTO_INCREMENT,
+  `tipo` ENUM('salario', 'bonus', 'comissao', 'retirada') NOT NULL,
+  `valor` DECIMAL(10, 2) NOT NULL,
+  `data_transacao` DATE NOT NULL,
+  `descricao` VARCHAR(255) NULL DEFAULT NULL,
+  `carteira_usuario_id` INT(11) NOT NULL,
+  PRIMARY KEY (`idTransacoesUsuario`),
+  INDEX `fk_transacoes_usuario_carteira_usuario1_idx` (`carteira_usuario_id` ASC),
+  CONSTRAINT `fk_transacoes_usuario_carteira_usuario1`
+    FOREIGN KEY (`carteira_usuario_id`)
+    REFERENCES `carteira_usuario` (`idCarteiraUsuario`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+-- Criação da tabela configuracao_carteira
+CREATE TABLE IF NOT EXISTS `configuracao_carteira` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `carteira_usuario_id` INT NOT NULL,
+    `salario_base` DECIMAL(10,2) NOT NULL,
+    `comissao_fixa` DECIMAL(5,2) DEFAULT 0.00,
+    `data_salario` INT NOT NULL COMMENT 'Dia do mês (1-31)',
+    `tipo_repeticao` ENUM('mensal', 'quinzenal') NOT NULL DEFAULT 'mensal',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fk_config_carteira_usuario`
+        FOREIGN KEY (`carteira_usuario_id`)
+        REFERENCES `carteira_usuario` (`idCarteiraUsuario`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;
+
 
 -- -----------------------------------------------------
 -- Table `Garantia`
@@ -840,6 +863,42 @@ INSERT IGNORE INTO `usuarios` (`idUsuarios`, `nome`, `rg`, `cpf`, `cep`, `rua`, 
 (1, 'admin_name', 'admin_rg', 'admin_cpf', '70005-115', 'Rua Acima', '12', 'Alvorada', 'Teste', 'MG', 'admin_email', 'admin_password', '000000-0000', '', 1, 'admin_created_at', 1, '3000-01-01');
 
 INSERT IGNORE INTO `migrations`(`version`) VALUES ('20210125173741');
+
+-- Tabela de Carteiras
+CREATE TABLE IF NOT EXISTS `carteiras` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nome` varchar(100) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `salario` decimal(10,2) NOT NULL,
+  `data_criacao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_carteira_usuario` (`usuario_id`),
+  CONSTRAINT `fk_carteira_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`idUsuarios`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Tabela de Bônus
+CREATE TABLE IF NOT EXISTS `bonus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `carteira_id` int(11) NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `descricao` text,
+  `data_adicao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_bonus_carteira` (`carteira_id`),
+  CONSTRAINT `fk_bonus_carteira` FOREIGN KEY (`carteira_id`) REFERENCES `carteiras` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Tabela de Comissões
+CREATE TABLE IF NOT EXISTS `comissoes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `carteira_id` int(11) NOT NULL,
+  `valor` decimal(10,2) NOT NULL,
+  `descricao` text,
+  `data_adicao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_comissao_carteira` (`carteira_id`),
+  CONSTRAINT `fk_comissao_carteira` FOREIGN KEY (`carteira_id`) REFERENCES `carteiras` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

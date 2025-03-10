@@ -127,6 +127,18 @@
                         </a>
                     </li>
                 <?php } ?>
+
+                <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteiraAdmin')) { ?>
+                    <li class="<?php if (isset($menuAdminCarteira)) {
+                        echo 'active';
+                    }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('admincarteira') ?>"><i class="bx bxs-wallet iconX"></i>
+                            <span class="title">Admin Carteira</span>
+                            <span class="title-tooltip">Admin Carteira</span>
+                        </a>
+                    </li>
+                <?php } ?>
+
                 <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCobranca')) { ?>
                     <li class="<?php if (isset($menuCobrancas)) {
                         echo 'active';
@@ -137,6 +149,17 @@
                         </a>
                     </li>
                 <?php } ?>
+
+                <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteira')) { ?>
+                    <li class="<?php if (isset($menuCarteira)) { echo 'active'; }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('carteira') ?>"><i class='bx bx-wallet iconX'></i>
+                            <span class="title">Carteira</span>
+                            <span class="title-tooltip">Carteira</span>
+                        </a>
+                    </li>
+                <?php } ?>
+
+                
 
                 <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vOrganizador')) { ?>
                     <li class="<?php if (isset($menuOrganizadores)) {

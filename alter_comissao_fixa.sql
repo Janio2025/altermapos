@@ -1,0 +1,1 @@
+ALTER TABLE configuracao_carteira MODIFY comissao_fixa DECIMAL(5,2) DEFAULT 0; 

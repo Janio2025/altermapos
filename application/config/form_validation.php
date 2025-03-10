@@ -471,4 +471,21 @@ $config = [
             'rules' => 'required|trim',
         ],
     ],
+    'carteira' => [
+        [
+            'field' => 'tipo',
+            'label' => 'Tipo',
+            'rules' => 'required'
+        ],
+        [
+            'field' => 'valor',
+            'label' => 'Valor',
+            'rules' => 'required'
+        ],
+        [
+            'field' => 'data_transacao',
+            'label' => 'Data',
+            'rules' => 'required'
+        ]
+    ],
 ];

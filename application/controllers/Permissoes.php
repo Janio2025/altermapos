@@ -61,6 +61,18 @@ class Permissoes extends MY_Controller
                 'eOrganizador' => $this->input->post('eOrganizador'),
                 'dOrganizador' => $this->input->post('dOrganizador'),
 
+                // Permissões de Carteiras
+                'vCarteira' => $this->input->post('vCarteira'),
+                'aCarteira' => $this->input->post('aCarteira'),
+                'eCarteira' => $this->input->post('eCarteira'),
+                'dCarteira' => $this->input->post('dCarteira'),
+
+                // Permissões de Carteiras Admin
+                'vCarteiraAdmin' => $this->input->post('vCarteiraAdmin'),
+                'aCarteiraAdmin' => $this->input->post('aCarteiraAdmin'),
+                'eCarteiraAdmin' => $this->input->post('eCarteiraAdmin'),
+                'dCarteiraAdmin' => $this->input->post('dCarteiraAdmin'),
+
                 // Outras permissões existentes
                 'aCliente' => $this->input->post('aCliente'),
                 'eCliente' => $this->input->post('eCliente'),
@@ -167,6 +179,18 @@ class Permissoes extends MY_Controller
                 'aOrganizador' => $this->input->post('aOrganizador'),
                 'eOrganizador' => $this->input->post('eOrganizador'),
                 'dOrganizador' => $this->input->post('dOrganizador'),
+
+                // Permissões de Carteiras
+                'vCarteira' => $this->input->post('vCarteira'),
+                'aCarteira' => $this->input->post('aCarteira'),
+                'eCarteira' => $this->input->post('eCarteira'),
+                'dCarteira' => $this->input->post('dCarteira'),
+
+                // Permissões de Carteiras Admin
+                'vCarteiraAdmin' => $this->input->post('vCarteiraAdmin'),
+                'aCarteiraAdmin' => $this->input->post('aCarteiraAdmin'),
+                'eCarteiraAdmin' => $this->input->post('eCarteiraAdmin'),
+                'dCarteiraAdmin' => $this->input->post('dCarteiraAdmin'),
 
                 // Outras permissões existentes
                 'aCliente' => $this->input->post('aCliente'),
