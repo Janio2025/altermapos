@@ -35,72 +35,49 @@ class Carteira extends MY_Controller
         $this->data['view'] = 'carteira/carteira';
 
         // Get user's wallet
-        $userId = $this->session->userdata('id');
-        $this->data['saldo'] = $this->carteira_model->getSaldo($userId);
+        $userId = $this->session->userdata('id_admin');
         
-        // Inicializa o total como zero
-        $this->data['total'] = 0;
-        
-        // Get user's wallet configuration
-        $carteira = $this->carteira_model->getByUsuarioId($userId);
-        if ($carteira) {
-            $config = $this->carteira_model->getConfiguracao($carteira->idCarteiraUsuario);
-            
-            if ($config) {
-                // Calculate total based on configuration
-                $salario_base = floatval($config->salario_base);
-                $comissao_fixa = floatval($config->comissao_fixa);
-                $tipo_valor_base = $config->tipo_valor_base;
-                
-                // Get base value for commission
-                $valor_base = 0;
-                if ($tipo_valor_base) {
-                    $this->db->select_sum($tipo_valor_base == 'servicos' ? 'servicos_os.subTotal' : 'os.valorTotal');
-                    $this->db->from($tipo_valor_base == 'servicos' ? 'servicos_os' : 'os');
-                    if ($tipo_valor_base == 'servicos') {
-                        $this->db->join('os', 'os.idOs = servicos_os.os_id');
-                    }
-                    $this->db->where('os.usuarios_id', $userId);
-                    $this->db->where('MONTH(os.dataFinal)', date('m'));
-                    $this->db->where('YEAR(os.dataFinal)', date('Y'));
-                    $this->db->where('os.status', 'Faturado');
-                    $query = $this->db->get();
-                    $result = $query->row();
-                    $valor_base = $result ? ($tipo_valor_base == 'servicos' ? $result->subTotal : $result->valorTotal) : 0;
-                    
-                    // If total type, subtract product costs
-                    if ($tipo_valor_base == 'total') {
-                        $this->db->select('os.idOs');
-                        $this->db->from('os');
-                        $this->db->where('usuarios_id', $userId);
-                        $this->db->where('MONTH(dataFinal)', date('m'));
-                        $this->db->where('YEAR(dataFinal)', date('Y'));
-                        $this->db->where('status', 'Faturado');
-                        $ordens = $this->db->get()->result();
-                        
-                        foreach ($ordens as $ordem) {
-                            $this->db->select_sum('produtos.precoCompra');
-                            $this->db->from('produtos_os');
-                            $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
-                            $this->db->where('produtos_os.os_id', $ordem->idOs);
-                            $query_produtos = $this->db->get();
-                            $result_produtos = $query_produtos->row();
-                            if ($result_produtos && $result_produtos->precoCompra) {
-                                $valor_base -= $result_produtos->precoCompra;
-                            }
-                        }
-                    }
-                }
-                
-                // Calculate commission
-                $comissao = ($valor_base * $comissao_fixa) / 100;
-                
-                // Calculate total (salário base + comissão)
-                $this->data['total'] = $salario_base + $comissao;
-            }
+        // Verifica se tem usuário na sessão
+        if (!$userId) {
+            $this->session->set_flashdata('error', 'Usuário não identificado na sessão.');
+            redirect(base_url());
         }
+
+        // Busca a carteira do usuário
+        $carteira = $this->carteira_model->getByUsuarioId($userId);
+        if (!$carteira) {
+            // Se não existir carteira, cria uma nova
+            $dados = array(
+                'usuarios_id' => $userId,
+                'saldo' => 0,
+                'ativo' => 1
+            );
+            $idCarteira = $this->carteira_model->add('carteira_usuario', $dados);
+            $carteira = $this->carteira_model->getById($idCarteira);
+        }
+
+        // Busca a configuração da carteira
+        $this->data['config'] = $this->carteira_model->getConfigByUsuarioId($userId);
+        if (!$this->data['config']) {
+            // Se não existir configuração, cria uma nova
+            $config_data = array(
+                'carteira_usuario_id' => $carteira->idCarteiraUsuario,
+                'salario_base' => 0,
+                'comissao_fixa' => 0,
+                'data_salario' => date('d'),
+                'tipo_repeticao' => 'mensal',
+                'tipo_valor_base' => 'servicos'
+            );
+            $this->carteira_model->salvarConfiguracao($config_data);
+            $this->data['config'] = $this->carteira_model->getConfiguracao($carteira->idCarteiraUsuario);
+        }
+
+        // Define o saldo na view
+        $this->data['saldo'] = $carteira->saldo;
+        $this->data['carteira'] = $carteira;
         
-        $this->data['transacoes'] = $this->carteira_model->getTransacoes($userId);
+        // Busca as transações
+        $this->data['transacoes'] = $this->carteira_model->getTransacoes($carteira->idCarteiraUsuario);
         
         return $this->layout();
     }
@@ -122,16 +99,11 @@ class Carteira extends MY_Controller
                 'valor' => str_replace(',', '.', str_replace('.', '', $this->input->post('valor'))),
                 'data_transacao' => $this->input->post('data_transacao'),
                 'descricao' => $this->input->post('descricao'),
-                'carteira_usuario_id' => $this->carteira_model->getCarteiraId($this->session->userdata('id'))
+                'carteira_usuario_id' => $this->carteira_model->getCarteiraId($this->session->userdata('id_admin')),
+                'considerado_saldo' => 1
             ];
 
-            if ($this->carteira_model->add('transacoes_usuario', $data) == true) {
-                // Update wallet balance
-                if ($data['tipo'] == 'retirada') {
-                    $data['valor'] = -$data['valor'];
-                }
-                $this->carteira_model->updateSaldo($data['carteira_usuario_id'], $data['valor']);
-
+            if ($this->carteira_model->registrarTransacao($data)) {
                 $this->session->set_flashdata('success', 'Transação adicionada com sucesso!');
                 redirect(base_url('carteira'));
             } else {
@@ -185,19 +157,48 @@ class Carteira extends MY_Controller
         return $this->layout();
     }
 
-    public function visualizar()
+    /**
+     * @property CI_Session $session
+     * @property Permission $permission
+     * @property Carteira_model $carteira_model
+     */
+    public function visualizar($id = null)
     {
         if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteira')) {
             $this->session->set_flashdata('error', 'Você não tem permissão para visualizar transações.');
             redirect(base_url('carteira'));
         }
 
-        $this->data['result'] = $this->carteira_model->getById($this->uri->segment(3));
-        if ($this->data['result'] == null) {
+        if (!$id) {
+            $id = $this->uri->segment(3);
+        }
+
+        if (!$id || !is_numeric($id)) {
+            $this->session->set_flashdata('error', 'ID da transação não informado.');
+            redirect(base_url('carteira'));
+        }
+
+        // Busca a carteira do usuário logado
+        $carteira = $this->carteira_model->getByUsuarioId($this->session->userdata('id_admin'));
+        if (!$carteira) {
+            $this->session->set_flashdata('error', 'Carteira não encontrada.');
+            redirect(base_url('carteira'));
+        }
+
+        // Busca a transação
+        $transacao = $this->carteira_model->getTransacaoById($id);
+        if (!$transacao) {
             $this->session->set_flashdata('error', 'Transação não encontrada.');
             redirect(base_url('carteira'));
         }
 
+        // Verifica se a transação pertence à carteira do usuário logado
+        if ($carteira->idCarteiraUsuario != $transacao->carteira_usuario_id) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar esta transação.');
+            redirect(base_url('carteira'));
+        }
+
+        $this->data['result'] = $transacao;
         $this->data['view'] = 'carteira/visualizar';
         return $this->layout();
     }
@@ -231,26 +232,28 @@ class Carteira extends MY_Controller
 
     public function admin()
     {
-        if(!$this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteiraAdmin')){
+        if (!$this->permission->checkPermission($this->permission->getPermissao($this->session->userdata('permissao')), 'vCarteiraAdmin')) {
            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar carteiras.');
            redirect(base_url());
         }
         
+        $this->data['menuAdminCarteira'] = 'AdminCarteira';
         $this->data['carteiras'] = $this->carteira_model->getAll();
         $this->data['view'] = 'carteira/vizualizarCarteiraAdmin';
-        $this->load->view('tema/topo', $this->data);
+        return $this->layout();
     }
     
     public function adicionarCarteira()
     {
-        if(!$this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteiraAdmin')){
+        if (!$this->permission->checkPermission($this->permission->getPermissao($this->session->userdata('permissao')), 'aCarteiraAdmin')) {
            $this->session->set_flashdata('error', 'Você não tem permissão para adicionar carteiras.');
            redirect(base_url());
         }
         
+        $this->data['menuAdminCarteira'] = 'AdminCarteira';
         $this->data['usuarios'] = $this->usuarios_model->getAll();
         $this->data['view'] = 'carteira/adicionarCarteira';
-        $this->load->view('tema/topo', $this->data);
+        return $this->layout();
     }
     
     public function salvarCarteira()
@@ -285,17 +288,18 @@ class Carteira extends MY_Controller
         }
     }
     
-    public function editarCarteira()
+    public function editarCarteira($id = null)
     {
-        if(!$this->permission->checkPermission($this->session->userdata('permissao'), 'eCarteiraAdmin')){
+        if (!$this->permission->checkPermission($this->permission->getPermissao($this->session->userdata('permissao')), 'eCarteiraAdmin')) {
            $this->session->set_flashdata('error', 'Você não tem permissão para editar carteiras.');
            redirect(base_url());
         }
         
+        $this->data['menuAdminCarteira'] = 'AdminCarteira';
         $this->data['usuarios'] = $this->usuarios_model->getAll();
         $this->data['carteira'] = $this->carteira_model->getById($this->uri->segment(3));
         $this->data['view'] = 'carteira/editarCarteira';
-        $this->load->view('tema/topo', $this->data);
+        return $this->layout();
     }
     
     public function excluirCarteira()
@@ -362,9 +366,10 @@ class Carteira extends MY_Controller
         }
     }
 
-    public function getValorBase() {
-        if(!$this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteira')){
-            echo json_encode(array('success' => false, 'message' => 'Você não tem permissão para esta ação.'));
+    public function getValorBase()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteira')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
             return;
         }
 
@@ -372,54 +377,152 @@ class Carteira extends MY_Controller
         $usuario_id = $this->input->post('usuario_id');
 
         if (!$tipo || !$usuario_id) {
-            echo json_encode(array('success' => false, 'message' => 'Parâmetros inválidos.'));
+            echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos']);
             return;
         }
 
-        $valor = 0;
+        $valor_base = $this->carteira_model->calcularValorBase($tipo, $usuario_id);
+        
+        echo json_encode([
+            'success' => true,
+            'valor_base' => $valor_base
+        ]);
+    }
 
-        if ($tipo == 'servicos') {
-            // Soma apenas os serviços das OS do usuário do mês atual
-            $this->db->select_sum('servicos_os.subTotal');
-            $this->db->from('servicos_os');
-            $this->db->join('os', 'os.idOs = servicos_os.os_id');
+    public function debug()
+    {
+        $userId = $this->session->userdata('id');
+        echo "ID do usuário na sessão: " . $userId . "<br>";
+        
+        $carteira = $this->carteira_model->getByUsuarioId($userId);
+        echo "Dados da carteira:<br>";
+        echo "<pre>";
+        print_r($carteira);
+        echo "</pre>";
+        
+        die();
+    }
+
+    public function receberComissao()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteira')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão para receber comissão']);
+            return;
+        }
+
+        $tipo = $this->input->post('tipo');
+        $usuario_id = $this->input->post('usuario_id');
+
+        if (!$tipo || !$usuario_id) {
+            echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos']);
+            return;
+        }
+
+        $this->db->trans_begin();
+
+        try {
+            // Calcula o valor base e a comissão
+            $valor_base = $this->carteira_model->calcularValorBase($tipo, $usuario_id);
+            $config = $this->carteira_model->getConfigByUsuarioId($usuario_id);
+            $percentual_comissao = $config ? $config->comissao_fixa : 0;
+            $valor_comissao = ($valor_base * $percentual_comissao) / 100;
+
+            if ($valor_comissao <= 0) {
+                echo json_encode(['success' => false, 'message' => 'Não há comissão pendente para receber']);
+                return;
+            }
+
+            // Busca a carteira do usuário
+            $carteira = $this->carteira_model->getByUsuarioId($usuario_id);
+            if (!$carteira) {
+                throw new Exception('Carteira não encontrada');
+            }
+
+            // Busca a configuração da carteira
+            $config_carteira = $this->carteira_model->getConfiguracao($carteira->idCarteiraUsuario);
+            if (!$config_carteira) {
+                throw new Exception('Configuração da carteira não encontrada');
+            }
+
+            // Atualiza o salário base
+            $novo_salario_base = $config_carteira->salario_base + $valor_comissao;
+            $config_data = [
+                'carteira_usuario_id' => $carteira->idCarteiraUsuario,
+                'salario_base' => $novo_salario_base,
+                'comissao_fixa' => $config_carteira->comissao_fixa,
+                'data_salario' => $config_carteira->data_salario,
+                'tipo_repeticao' => $config_carteira->tipo_repeticao,
+                'tipo_valor_base' => $config_carteira->tipo_valor_base
+            ];
+
+            // Salva a nova configuração
+            if (!$this->carteira_model->salvarConfiguracao($config_data)) {
+                throw new Exception('Erro ao atualizar salário base');
+            }
+
+            // Registra a transação de comissão
+            $dados_transacao = [
+                'tipo' => 'comissao',
+                'valor' => $valor_comissao,
+                'data_transacao' => date('Y-m-d'),
+                'descricao' => 'Recebimento de comissão',
+                'carteira_usuario_id' => $carteira->idCarteiraUsuario,
+                'considerado_saldo' => 1
+            ];
+
+            if (!$this->carteira_model->registrarTransacao($dados_transacao)) {
+                throw new Exception('Erro ao registrar transação de comissão');
+            }
+
+            // Atualiza o status das OS relacionadas
+            if (!$this->carteira_model->finalizarOsComissao($tipo, $usuario_id)) {
+                throw new Exception('Erro ao finalizar as OS');
+            }
+
+            $this->db->trans_commit();
+            echo json_encode(['success' => true]);
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    public function debugComissao()
+    {
+        $usuario_id = $this->session->userdata('id_admin');
+        $carteira = $this->carteira_model->getByUsuarioId($usuario_id);
+        $config = $this->carteira_model->getConfigByUsuarioId($usuario_id);
+        
+        echo "ID do usuário: " . $usuario_id . "<br>";
+        echo "Configuração da carteira:<br>";
+        echo "<pre>";
+        print_r($config);
+        echo "</pre>";
+        
+        if ($config) {
+            $tipo = $config->tipo_valor_base;
+            $valor_base = $this->carteira_model->calcularValorBase($tipo, $usuario_id);
+            echo "Tipo de valor base: " . $tipo . "<br>";
+            echo "Valor base calculado: R$ " . number_format($valor_base, 2, ',', '.') . "<br>";
+            echo "Percentual de comissão: " . $config->comissao_fixa . "%<br>";
+            echo "Valor da comissão: R$ " . number_format(($valor_base * $config->comissao_fixa / 100), 2, ',', '.') . "<br>";
+            
+            // Lista as OS do mês atual
+            $this->db->select('os.*, servicos_os.subTotal');
+            $this->db->from('os');
+            $this->db->join('servicos_os', 'os.idOs = servicos_os.os_id', 'left');
             $this->db->where('os.usuarios_id', $usuario_id);
             $this->db->where('MONTH(os.dataFinal)', date('m'));
             $this->db->where('YEAR(os.dataFinal)', date('Y'));
             $this->db->where('os.status', 'Faturado');
-            $query = $this->db->get();
-            $result = $query->row();
-            $valor = $result->subTotal ?: 0;
-        } else if ($tipo == 'total') {
-            // Primeiro, pega todas as OS do usuário do mês atual
-            $this->db->select('os.idOs, os.valorTotal');
-            $this->db->from('os');
-            $this->db->where('usuarios_id', $usuario_id);
-            $this->db->where('MONTH(dataFinal)', date('m'));
-            $this->db->where('YEAR(dataFinal)', date('Y'));
-            $this->db->where('status', 'Faturado');
-            $query = $this->db->get();
-            $ordens = $query->result();
-
-            foreach ($ordens as $ordem) {
-                // Soma o valor total da OS
-                $valor += $ordem->valorTotal;
-
-                // Busca e subtrai o precoCompra dos produtos desta OS
-                $this->db->select_sum('produtos.precoCompra');
-                $this->db->from('produtos_os');
-                $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
-                $this->db->where('produtos_os.os_id', $ordem->idOs);
-                $query_produtos = $this->db->get();
-                $result_produtos = $query_produtos->row();
-                
-                // Subtrai o custo dos produtos (se houver)
-                if ($result_produtos && $result_produtos->precoCompra) {
-                    $valor -= $result_produtos->precoCompra;
-                }
-            }
+            $ordens = $this->db->get()->result();
+            
+            echo "<br>Ordens de Serviço do mês atual:<br>";
+            echo "<pre>";
+            print_r($ordens);
+            echo "</pre>";
         }
-
-        echo json_encode(array('success' => true, 'valor' => $valor));
+        
+        die();
     }
 }

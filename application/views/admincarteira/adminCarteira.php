@@ -73,8 +73,8 @@
                         foreach ($carteiras as $r) {
                             echo '<tr>';
                             echo '<td data-label="Cod.">' . $r->idCarteiraUsuario . '</td>';
-                            echo '<td data-label="Nome">' . $r->usuario . '</td>';
-                            echo '<td data-label="Usuário">' . $r->usuario . '</td>';
+                            echo '<td data-label="Nome">' . $r->nome_usuario . '</td>';
+                            echo '<td data-label="Usuário">' . $r->nome_usuario . '</td>';
                             echo '<td data-label="Salário">R$ ' . number_format($r->saldo, 2, ',', '.') . '</td>';
                             echo '<td data-label="Total Bônus">R$ ' . number_format($r->total_bonus, 2, ',', '.') . '</td>';
                             echo '<td data-label="Total Comissões">R$ ' . number_format($r->total_comissoes, 2, ',', '.') . '</td>';

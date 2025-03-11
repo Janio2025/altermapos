@@ -101,6 +101,8 @@ CREATE TABLE IF NOT EXISTS `transacoes_usuario` (
     `data_transacao` date NOT NULL,
     `descricao` varchar(255) DEFAULT NULL,
     `carteira_usuario_id` int NOT NULL,
+    `considerado_saldo` tinyint(1) DEFAULT '0',
+    `saldo_acumulado` decimal(10,2) DEFAULT '0.00',
     PRIMARY KEY (`idTransacoesUsuario`),
     KEY `fk_transacoes_usuario_carteira_usuario1_idx` (`carteira_usuario_id`),
     CONSTRAINT `fk_transacoes_usuario_carteira_usuario1`
@@ -903,3 +905,16 @@ INSERT IGNORE INTO `migrations` (`version`) VALUES (20210125173741);
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+SET @saldo := 0;
+UPDATE transacoes_usuario 
+SET saldo_acumulado = (@saldo := @saldo + 
+    CASE 
+        WHEN tipo = 'retirada' THEN -valor 
+        ELSE valor 
+    END)
+ORDER BY data_transacao ASC, idTransacoesUsuario ASC;
+
+UPDATE transacoes_usuario 
+SET considerado_saldo = 1 
+WHERE tipo IN ('salario', 'bonus', 'comissao', 'retirada');

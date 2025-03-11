@@ -61,7 +61,8 @@
             allowNegative: false,
             thousands: '.',
             decimal: ',',
-            affixesStay: false
+            affixesStay: false,
+            allowZero: true
         });
 
         $('#formCarteira').validate({

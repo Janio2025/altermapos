@@ -73,6 +73,7 @@
                             <div class="span12" id="divCadastrarOs">
                                 <form action="<?php echo current_url(); ?>" method="post" id="formOs">
                                     <?php echo form_hidden('idOs', $result->idOs) ?>
+                                    <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         <h3>N° OS:
                                             <?php echo $result->idOs; ?>
@@ -628,6 +629,7 @@
 <div id="modal-anotacao" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
     aria-hidden="true">
     <form action="#" method="POST" id="formAnotacao">
+        <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="myModalLabel">Adicionar Anotação</h3>
@@ -651,6 +653,7 @@
 <div id="modal-faturar" class="modal hide fade " tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
     aria-hidden="true">
     <form id="formFaturar" action="<?php echo current_url() ?>" method="post">
+        <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
             <h3 id="myModalLabel">Faturar OS</h3>

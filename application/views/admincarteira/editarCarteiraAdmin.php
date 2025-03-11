@@ -74,6 +74,28 @@
                             </div>
                         </div>
 
+                        <!-- Widget de Comissão Pendente -->
+                        <div class="control-group">
+                            <label class="control-label">Comissão Pendente</label>
+                            <div class="controls">
+                                <div class="widget-box" style="margin-bottom: 0;">
+                                    <div class="widget-content">
+                                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 15px;">
+                                            <div class="comissao-value" style="font-size: 28px; color: #ffc107;">
+                                                R$ <span id="comissao-pendente">0,00</span>
+                                            </div>
+                                            <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteira')) { ?>
+                                                <button type="button" onclick="receberComissao()" class="button btn btn-warning" style="min-width: 200px;">
+                                                    <span class="button__icon"><i class='bx bx-check-circle'></i></span>
+                                                    <span class="button__text2">Receber Comissão</span>
+                                                </button>
+                                            <?php } ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Seção de Bônus -->
                         <div class="control-group">
                             <label class="control-label">Bônus</label>
@@ -175,6 +197,83 @@
 <script src="<?php echo base_url(); ?>assets/js/jquery.validate.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <script type="text/javascript">
+    // Função para converter valor do formato brasileiro para número
+    function parseMoneyBR(value) {
+        if (!value) return 0;
+        return parseFloat(value.replace('.', '').replace(',', '.'));
+    }
+
+    // Função para formatar número para dinheiro BR
+    function formatMoneyBR(value) {
+        return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Função para calcular o total - movida para fora do document.ready
+    function calcularTotal() {
+        // Pega os valores dos campos
+        let salarioBase = parseMoneyBR($('#salario_base').val());
+        let bonus = parseMoneyBR($('#bonus_valor').val());
+        let retirada = parseMoneyBR($('#retirada_valor').val());
+        
+        // Marca quais transações serão registradas
+        $('#tem_bonus').val(bonus > 0 ? '1' : '0');
+        $('#tem_retirada').val(retirada > 0 ? '1' : '0');
+        
+        // Calcula o total (retirada é subtraída)
+        let total = salarioBase + bonus - retirada;
+        
+        // Atualiza o campo total
+        $('#total').val(formatMoneyBR(total));
+    }
+
+    // Função para receber a comissão
+    function receberComissao() {
+        let tipoValorBase = $('#tipo_valor_base').val();
+        let usuarioId = $('#usuario').val();
+        
+        if (!tipoValorBase || !usuarioId) {
+            alert('Selecione o tipo de valor base e o usuário primeiro.');
+            return;
+        }
+        
+        if (confirm('Confirma o recebimento da comissão? As OS relacionadas serão marcadas como finalizadas e o valor será adicionado ao salário base.')) {
+            $.ajax({
+                url: '<?php echo base_url('index.php/admincarteira/receberComissao'); ?>',
+                type: 'POST',
+                data: {
+                    tipo: tipoValorBase,
+                    usuario_id: usuarioId
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        // Atualiza o salário base com o novo valor
+                        let salarioAtual = parseMoneyBR($('#salario_base').val());
+                        let comissao = parseMoneyBR($('#comissao-pendente').text());
+                        let novoSalario = salarioAtual + comissao;
+                        
+                        // Atualiza o campo de salário base
+                        $('#salario_base').val(formatMoneyBR(novoSalario));
+                        
+                        // Zera a comissão pendente
+                        $('#comissao-pendente').text('0,00');
+                        
+                        // Recalcula o total
+                        calcularTotal();
+                        
+                        // Mostra mensagem de sucesso
+                        alert('Comissão recebida com sucesso! O valor foi adicionado ao salário base.');
+                    } else {
+                        alert(response.message || 'Erro ao processar comissão');
+                    }
+                },
+                error: function() {
+                    alert('Erro ao processar comissão');
+                }
+            });
+        }
+    }
+
     $(document).ready(function(){
         // Máscara para campos de dinheiro
         $('.money').maskMoney({
@@ -185,36 +284,10 @@
             affixesStay: false
         });
 
-        // Função para converter valor do formato brasileiro para número
-        function parseMoneyBR(value) {
-            if (!value) return 0;
-            return parseFloat(value.replace('.', '').replace(',', '.'));
-        }
-
-        // Função para formatar número para dinheiro BR
-        function formatMoneyBR(value) {
-            return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        // Função para calcular o total
-        function calcularTotal() {
-            // Pega os valores dos campos
-            let salarioBase = parseMoneyBR($('#salario_base').val());
-            let bonus = parseMoneyBR($('#bonus_valor').val());
-            let comissao = parseMoneyBR($('#comissao_valor').val());
-            let retirada = parseMoneyBR($('#retirada_valor').val());
-            
-            // Marca quais transações serão registradas
-            $('#tem_bonus').val(bonus > 0 ? '1' : '0');
-            $('#tem_comissao').val(comissao > 0 ? '1' : '0');
-            $('#tem_retirada').val(retirada > 0 ? '1' : '0');
-            
-            // Calcula o total (retirada é subtraída)
-            let total = salarioBase + bonus + comissao - retirada;
-            
-            // Atualiza o campo total
-            $('#total').val(formatMoneyBR(total));
-        }
+        // Eventos para recalcular os valores
+        $('#salario_base').on('keyup', calcularTotal);
+        $('#bonus_valor').on('keyup', calcularTotal);
+        $('#retirada_valor').on('keyup', calcularTotal);
 
         // Função para buscar o valor base da comissão
         function buscarValorBase() {
@@ -237,8 +310,12 @@
                             // Formata o valor para exibição
                             $('#comissao_base').val(formatMoneyBR(valor));
                             
-                            // Usa a comissão fixa como porcentagem
+                            // Calcula e atualiza a comissão pendente
                             let comissaoFixa = parseFloat($('#comissao_fixa').val()) || 0;
+                            let comissaoPendente = valor * (comissaoFixa / 100);
+                            $('#comissao-pendente').text(formatMoneyBR(comissaoPendente));
+                            
+                            // Usa a comissão fixa como porcentagem
                             if (comissaoFixa > 0) {
                                 $('#comissao_porcentagem').val(comissaoFixa);
                                 calcularComissao();
@@ -248,7 +325,7 @@
                         }
                     },
                     error: function() {
-                        console.log('Erro ao buscar valor base da comissão');
+                        console.log('Erro ao buscar valor base');
                     }
                 });
             }
@@ -265,18 +342,6 @@
                 calcularTotal();
             }
         }
-
-        // Eventos para recalcular os valores
-        $('#salario_base').on('keyup', calcularTotal);
-        $('#bonus_valor').on('keyup', calcularTotal);
-        $('#retirada_valor').on('keyup', calcularTotal);
-        $('#comissao_fixa').on('input', function() {
-            // Quando a comissão fixa mudar, atualiza a porcentagem da comissão
-            let comissaoFixa = $(this).val();
-            $('#comissao_porcentagem').val(comissaoFixa);
-            calcularComissao();
-        });
-        $('#comissao_base, #comissao_porcentagem').on('keyup change', calcularComissao);
 
         // Eventos para recalcular os valores
         $('#tipo_valor_base, #usuario').on('change', function() {
