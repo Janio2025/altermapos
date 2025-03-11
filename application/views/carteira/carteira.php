@@ -73,10 +73,7 @@
                     </div>
                     <?php if($carteira->saldo > 0): ?>
                     <div style="text-align: center; margin-top: 15px;">
-                        <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
-                            <span class="button__icon"><i class='bx bx-money'></i></span>
-                            <span class="button__text2">Realizar Saque via PIX</span>
-                        </button>
+                        
                     </div>
                     <?php endif; ?>
                     <?php else: ?>
@@ -84,7 +81,12 @@
                         R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
                     </div>
                     <?php if($saldo > 0): ?>
-                    
+                        <div style="text-align: center; margin-top: 15px;">
+                        <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
+                            <span class="button__icon"><i class='bx bx-money'></i></span>
+                            <span class="button__text2">Realizar Saque via PIX</span>
+                        </button>
+                    </div>
                     <?php endif; ?>
                     <?php endif; ?>
                 </div>
