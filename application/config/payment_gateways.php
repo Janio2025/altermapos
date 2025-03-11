@@ -46,12 +46,12 @@ $config['payment_gateways'] = [
         'name' => 'MercadoPago',
         'library_name' => 'MercadoPago',
         'credentials' => [
-            'access_token' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_ACCESS_TOKEN'] ?? '',
-            'public_key' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_PUBLIC_KEY'] ?? '',
-            'client_secret' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_CLIENT_ID'] ?? '',
-            'client_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_CLIENT_SECRET'] ?? '',
-            'integrator_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_INTEGRATOR_ID'] ?? '',
-            'platform_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_PLATFORM_ID'] ?? '',
+            'access_token' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_ACCESS_TOKEN'] ?? 'APP_USR-8864383486823594-031108-15997e6e2303e785ea617d88c692f338-115629378',
+            'public_key' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_PUBLIC_KEY'] ?? 'APP_USR-04037a3b-3a52-40e4-ba0b-7a8f97900fb1',
+            'client_secret' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_CLIENT_ID'] ?? '8864383486823594',
+            'client_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_CLIENT_SECRET'] ?? 'NTVnNEGlifdhPBRrfW0SRBlVo85Aw4tN',
+            'integrator_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_INTEGRATOR_ID'] ?? '115629378',
+            'platform_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_PLATFORM_ID'] ?? '8864383486823594',
             'corporation_id' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_CREDENTIALS_CORPORATION_ID'] ?? '',
         ],
         'boleto_expiration' => $_ENV['PAYMENT_GATEWAYS_MERCADO_PAGO_BOLETO_EXPIRATION'] ?? 'P3D',
@@ -109,3 +109,5 @@ $config['payment_gateways'] = [
         ],
     ],
 ];
+
+$config['log_threshold'] = 2; // ou maior para ver os logs de debug

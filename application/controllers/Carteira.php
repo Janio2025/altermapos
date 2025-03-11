@@ -525,4 +525,154 @@ class Carteira extends MY_Controller
         
         die();
     }
+
+    public function realizarSaquePix()
+    {
+        header('Content-Type: application/json');
+        
+        try {
+            // 1. Validações iniciais
+            if (!$this->session->userdata('logado')) {
+                throw new Exception('Sessão expirada. Faça login novamente.');
+            }
+
+            $usuario_id = $this->session->userdata('id_admin');
+            
+            // 2. Carrega dados necessários
+            $carteira = $this->carteira_model->getByUsuarioId($usuario_id);
+            $config = $this->carteira_model->getConfigByUsuarioId($usuario_id);
+            $usuario = $this->usuarios_model->getById($usuario_id);
+
+            // 3. Validações de dados
+            if (!$carteira) {
+                throw new Exception('Carteira não encontrada.');
+            }
+
+            if (!$config || empty($config->chave_pix)) {
+                throw new Exception('Chave PIX não configurada na carteira.');
+            }
+
+            if ($carteira->saldo <= 0) {
+                throw new Exception('Saldo insuficiente para realizar saque.');
+            }
+
+            // 4. Inicia a transação no banco
+            $this->db->trans_begin();
+
+            try {
+                // 5. Prepara os dados da transação
+                $valor_saque = $carteira->saldo;
+                $transacao = array(
+                    'tipo' => 'retirada',
+                    'valor' => $valor_saque,
+                    'data_transacao' => date('Y-m-d'),
+                    'descricao' => 'Saque via PIX em processamento',
+                    'carteira_usuario_id' => $carteira->idCarteiraUsuario,
+                    'considerado_saldo' => 1
+                );
+
+                // 6. Registra a transação
+                if (!$this->carteira_model->registrarTransacao($transacao)) {
+                    throw new Exception('Erro ao registrar transação.');
+                }
+
+                // 7. Atualiza o saldo
+                if (!$this->carteira_model->updateSaldo($carteira->idCarteiraUsuario, -$valor_saque)) {
+                    throw new Exception('Erro ao atualizar saldo.');
+                }
+
+                // 8. Carrega configuração do Mercado Pago
+                $this->load->config('payment_gateways');
+                $mercadoPagoConfig = $this->config->item('payment_gateways')['MercadoPago'];
+                
+                if (empty($mercadoPagoConfig['credentials']['access_token'])) {
+                    throw new Exception('Token do Mercado Pago não configurado.');
+                }
+
+                // 9. Prepara os dados para a API do Mercado Pago
+                $payment_data = array(
+                    'amount' => floatval($valor_saque),
+                    'payment_method_id' => 'pix',
+                    'description' => "Saque via PIX - Carteira #" . $carteira->idCarteiraUsuario,
+                    'payer' => array(
+                        'email' => $usuario->email,
+                        'first_name' => explode(' ', $usuario->nome)[0],
+                        'last_name' => end(explode(' ', $usuario->nome)),
+                        'identification' => array(
+                            'type' => 'CPF',
+                            'number' => preg_replace('/[^0-9]/', '', $usuario->cpf)
+                        )
+                    ),
+                    'transaction_amount' => floatval($valor_saque),
+                    'description' => "Saque via PIX - Carteira #" . $carteira->idCarteiraUsuario,
+                    'payment_method_id' => "pix",
+                    'pix_key_type' => 'CPF',
+                    'pix_key' => $config->chave_pix
+                );
+
+                // 10. Faz a requisição para a API do Mercado Pago
+                $ch = curl_init('https://api.mercadopago.com/v1/payments');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payment_data));
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Desativa verificação SSL para localhost
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                    'Authorization: Bearer ' . $mercadoPagoConfig['credentials']['access_token'],
+                    'Content-Type: application/json'
+                ));
+
+                $response = curl_exec($ch);
+                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                
+                if ($error = curl_error($ch)) {
+                    throw new Exception('Erro na requisição: ' . $error);
+                }
+                
+                curl_close($ch);
+
+                // 11. Processa a resposta
+                $result = json_decode($response);
+
+                if ($http_code !== 201 && $http_code !== 200) {
+                    $error_msg = isset($result->message) ? $result->message : 'Erro desconhecido';
+                    throw new Exception('Erro no Mercado Pago: ' . $error_msg);
+                }
+
+                if (!isset($result->id)) {
+                    throw new Exception('ID do pagamento não retornado pelo Mercado Pago');
+                }
+
+                // 12. Atualiza a descrição da transação com o ID do pagamento
+                $this->carteira_model->edit('transacoes_usuario', 
+                    ['descricao' => 'Saque via PIX - ID: ' . $result->id],
+                    'carteira_usuario_id',
+                    $carteira->idCarteiraUsuario
+                );
+
+                $this->db->trans_commit();
+                
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Saque realizado com sucesso! O valor será enviado para sua chave PIX.',
+                    'payment_id' => $result->id,
+                    'debug_info' => [
+                        'http_code' => $http_code,
+                        'response' => $result
+                    ]
+                ]);
+                return;
+
+            } catch (Exception $error) {
+                $this->db->trans_rollback();
+                throw new Exception('Erro ao processar pagamento: ' . $error->getMessage());
+            }
+
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
+            return;
+        }
+    }
 }

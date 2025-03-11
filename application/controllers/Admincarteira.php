@@ -83,10 +83,36 @@ class Admincarteira extends MY_Controller {
                 'ativo' => 1
             );
             
-            if ($this->carteira_model->add('carteira_usuario', $data) == TRUE) {
-                $this->session->set_flashdata('success', 'Carteira adicionada com sucesso!');
-                redirect(base_url() . 'index.php/admincarteira');
-            } else {
+            // Inicia a transação
+            $this->db->trans_begin();
+            
+            try {
+                // Adiciona a carteira
+                $id_carteira = $this->carteira_model->add('carteira_usuario', $data);
+                
+                if ($id_carteira) {
+                    // Prepara os dados de configuração
+                    $config_data = array(
+                        'carteira_usuario_id' => $id_carteira,
+                        'salario_base' => $this->input->post('salario'),
+                        'comissao_fixa' => 0,
+                        'data_salario' => date('d'),
+                        'tipo_repeticao' => 'mensal',
+                        'tipo_valor_base' => 'servicos',
+                        'chave_pix' => $this->input->post('chave_pix')
+                    );
+                    
+                    // Salva a configuração
+                    $this->carteira_model->salvarConfiguracao($config_data);
+                    
+                    $this->db->trans_commit();
+                    $this->session->set_flashdata('success', 'Carteira adicionada com sucesso!');
+                    redirect(base_url() . 'index.php/admincarteira');
+                } else {
+                    throw new Exception('Erro ao adicionar carteira');
+                }
+            } catch (Exception $e) {
+                $this->db->trans_rollback();
                 $this->session->set_flashdata('error', 'Erro ao adicionar carteira.');
                 redirect(base_url() . 'index.php/admincarteira/adicionar');
             }

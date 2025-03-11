@@ -33,6 +33,14 @@
                         </div>
                     </div>
 
+                    <div class="control-group">
+                        <label for="chave_pix" class="control-label">Chave PIX</label>
+                        <div class="controls">
+                            <input id="chave_pix" type="text" name="chave_pix" class="input-xlarge" placeholder="Digite a chave PIX (CPF, Email, Telefone ou Chave Aleatória)" />
+                            <span class="help-inline">Esta chave PIX será usada para receber os saques da carteira</span>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <div class="span12">
                             <div class="span6 offset3" style="display:flex;justify-content: center">

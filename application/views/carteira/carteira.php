@@ -8,6 +8,44 @@
     .widget-box {
         margin-bottom: 20px;
     }
+    .modal-saque .modal-content {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .modal-saque .modal-header {
+        
+        background:rgb(66, 69, 197);
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 8px 8px 0 0;
+        padding: 15px 20px;
+    }
+    .modal-saque .modal-title {
+        color:rgb(253, 253, 253);
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    .modal-saque .modal-body {
+        padding: 30px 20px;
+    }
+    .modal-saque .valor-saque {
+        font-size: 2.5rem;
+        color: #28a745;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    .modal-saque .info-pix {
+        color: #6c757d;
+        font-size: 1rem;
+        margin-bottom: 0;
+    }
+    .modal-saque .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 15px 20px;
+    }
+    .modal-saque .btn-confirmar {
+        min-width: 150px;
+        padding: 8px 20px;
+    }
 </style>
 
 <div class="new122">
@@ -33,10 +71,26 @@
                     <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
                         R$ <?php echo number_format($carteira->saldo, 2, ',', '.'); ?>
                     </div>
+                    <?php if($carteira->saldo > 0): ?>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
+                            <span class="button__icon"><i class='bx bx-money'></i></span>
+                            <span class="button__text2">Realizar Saque via PIX</span>
+                        </button>
+                    </div>
+                    <?php endif; ?>
                     <?php else: ?>
                     <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
                         R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
                     </div>
+                    <?php if($saldo > 0): ?>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
+                            <span class="button__icon"><i class='bx bx-money'></i></span>
+                            <span class="button__text2">Realizar Saque via PIX</span>
+                        </button>
+                    </div>
+                    <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -206,6 +260,53 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Saque -->
+    <div class="modal fade modal-saque" id="modalSaque" tabindex="-1" role="dialog" aria-labelledby="modalSaqueLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalSaqueLabel">
+                        <i class="bx bx-money"></i> Confirmar Saque via PIX
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="valor-saque">
+                            R$ <span id="valorSaque">0,00</span>
+                        </div>
+                        <p class="info-pix">
+                            <i class="bx bx bx-money"></i>
+                            O valor será enviado para a chave 
+                        </p>
+                        <p class="info-pix">
+                            <i class="bx bx-document"></i>
+                           PIX: <?php echo isset($config) ? $config->chave_pix : ''; ?>
+                        </p>
+                        <p class="info-pix">
+                            <i class=""></i>
+                            cadastrada na sua carteira
+                        </p>
+
+                        
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger btn-confirmar" data-dismiss="modal">
+                        <i class="bx bx-check"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success btn-confirmar" onclick="realizarSaquePix()">
+                        <i class="bx bx-check"></i> Confirmar Saque
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
 </div>
 
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
@@ -318,8 +419,69 @@
             });
         }
 
+        // Função para abrir o modal de saque
+        window.abrirModalSaque = function() {
+            let saldoAtual = <?php echo isset($carteira) ? $carteira->saldo : $saldo; ?>;
+            $('#valorSaque').text(formatarMoeda(saldoAtual));
+            $('#modalSaque').modal('show');
+        }
+
+        // Função para realizar saque via PIX
+        window.realizarSaquePix = function() {
+            $('#modalSaque').modal('hide');
+            
+            Swal.fire({
+                title: 'Processando...',
+                text: 'Aguarde enquanto processamos seu saque.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: '<?php echo base_url('index.php/carteira/realizarSaquePix'); ?>',
+                type: 'POST',
+                data: {
+                    <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso!',
+                            text: response.message
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: response.message || 'Erro ao realizar saque!'
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Erro ao processar a requisição!'
+                    });
+                }
+            });
+        }
+
         // Atualiza o valor da comissão pendente a cada 30 segundos
         buscarValorBase(); // Chama imediatamente ao carregar
         setInterval(buscarValorBase, 30000); // Atualiza a cada 30 segundos
     });
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 </script>
