@@ -102,11 +102,16 @@
         <div class="widget-content">
             <div class="row-fluid" style="min-height: 100px; padding: 10px;">
                 <div class="span12">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <div class="comissao-value" style="font-size: 28px; color: #ffc107;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+                        <div class="comissao-value" style="font-size: 28px; color: #ffc107; margin-top: 10px;">
                             R$ <span id="comissao-pendente">0,00</span>
                         </div>
-                        
+                        <div id="btn-comissao-container" style="display: none; margin-bottom: 10px;">
+                            <button type="button" onclick="receberComissao()" class="button btn btn-success" style="padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-check" style="margin-right: 5px;"></i>
+                                <span>Receber Comissão</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -350,7 +355,9 @@
     </div>
 </div>
 
+<script src="<?php echo base_url(); ?>assets/js/jquery.validate.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         // Máscara para campos de dinheiro
@@ -395,12 +402,21 @@
                             let comissaoPendente = (valorBase * percentualComissao) / 100;
                             
                             $('#comissao-pendente').text(formatMoneyBR(comissaoPendente));
+                            
+                            // Mostra ou esconde o botão baseado no valor da comissão
+                            if (comissaoPendente > 0) {
+                                $('#btn-comissao-container').show();
+                            } else {
+                                $('#btn-comissao-container').hide();
+                            }
                         } else {
                             $('#comissao-pendente').text('0,00');
+                            $('#btn-comissao-container').hide();
                         }
                     },
                     error: function() {
                         $('#comissao-pendente').text('0,00');
+                        $('#btn-comissao-container').hide();
                     }
                 });
             }
