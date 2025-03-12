@@ -113,6 +113,54 @@
         </div>
     </div>
 
+    <!-- Resumo Mensal -->
+    <div class="widget-box">
+        <div class="widget-title">
+            <span class="icon">
+                <i class="bx bx-chart"></i>
+            </span>
+            <h5>Resumo do Mês Atual</h5>
+        </div>
+        <div class="widget-content">
+            <div class="row-fluid" style="padding: 10px;">
+                <div class="span12">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <!-- Card Comissões -->
+                        <div class="summary-card" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="color: #ffc107;">
+                                <i class="bx bx-money-withdraw" style="font-size: 24px;"></i>
+                                <span style="font-weight: 600; margin-left: 5px;">Comissões</span>
+                            </div>
+                            <div style="font-size: 24px; margin-top: 10px; color: #333;">
+                                R$ <span id="total-comissoes">0,00</span>
+                            </div>
+                        </div>
+                        <!-- Card Retiradas -->
+                        <div class="summary-card" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="color: #dc3545;">
+                                <i class="bx bx-transfer-alt" style="font-size: 24px;"></i>
+                                <span style="font-weight: 600; margin-left: 5px;">Retiradas</span>
+                            </div>
+                            <div style="font-size: 24px; margin-top: 10px; color: #333;">
+                                R$ <span id="total-retiradas">0,00</span>
+                            </div>
+                        </div>
+                        <!-- Card Bônus -->
+                        <div class="summary-card" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <div style="color: #17a2b8;">
+                                <i class="bx bx-gift" style="font-size: 24px;"></i>
+                                <span style="font-weight: 600; margin-left: 5px;">Bônus</span>
+                            </div>
+                            <div style="font-size: 24px; margin-top: 10px; color: #333;">
+                                R$ <span id="total-bonus">0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Lista de Transações -->
     <div class="widget-box">
         <div class="widget-title">
@@ -223,16 +271,16 @@
                                         <?php
                                         switch ($t->tipo) {
                                             case 'salario':
-                                                echo '<span class="label label-success">Salário</span>';
+                                                echo '<span class="label label-success" data-tipo="salario">Salário</span>';
                                                 break;
                                             case 'bonus':
-                                                echo '<span class="label label-info">Bônus</span>';
+                                                echo '<span class="label label-info" data-tipo="bonus">Bônus</span>';
                                                 break;
                                             case 'comissao':
-                                                echo '<span class="label label-warning">Comissão</span>';
+                                                echo '<span class="label label-warning" data-tipo="comissao">Comissão</span>';
                                                 break;
                                             case 'retirada':
-                                                echo '<span class="label label-important">Retirada</span>';
+                                                echo '<span class="label label-important" data-tipo="retirada">Retirada</span>';
                                                 break;
                                         }
                                         ?>
@@ -390,6 +438,8 @@
                                     title: 'Sucesso!',
                                     text: 'Comissão recebida com sucesso!'
                                 }).then(() => {
+                                    // Dispara o evento antes de recarregar a página
+                                    $(document).trigger('transacaoAdicionada');
                                     window.location.reload();
                                 });
                             } else {
@@ -472,6 +522,59 @@
         // Atualiza o valor da comissão pendente a cada 30 segundos
         buscarValorBase(); // Chama imediatamente ao carregar
         setInterval(buscarValorBase, 30000); // Atualiza a cada 30 segundos
+
+        // Calcula os totais mensais
+        function calcularTotaisMensais() {
+            const dataAtual = new Date();
+            let totalComissoes = 0;
+            let totalRetiradas = 0;
+            let totalBonus = 0;
+
+            // Itera sobre cada linha da tabela
+            $('.table-transactions tbody tr').each(function() {
+                const data = $(this).find('.col-data').text();
+                if (!data) return; // Pula linhas sem data
+                
+                const tipo = $(this).find('.col-tipo span').attr('data-tipo');
+                const valorText = $(this).find('.col-valor').text().replace('R$ ', '');
+                const valor = parseFloat(valorText.replace('.', '').replace(',', '.'));
+
+                if (isNaN(valor)) return; // Pula se não for um número válido
+
+                // Verifica se a data é do mês atual
+                const [dia, mes, ano] = data.split('/');
+                const dataTransacao = new Date(ano, mes - 1, dia);
+                
+                if (dataTransacao.getMonth() === dataAtual.getMonth() && 
+                    dataTransacao.getFullYear() === dataAtual.getFullYear()) {
+                    
+                    switch (tipo) {
+                        case 'comissao':
+                            totalComissoes += valor;
+                            break;
+                        case 'retirada':
+                            totalRetiradas += valor;
+                            break;
+                        case 'bonus':
+                            totalBonus += valor;
+                            break;
+                    }
+                }
+            });
+
+            // Atualiza os totais na interface usando formatarMoeda
+            $('#total-comissoes').text(formatarMoeda(totalComissoes));
+            $('#total-retiradas').text(formatarMoeda(totalRetiradas));
+            $('#total-bonus').text(formatarMoeda(totalBonus));
+        }
+
+        // Calcula os totais ao carregar a página
+        calcularTotaisMensais();
+
+        // Recalcula os totais quando uma nova transação é adicionada
+        $(document).on('transacaoAdicionada', function() {
+            calcularTotaisMensais();
+        });
     });
 
     function formatarMoeda(valor) {

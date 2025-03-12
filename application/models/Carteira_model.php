@@ -30,8 +30,16 @@ class Carteira_model extends CI_Model
     public function getAll($limit = 0, $start = 0)
     {
         $this->db->select('cu.*, u.nome as nome_usuario,
-            COALESCE((SELECT SUM(valor) FROM transacoes_usuario WHERE carteira_usuario_id = cu.idCarteiraUsuario AND tipo = "bonus"), 0) as total_bonus,
-            COALESCE((SELECT SUM(valor) FROM transacoes_usuario WHERE carteira_usuario_id = cu.idCarteiraUsuario AND tipo = "comissao"), 0) as total_comissoes');
+            COALESCE((SELECT SUM(valor) FROM transacoes_usuario 
+                WHERE carteira_usuario_id = cu.idCarteiraUsuario 
+                AND tipo = "bonus" 
+                AND MONTH(data_transacao) = MONTH(CURRENT_DATE())
+                AND YEAR(data_transacao) = YEAR(CURRENT_DATE())), 0) as total_bonus,
+            COALESCE((SELECT SUM(valor) FROM transacoes_usuario 
+                WHERE carteira_usuario_id = cu.idCarteiraUsuario 
+                AND tipo = "comissao" 
+                AND MONTH(data_transacao) = MONTH(CURRENT_DATE())
+                AND YEAR(data_transacao) = YEAR(CURRENT_DATE())), 0) as total_comissoes');
         $this->db->from('carteira_usuario cu');
         $this->db->join('usuarios u', 'u.idUsuarios = cu.usuarios_id');
         if ($limit > 0) {
@@ -42,7 +50,26 @@ class Carteira_model extends CI_Model
 
     public function getById($id)
     {
-        return $this->get('carteira_usuario', '*', array('idCarteiraUsuario' => $id), 0, 0, TRUE);
+        $this->db->select('carteira_usuario.*, usuarios.nome, usuarios.idUsuarios as usuarios_id');
+        $this->db->from('carteira_usuario');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = carteira_usuario.usuarios_id');
+        $this->db->where('carteira_usuario.idCarteiraUsuario', $id);
+        $carteira = $this->db->get()->row();
+
+        if ($carteira) {
+            // Busca a configuração da carteira para calcular a comissão
+            $config = $this->getConfiguracao($id);
+            if ($config) {
+                // Calcula o valor base usando o método calcularValorBase
+                $valor_base = $this->calcularValorBase($config->tipo_valor_base, $carteira->usuarios_id);
+                // Calcula a comissão pendente baseada no valor base e na comissão fixa
+                $carteira->comissao_pendente = ($valor_base * $config->comissao_fixa) / 100;
+            } else {
+                $carteira->comissao_pendente = 0;
+            }
+        }
+
+        return $carteira;
     }
 
     public function add($table, $data)
@@ -201,38 +228,97 @@ class Carteira_model extends CI_Model
 
     public function registrarTransacao($data)
     {
-        if ($this->db->insert('transacoes_usuario', $data)) {
-            // Se for uma retirada, atualiza o salario_base na configuracao_carteira
-            if ($data['tipo'] == 'retirada') {
-                $config = $this->getConfiguracao($data['carteira_usuario_id']);
-                if ($config) {
-                    $novo_salario_base = $config->salario_base - $data['valor'];
-                    
-                    $this->salvarConfiguracao([
-                        'carteira_usuario_id' => $data['carteira_usuario_id'],
-                        'salario_base' => $novo_salario_base,
-                        'comissao_fixa' => $config->comissao_fixa,
-                        'data_salario' => $config->data_salario,
-                        'tipo_repeticao' => $config->tipo_repeticao,
-                        'tipo_valor_base' => $config->tipo_valor_base
-                    ]);
-                    
-                    // Atualiza o saldo da carteira para ficar igual ao salario_base
-                    return $this->edit('carteira_usuario', array('saldo' => $novo_salario_base), 'idCarteiraUsuario', $data['carteira_usuario_id']);
-                }
-            } else {
-                // Para outros tipos de transação, atualiza o saldo normalmente
-                $carteira = $this->getById($data['carteira_usuario_id']);
-                $novo_saldo = $carteira->saldo;
-                
-                if (in_array($data['tipo'], array('salario', 'bonus', 'comissao'))) {
-                    $novo_saldo += $data['valor'];
-                }
-                
-                return $this->edit('carteira_usuario', array('saldo' => $novo_saldo), 'idCarteiraUsuario', $data['carteira_usuario_id']);
+        $this->db->trans_begin();
+
+        try {
+            // Busca a carteira e configuração antes de qualquer operação
+            $carteira = $this->getById($data['carteira_usuario_id']);
+            if (!$carteira) {
+                throw new Exception('Carteira não encontrada');
             }
+            
+            $config = $this->getConfiguracao($data['carteira_usuario_id']);
+            if (!$config) {
+                throw new Exception('Configuração não encontrada');
+            }
+
+            // Se for comissão, finaliza as OS relacionadas e atualiza a descrição
+            if ($data['tipo'] == 'comissao') {
+                // Busca as OS relacionadas
+                if ($config->tipo_valor_base == 'servicos') {
+                    $this->db->select('DISTINCT os.idOs');
+                    $this->db->from('servicos_os');
+                    $this->db->join('os', 'os.idOs = servicos_os.os_id');
+                    $this->db->where('os.usuarios_id', $carteira->usuarios_id);
+                    $this->db->where('MONTH(os.dataFinal)', date('m'));
+                    $this->db->where('YEAR(os.dataFinal)', date('Y'));
+                    $this->db->where('os.status', 'Faturado');
+                } else {
+                    $this->db->select('idOs');
+                    $this->db->from('os');
+                    $this->db->where('usuarios_id', $carteira->usuarios_id);
+                    $this->db->where('MONTH(dataFinal)', date('m'));
+                    $this->db->where('YEAR(dataFinal)', date('Y'));
+                    $this->db->where('status', 'Faturado');
+                }
+
+                $query = $this->db->get();
+                $ordens = $query->result();
+                
+                if (!empty($ordens)) {
+                    // Formata os IDs das OS para a descrição
+                    $os_ids = array_map(function($ordem) {
+                        return $ordem->idOs;
+                    }, $ordens);
+                    
+                    // Atualiza a descrição com os IDs das OS
+                    $data['descricao'] = 'OS: ' . implode(', ', $os_ids);
+
+                    // Atualiza o status das OS para Finalizado
+                    $this->db->where_in('idOs', $os_ids);
+                    if (!$this->db->update('os', ['status' => 'Finalizado'])) {
+                        throw new Exception('Erro ao finalizar OS');
+                    }
+                }
+            }
+
+            // Insere a transação
+            if (!$this->db->insert('transacoes_usuario', $data)) {
+                throw new Exception('Erro ao inserir transação');
+            }
+
+            $novo_saldo = $carteira->saldo;
+
+            // Atualiza o saldo baseado no tipo de transação
+            if ($data['tipo'] == 'retirada') {
+                $novo_saldo -= $data['valor'];
+                
+                // Atualiza também o salário base na configuração
+                $novo_salario_base = $config->salario_base - $data['valor'];
+                $this->salvarConfiguracao([
+                    'carteira_usuario_id' => $data['carteira_usuario_id'],
+                    'salario_base' => $novo_salario_base,
+                    'comissao_fixa' => $config->comissao_fixa,
+                    'data_salario' => $config->data_salario,
+                    'tipo_repeticao' => $config->tipo_repeticao,
+                    'tipo_valor_base' => $config->tipo_valor_base
+                ]);
+            } 
+            else if (in_array($data['tipo'], array('salario', 'bonus', 'comissao'))) {
+                $novo_saldo += $data['valor'];
+            }
+
+            // Atualiza o saldo da carteira
+            if (!$this->edit('carteira_usuario', array('saldo' => $novo_saldo), 'idCarteiraUsuario', $data['carteira_usuario_id'])) {
+                throw new Exception('Erro ao atualizar saldo');
+            }
+
+            $this->db->trans_commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            return false;
         }
-        return false;
     }
 
     public function calcularComissaoOS($usuario_id, $tipo_valor_base = 'servicos')
@@ -350,7 +436,7 @@ class Carteira_model extends CI_Model
         $valor_base = 0;
         
         if ($tipo == 'servicos') {
-            // Soma apenas os serviços das OS do usuário do mês atual
+            // Soma apenas os serviços das OS do usuário do mês atual que estão Faturadas
             $this->db->select_sum('servicos_os.subTotal');
             $this->db->from('servicos_os');
             $this->db->join('os', 'os.idOs = servicos_os.os_id');
@@ -362,7 +448,7 @@ class Carteira_model extends CI_Model
             $result = $query->row();
             $valor_base = $result->subTotal ?: 0;
         } else {
-            // Calcula baseado no valor total das OS menos o custo dos produtos
+            // Para outros tipos, calcula baseado no valor total das OS menos produtos
             $this->db->select('os.idOs, os.valorTotal');
             $this->db->from('os');
             $this->db->where('usuarios_id', $usuario_id);

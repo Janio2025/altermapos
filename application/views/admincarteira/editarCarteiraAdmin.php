@@ -26,21 +26,14 @@
                     <?php } ?>
 
                     <form action="<?php echo base_url(); ?>index.php/admincarteira/atualizar" id="formCarteira" method="post" class="form-horizontal">
+                        <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
                         <input type="hidden" name="idCarteiraUsuario" value="<?php echo $carteira->idCarteiraUsuario; ?>">
                         
                         <div class="control-group">
                             <label for="usuario" class="control-label">Usuário<span class="required">*</span></label>
                             <div class="controls">
-                                <select name="usuario" id="usuario" class="input-xlarge" required>
-                                    <option value="">Selecione um usuário</option>
-                                    <?php if(isset($usuarios)): ?>
-                                        <?php foreach($usuarios as $usuario): ?>
-                                            <option value="<?php echo $usuario->idUsuarios; ?>" <?php echo ($carteira->usuarios_id == $usuario->idUsuarios) ? 'selected' : ''; ?>>
-                                                <?php echo $usuario->nome; ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
+                                <input type="text" class="input-xlarge" value="<?php echo $carteira->nome; ?>" readonly>
+                                <input type="hidden" name="usuario" id="usuario" value="<?php echo $carteira->usuarios_id; ?>">
                             </div>
                         </div>
 
@@ -230,6 +223,7 @@
     function receberComissao() {
         let tipoValorBase = $('#tipo_valor_base').val();
         let usuarioId = $('#usuario').val();
+        let comissaoValor = parseMoneyBR($('#comissao-pendente').text());
         
         if (!tipoValorBase || !usuarioId) {
             alert('Selecione o tipo de valor base e o usuário primeiro.');
@@ -242,7 +236,11 @@
                 type: 'POST',
                 data: {
                     tipo: tipoValorBase,
-                    usuario_id: usuarioId
+                    usuario_id: usuarioId,
+                    valor: comissaoValor,
+                    descricao: 'Comissão recebida',
+                    tipo_transacao: 'comissao',
+                    <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
                 },
                 dataType: 'json',
                 success: function(response) {
@@ -261,8 +259,12 @@
                         // Recalcula o total
                         calcularTotal();
                         
-                        // Mostra mensagem de sucesso
+                        // Dispara evento de transação adicionada
+                        $(document).trigger('transacaoAdicionada');
+                        
+                        // Mostra mensagem de sucesso e recarrega a página
                         alert('Comissão recebida com sucesso! O valor foi adicionado ao salário base.');
+                        window.location.reload();
                     } else {
                         alert(response.message || 'Erro ao processar comissão');
                     }
@@ -300,12 +302,12 @@
                     type: 'POST',
                     data: {
                         tipo: tipoValorBase,
-                        usuario_id: usuarioId
+                        usuario_id: usuarioId,
+                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
                     },
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
-                            // Garante que o valor é um número
                             let valor = parseFloat(response.valor) || 0;
                             // Formata o valor para exibição
                             $('#comissao_base').val(formatMoneyBR(valor));
@@ -361,7 +363,8 @@
                     type: 'POST',
                     data: {
                         tipo: tipoValorBase,
-                        usuario_id: usuarioId
+                        usuario_id: usuarioId,
+                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
                     },
                     dataType: 'json',
                     success: function(response) {

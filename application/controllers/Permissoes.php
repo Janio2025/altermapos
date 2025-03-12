@@ -72,6 +72,7 @@ class Permissoes extends MY_Controller
                 'aCarteiraAdmin' => $this->input->post('aCarteiraAdmin'),
                 'eCarteiraAdmin' => $this->input->post('eCarteiraAdmin'),
                 'dCarteiraAdmin' => $this->input->post('dCarteiraAdmin'),
+                'pCarteiraAdmin' => $this->input->post('pCarteiraAdmin'),
 
                 // Outras permissões existentes
                 'aCliente' => $this->input->post('aCliente'),
@@ -191,6 +192,7 @@ class Permissoes extends MY_Controller
                 'aCarteiraAdmin' => $this->input->post('aCarteiraAdmin'),
                 'eCarteiraAdmin' => $this->input->post('eCarteiraAdmin'),
                 'dCarteiraAdmin' => $this->input->post('dCarteiraAdmin'),
+                'pCarteiraAdmin' => $this->input->post('pCarteiraAdmin'),
 
                 // Outras permissões existentes
                 'aCliente' => $this->input->post('aCliente'),

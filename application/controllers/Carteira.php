@@ -465,18 +465,12 @@ class Carteira extends MY_Controller
                 'tipo' => 'comissao',
                 'valor' => $valor_comissao,
                 'data_transacao' => date('Y-m-d'),
-                'descricao' => 'Recebimento de comissão',
                 'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                 'considerado_saldo' => 1
             ];
 
             if (!$this->carteira_model->registrarTransacao($dados_transacao)) {
                 throw new Exception('Erro ao registrar transação de comissão');
-            }
-
-            // Atualiza o status das OS relacionadas
-            if (!$this->carteira_model->finalizarOsComissao($tipo, $usuario_id)) {
-                throw new Exception('Erro ao finalizar as OS');
             }
 
             $this->db->trans_commit();

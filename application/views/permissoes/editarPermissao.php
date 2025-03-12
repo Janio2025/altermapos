@@ -183,6 +183,16 @@
                                         <span class="lbl"> Excluir Carteiras Admin</span>
                                     </label>
                                 </td>
+                                <td>
+                                    <label>
+                                        <input <?php if (isset($permissoes['pCarteiraAdmin'])) {
+                                            if ($permissoes['pCarteiraAdmin'] == '1') {
+                                                echo 'checked';
+                                            }
+                                        }?> name="pCarteiraAdmin" class="marcar" type="checkbox" value="1" />
+                                        <span class="lbl"> Pagar Usuários</span>
+                                    </label>
+                                </td>
                             </tr>
                         </table>
                     </div>

@@ -86,6 +86,9 @@
                             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'eCarteiraAdmin')) {
                                 echo '<a href="' . base_url() . 'index.php/admincarteira/editar/' . $r->idCarteiraUsuario . '" class="btn-nwe3" title="Editar Carteira"><i class="bx bx-edit bx-xs"></i></a>';
                             }
+                            if ($this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) {
+                                echo '<a href="' . base_url() . 'index.php/admincarteira/pagarusuario/' . $r->idCarteiraUsuario . '" class="btn-nwe2" title="Pagar Usuário"><i class="bx bx-money bx-xs"></i></a>';
+                            }
                             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dCarteiraAdmin')) {
                                 echo '<a href="#modal-excluir" role="button" data-toggle="modal" carteira="' . $r->idCarteiraUsuario . '" class="btn-nwe4" title="Excluir Carteira"><i class="bx bx-trash-alt bx-xs"></i></a>';
                             }

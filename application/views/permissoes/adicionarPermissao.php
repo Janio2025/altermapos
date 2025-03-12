@@ -61,6 +61,18 @@
                                                         <span class="lbl"> Excluir Carteiras</span>
                                                     </label>
                                                 </td>
+                                                <td>
+                                                    <label>
+                                                        <input name="dCarteiraAdmin" class="marcar" type="checkbox" value="1" />
+                                                        <span class="lbl"> Excluir Carteiras</span>
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <label>
+                                                        <input name="pCarteiraAdmin" class="marcar" type="checkbox" value="1" />
+                                                        <span class="lbl"> Pagar Usuários</span>
+                                                    </label>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
