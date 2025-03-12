@@ -13,14 +13,13 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     .modal-saque .modal-header {
-        
-        background:rgb(66, 69, 197);
+        background: #f8f9fa;
         border-bottom: 1px solid #e9ecef;
         border-radius: 8px 8px 0 0;
         padding: 15px 20px;
     }
     .modal-saque .modal-title {
-        color:rgb(253, 253, 253);
+        color: #2D335B;
         font-size: 1.25rem;
         font-weight: 600;
     }
@@ -72,16 +71,14 @@
                         R$ <?php echo number_format($carteira->saldo, 2, ',', '.'); ?>
                     </div>
                     <?php if($carteira->saldo > 0): ?>
-                    <div style="text-align: center; margin-top: 15px;">
-                        
-                    </div>
+                    
                     <?php endif; ?>
                     <?php else: ?>
                     <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
                         R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
                     </div>
                     <?php if($saldo > 0): ?>
-                        <div style="text-align: center; margin-top: 15px;">
+                    <div style="text-align: center; margin-top: 15px;">
                         <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
                             <span class="button__icon"><i class='bx bx-money'></i></span>
                             <span class="button__text2">Realizar Saque via PIX</span>
@@ -276,24 +273,14 @@
                             R$ <span id="valorSaque">0,00</span>
                         </div>
                         <p class="info-pix">
-                            <i class="bx bx bx-money"></i>
-                            O valor será enviado para a chave 
+                            <i class="bx bx-info-circle"></i>
+                            O valor será enviado para a chave PIX cadastrada na sua carteira
                         </p>
-                        <p class="info-pix">
-                            <i class="bx bx-document"></i>
-                           PIX: <?php echo isset($config) ? $config->chave_pix : ''; ?>
-                        </p>
-                        <p class="info-pix">
-                            <i class=""></i>
-                            cadastrada na sua carteira
-                        </p>
-
-                        
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger btn-confirmar" data-dismiss="modal">
-                        <i class="bx bx-check"></i> Cancelar
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                        <i class="bx bx-x"></i> Cancelar
                     </button>
                     <button type="button" class="btn btn-success btn-confirmar" onclick="realizarSaquePix()">
                         <i class="bx bx-check"></i> Confirmar Saque
@@ -303,7 +290,16 @@
         </div>
     </div>
 
-    
+    <!-- Remove o campo de chave PIX -->
+    <div class="control-group" style="display: none;">
+        <label for="chave_pix" class="control-label">Chave PIX para Saques</label>
+        <div class="controls">
+            <input type="text" name="chave_pix" id="chave_pix" class="input-xlarge" 
+                value="<?php echo isset($config) ? $config->chave_pix : ''; ?>" 
+                placeholder="Digite sua chave PIX (CPF, Email, Telefone ou Chave Aleatória)">
+            <span class="help-inline">Esta chave PIX será usada para receber os saques da sua carteira</span>
+        </div>
+    </div>
 </div>
 
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
