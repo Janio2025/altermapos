@@ -99,7 +99,7 @@
                                 </div>
                                 
                                 <div style="margin-top: 10px;">
-                                    <input type="text" class="span6" name="bonus_descricao" placeholder="Descrição do Bônus">
+                                    <input type="text" class="span6" name="bonus_descricao" placeholder="Descrição do Bônus" onChange="javascript:this.value=this.value.toUpperCase();">
                                 </div>
                             </div>
                         </div>
@@ -143,11 +143,11 @@
                             <div class="controls">
                                 <div class="input-prepend" style="margin-bottom: 10px;">
                                     <span class="add-on">R$</span>
-                                    <input type="text" class="money" name="retirada_valor" id="retirada_valor" placeholder="Valor da Retirada">
+                                    <input type="text" class="money" name="retirada_valor" id="retirada_valor" placeholder="Valor da Retirada" >
                                 </div>
                                 
                                 <div style="margin-top: 10px;">
-                                    <input type="text" class="span6" name="retirada_descricao" placeholder="Descrição da Retirada">
+                                    <input type="text" class="span6" name="retirada_descricao" placeholder="Descrição da Retirada" onChange="javascript:this.value=this.value.toUpperCase();">
                                 </div>
                             </div>
                         </div>

@@ -11,8 +11,11 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- Outros scripts da página -->
-<script src="<?php echo base_url(); ?>assets/js/funcoes.js"></script> <!-- Se houver outros scripts -->
+<script src="<?php echo base_url(); ?>assets/js/funcoes.js"></script>
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 
@@ -145,6 +148,57 @@
         /* Define o padding de 5% em todos os lados */
         margin-bottom: 2%;
         /* Adiciona um espaço de 5% abaixo de cada div */
+    }
+
+    /* Estilos para a nova seção de movimento e preços */
+    .movimento-btns {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .movimento-btns label {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .movimento-btns label:hover {
+        background-color: #f8f9fa;
+    }
+
+    .movimento-btns .badge {
+        margin-left: 5px;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .span4 {
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-bottom: 20px;
+        }
+
+        .row-fluid [class*="span"] {
+            width: 100%;
+            margin-left: 0;
+            float: none;
+        }
+
+        .movimento-btns {
+            flex-direction: row;
+            width: 100%;
+        }
+
+        .movimento-btns label {
+            width: 50%;
+        }
     }
 </style>
 
@@ -710,17 +764,52 @@
             document.getElementById('additionalCompativelProdutos').appendChild(newInput);
             compativelProdutoCounter++;
         } else {
-            alert('Por favor, preencha todos os campos Modelo Compatível antes de adicionar um novo.');
+            Swal.fire({
+                title: 'Campo Obrigatório',
+                text: 'Por favor, preencha todos os campos Modelo Compatível antes de adicionar um novo.',
+                icon: 'warning',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#3085d6',
+                background: '#fff',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    title: 'text-danger'
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp'
+                }
+            });
         }
     });
 
     document.addEventListener('click', function (e) {
         if (e.target && e.target.className.includes('removeCompativelProduto')) {
-            e.target.parentElement.parentElement.remove();
+            const elementToRemove = e.target.parentElement.parentElement;
+            
+            Swal.fire({
+                title: 'Confirmar Exclusão',
+                text: 'Deseja remover este modelo compatível?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, remover',
+                cancelButtonText: 'Cancelar',
+                background: '#fff',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    elementToRemove.remove();
+                }
+            });
         }
     });
-
-
 </script>
 
 <script>

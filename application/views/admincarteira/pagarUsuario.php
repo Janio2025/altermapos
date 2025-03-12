@@ -98,7 +98,7 @@
                                 <div class="control-group" style="margin-bottom: 15px;">
                                     <label for="retirada_descricao" class="control-label" style="font-weight: 500; color: #495057;">Descrição da Retirada<span class="required" style="color: #dc3545;">*</span></label>
                                     <div class="controls">
-                                        <input id="retirada_descricao" type="text" name="retirada_descricao" value="" style="width: calc(100% - 16px); padding: 8px; border: 1px solid #ced4da; border-radius: 4px;"/>
+                                        <input id="retirada_descricao" type="text" name="retirada_descricao" value="" style="width: calc(100% - 16px); padding: 8px; border: 1px solid #ced4da; border-radius: 4px;" onChange="javascript:this.value=this.value.toUpperCase();"/>
                                     </div>
                                 </div>
 
