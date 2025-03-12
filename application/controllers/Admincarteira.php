@@ -611,7 +611,7 @@ class Admincarteira extends MY_Controller {
         $this->data['carteira'] = $carteira;
         $this->data['configuracao'] = $configuracao;
         $this->data['custom_error'] = '';
-        $this->data['view'] = 'admincarteira/pagarusuario';
+        $this->data['view'] = 'admincarteira/pagarUsuario';
         return $this->layout();
     }
 
