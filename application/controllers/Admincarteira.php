@@ -672,7 +672,7 @@ class Admincarteira extends MY_Controller {
             // Atualiza o salário base na configuração
             $config_data = array(
                 'carteira_usuario_id' => $id,
-                'salario_base' => $carteira->saldo - $valor, // Atualiza o salário base com o novo saldo
+                'salario_base' => $config->salario_base, // Mantém o salário base original
                 'comissao_fixa' => $config->comissao_fixa,
                 'data_salario' => $config->data_salario,
                 'tipo_repeticao' => $config->tipo_repeticao,

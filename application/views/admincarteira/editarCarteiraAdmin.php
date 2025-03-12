@@ -71,18 +71,16 @@
                         <div class="control-group">
                             <label class="control-label">Comissão Pendente</label>
                             <div class="controls">
-                                <div class="widget-box" style="margin-bottom: 0;">
+                                <div class="widget-box span6" style="margin-bottom: 0;">
                                     <div class="widget-content">
                                         <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; padding: 15px;">
                                             <div class="comissao-value" style="font-size: 28px; color: #ffc107;">
                                                 R$ <span id="comissao-pendente">0,00</span>
                                             </div>
-                                            <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteira')) { ?>
-                                                <button type="button" onclick="receberComissao()" class="button btn btn-warning" style="min-width: 200px;">
-                                                    <span class="button__icon"><i class='bx bx-check-circle'></i></span>
-                                                    <span class="button__text2">Receber Comissão</span>
-                                                </button>
-                                            <?php } ?>
+                                            <div class="alert alert-info" style="margin-bottom: 0;">
+                                                <i class='bx bx-info-circle'></i>
+                                                Para realizar retiradas ou receber comissões, acesse a opção "Pagar Usuário" na listagem de carteiras.
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -137,28 +135,14 @@
                             </div>
                         </div>
 
-                        <!-- Seção de Retirada -->
-                        <div class="control-group">
-                            <label class="control-label">Retirada</label>
-                            <div class="controls">
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <span class="add-on">R$</span>
-                                    <input type="text" class="money" name="retirada_valor" id="retirada_valor" placeholder="Valor da Retirada" >
-                                </div>
-                                
-                                <div style="margin-top: 10px;">
-                                    <input type="text" class="span6" name="retirada_descricao" placeholder="Descrição da Retirada" onChange="javascript:this.value=this.value.toUpperCase();">
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Campo para mostrar o total -->
                         <div class="control-group">
                             <label class="control-label">Total</label>
                             <div class="controls">
                                 <div class="input-prepend">
                                     <span class="add-on">R$</span>
-                                    <input type="text" id="total" name="total" class="money" readonly>
+                                    <input type="text" id="total" name="total" class="money" value="<?php echo number_format($carteira->saldo, 2, ',', '.'); ?>" readonly>
+                                    <input type="hidden" id="saldo_original" name="saldo_original" value="<?php echo number_format($carteira->saldo, 2, ',', '.'); ?>">
                                 </div>
                             </div>
                         </div>
@@ -166,7 +150,6 @@
                         <!-- Campos ocultos para armazenar as transações -->
                         <input type="hidden" name="tem_bonus" id="tem_bonus" value="0">
                         <input type="hidden" name="tem_comissao" id="tem_comissao" value="0">
-                        <input type="hidden" name="tem_retirada" id="tem_retirada" value="0">
 
                         <div class="form-actions">
                             <div class="span12">
@@ -201,79 +184,20 @@
         return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // Função para calcular o total - movida para fora do document.ready
+    // Função para calcular o total
     function calcularTotal() {
         // Pega os valores dos campos
-        let salarioBase = parseMoneyBR($('#salario_base').val());
+        let saldoOriginal = parseMoneyBR($('#saldo_original').val());
         let bonus = parseMoneyBR($('#bonus_valor').val());
-        let retirada = parseMoneyBR($('#retirada_valor').val());
         
         // Marca quais transações serão registradas
         $('#tem_bonus').val(bonus > 0 ? '1' : '0');
-        $('#tem_retirada').val(retirada > 0 ? '1' : '0');
         
-        // Calcula o total (retirada é subtraída)
-        let total = salarioBase + bonus - retirada;
+        // Calcula o total (saldo original + bonus)
+        let total = saldoOriginal + bonus;
         
         // Atualiza o campo total
         $('#total').val(formatMoneyBR(total));
-    }
-
-    // Função para receber a comissão
-    function receberComissao() {
-        let tipoValorBase = $('#tipo_valor_base').val();
-        let usuarioId = $('#usuario').val();
-        let comissaoValor = parseMoneyBR($('#comissao-pendente').text());
-        
-        if (!tipoValorBase || !usuarioId) {
-            alert('Selecione o tipo de valor base e o usuário primeiro.');
-            return;
-        }
-        
-        if (confirm('Confirma o recebimento da comissão? As OS relacionadas serão marcadas como finalizadas e o valor será adicionado ao salário base.')) {
-            $.ajax({
-                url: '<?php echo base_url('index.php/admincarteira/receberComissao'); ?>',
-                type: 'POST',
-                data: {
-                    tipo: tipoValorBase,
-                    usuario_id: usuarioId,
-                    valor: comissaoValor,
-                    descricao: 'Comissão recebida',
-                    tipo_transacao: 'comissao',
-                    <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        // Atualiza o salário base com o novo valor
-                        let salarioAtual = parseMoneyBR($('#salario_base').val());
-                        let comissao = parseMoneyBR($('#comissao-pendente').text());
-                        let novoSalario = salarioAtual + comissao;
-                        
-                        // Atualiza o campo de salário base
-                        $('#salario_base').val(formatMoneyBR(novoSalario));
-                        
-                        // Zera a comissão pendente
-                        $('#comissao-pendente').text('0,00');
-                        
-                        // Recalcula o total
-                        calcularTotal();
-                        
-                        // Dispara evento de transação adicionada
-                        $(document).trigger('transacaoAdicionada');
-                        
-                        // Mostra mensagem de sucesso e recarrega a página
-                        alert('Comissão recebida com sucesso! O valor foi adicionado ao salário base.');
-                        window.location.reload();
-                    } else {
-                        alert(response.message || 'Erro ao processar comissão');
-                    }
-                },
-                error: function() {
-                    alert('Erro ao processar comissão');
-                }
-            });
-        }
     }
 
     $(document).ready(function(){
@@ -289,7 +213,6 @@
         // Eventos para recalcular os valores
         $('#salario_base').on('keyup', calcularTotal);
         $('#bonus_valor').on('keyup', calcularTotal);
-        $('#retirada_valor').on('keyup', calcularTotal);
 
         // Função para buscar o valor base da comissão
         function buscarValorBase() {
@@ -445,3 +368,5 @@
         calcularTotal();
     });
 </script>
+
+

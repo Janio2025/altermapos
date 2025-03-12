@@ -199,6 +199,7 @@
             }
             
             $("#saldo").val('R$ ' + novo_saldo.toFixed(2).replace('.', ','));
+            $("#salario_base").val($("#salario_base").val());
         });
     });
 
