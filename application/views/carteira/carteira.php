@@ -45,6 +45,184 @@
         min-width: 150px;
         padding: 8px 20px;
     }
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        padding: 1px;
+        margin: 0;
+        width: 100%;
+    }
+    
+    .summary-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        min-width: 0;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    /* Estilos para o modal de movimentações */
+    .modal-movimentacoes .modal-content {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .modal-movimentacoes .modal-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 8px 8px 0 0;
+        padding: 15px 20px;
+    }
+    
+    .modal-movimentacoes .modal-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #2D335B;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    
+    .modal-movimentacoes .modal-body {
+        padding: 20px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .modal-movimentacoes .table {
+        margin-bottom: 0;
+    }
+    
+    .modal-movimentacoes .empty-state {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+    }
+    
+    .modal-movimentacoes .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .summary-card .card-title {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .summary-card .card-title i {
+        font-size: 24px;
+    }
+    
+    .summary-card .card-title span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 16px;
+    }
+    
+    .summary-card .card-value {
+        font-size: 24px;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 15px;
+    }
+    
+    /* Media queries para responsividade */
+    @media screen and (max-width: 1200px) {
+        .cards-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .summary-card {
+            padding: 12px;
+        }
+        
+        .summary-card .card-value {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        
+        .summary-card .card-title i {
+            font-size: 20px;
+        }
+        
+        .summary-card .card-title span {
+            font-size: 14px;
+        }
+    }
+    
+    @media screen and (max-width: 992px) {
+        .cards-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .summary-card {
+            padding: 10px;
+        }
+        
+        .summary-card .card-title {
+            margin-bottom: 8px;
+        }
+        
+        .summary-card .card-title i {
+            font-size: 16px;
+        }
+        
+        .summary-card .card-title span {
+            font-size: 13px;
+        }
+        
+        .summary-card .card-value {
+            font-size: 18px;
+            margin-top: 8px;
+        }
+    }
+    
+    @media screen and (max-width: 768px) {
+        .cards-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        
+        .summary-card {
+            padding: 8px;
+        }
+        
+        .summary-card .card-title {
+            margin-bottom: 6px;
+        }
+        
+        .summary-card .card-title i {
+            font-size: 14px;
+        }
+        
+        .summary-card .card-title span {
+            font-size: 12px;
+        }
+        
+        .summary-card .card-value {
+            font-size: 16px;
+            margin-top: 6px;
+        }
+    }
 </style>
 
 <div class="new122">
@@ -136,93 +314,9 @@
         <div class="widget-content">
             <div class="row-fluid" style="padding: 0;">
                 <div class="span12" style="padding: 0;">
-                    <style>
-                        .cards-grid {
-                            display: grid;
-                            grid-template-columns: repeat(4, 1fr);
-                            gap: 15px;
-                            padding: 1px;
-                            margin: 0;
-                            width: 100%;
-                        }
-                        
-                        .summary-card {
-                            background: #fff;
-                            border-radius: 8px;
-                            padding: 15px;
-                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                            min-width: 0; /* Previne overflow em telas pequenas */
-                        }
-                        
-                        .summary-card .card-title {
-                            display: flex;
-                            align-items: center;
-                            gap: 5px;
-                            margin-bottom: 10px;
-                        }
-                        
-                        .summary-card .card-value {
-                            font-size: 24px;
-                            color: #333;
-                        }
-                        
-                        /* Media queries para responsividade */
-                        @media screen and (max-width: 1200px) {
-                            .cards-grid {
-                                grid-template-columns: repeat(4, 1fr);
-                                gap: 10px;
-                            }
-                            
-                            .summary-card {
-                                padding: 12px;
-                            }
-                            
-                            .summary-card .card-value {
-                                font-size: 20px;
-                            }
-                        }
-                        
-                        @media screen and (max-width: 992px) {
-                            .cards-grid {
-                                grid-template-columns: repeat(4, 1fr);
-                                gap: 8px;
-                            }
-                            
-                            .summary-card {
-                                padding: 10px;
-                            }
-                            
-                            .summary-card .card-title {
-                                font-size: 14px;
-                            }
-                            
-                            .summary-card .card-value {
-                                font-size: 18px;
-                            }
-                        }
-                        
-                        @media screen and (max-width: 768px) {
-                            .cards-grid {
-                                grid-template-columns: repeat(4, 1fr);
-                                gap: 6px;
-                            }
-                            
-                            .summary-card {
-                                padding: 8px;
-                            }
-                            
-                            .summary-card .card-title {
-                                font-size: 13px;
-                            }
-                            
-                            .summary-card .card-value {
-                                font-size: 16px;
-                            }
-                        }
-                    </style>
                     <div class="cards-grid">
                         <!-- Card Retiradas -->
-                        <div class="summary-card">
+                        <div class="summary-card" onclick="abrirModalMovimentacoes('retirada', 'Retiradas', '#dc3545', 'bx-transfer-alt')">
                             <div class="card-title" style="color: #dc3545;">
                                 <i class="bx bx-transfer-alt" style="font-size: 20px;"></i>
                                 <span style="font-weight: 600;">Retiradas</span>
@@ -232,7 +326,7 @@
                             </div>
                         </div>
                         <!-- Card Comissões -->
-                        <div class="summary-card">
+                        <div class="summary-card" onclick="abrirModalMovimentacoes('comissao', 'Comissões', '#ffc107', 'bx-money-withdraw')">
                             <div class="card-title" style="color: #ffc107;">
                                 <i class="bx bx-money-withdraw" style="font-size: 20px;"></i>
                                 <span style="font-weight: 600;">Comissões</span>
@@ -242,7 +336,7 @@
                             </div>
                         </div>
                         <!-- Card Bônus -->
-                        <div class="summary-card">
+                        <div class="summary-card" onclick="abrirModalMovimentacoes('bonus', 'Bônus', '#17a2b8', 'bx-gift')">
                             <div class="card-title" style="color: #17a2b8;">
                                 <i class="bx bx-gift" style="font-size: 20px;"></i>
                                 <span style="font-weight: 600;">Bônus</span>
@@ -252,7 +346,7 @@
                             </div>
                         </div>
                         <!-- Card Total Comissões + Bônus -->
-                        <div class="summary-card">
+                        <div class="summary-card" onclick="abrirModalMovimentacoes('ganhos', 'Ganhos Totais', '#28a745', 'bx-money')">
                             <div class="card-title" style="color: #28a745;">
                                 <i class="bx bx-money" style="font-size: 20px;"></i>
                                 <span style="font-weight: 600;">Ganhos</span>
@@ -452,6 +546,26 @@
                 value="<?php echo isset($config) ? $config->chave_pix : ''; ?>" 
                 placeholder="Digite sua chave PIX (CPF, Email, Telefone ou Chave Aleatória)">
             <span class="help-inline">Esta chave PIX será usada para receber os saques da sua carteira</span>
+        </div>
+    </div>
+
+    <!-- Modal de Movimentações -->
+    <div class="modal fade modal-movimentacoes" id="modalMovimentacoes" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bx" id="modalMovimentacoesIcon"></i>
+                        <span id="modalMovimentacoesTitulo"></span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="modalMovimentacoesConteudo"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -693,6 +807,97 @@
         $(document).on('transacaoAdicionada', function() {
             calcularTotaisMensais();
         });
+
+        // Função para abrir o modal de movimentações
+        window.abrirModalMovimentacoes = function(tipo, titulo, cor, icone) {
+            const dataAtual = new Date();
+            let movimentacoes = [];
+            let total = 0;
+
+            // Coleta as movimentações do tipo especificado
+            $('.table-transactions tbody tr').each(function() {
+                const data = $(this).find('.col-data').text();
+                if (!data) return;
+
+                const tipoTransacao = $(this).find('.col-tipo span').attr('data-tipo');
+                
+                // Para o card de ganhos, inclui tanto comissões quanto bônus
+                if (tipo === 'ganhos' && (tipoTransacao !== 'comissao' && tipoTransacao !== 'bonus')) {
+                    return;
+                } else if (tipo !== 'ganhos' && tipoTransacao !== tipo) {
+                    return;
+                }
+
+                const [dia, mes, ano] = data.split('/');
+                const dataTransacao = new Date(ano, mes - 1, dia);
+                
+                // Verifica se é do mês atual
+                if (dataTransacao.getMonth() === dataAtual.getMonth() && 
+                    dataTransacao.getFullYear() === dataAtual.getFullYear()) {
+                    
+                    const valorText = $(this).find('.col-valor').text().replace('R$ ', '');
+                    const valor = parseFloat(valorText.replace('.', '').replace(',', '.'));
+                    const descricao = $(this).find('.col-descricao').text();
+
+                    movimentacoes.push({
+                        data: data,
+                        valor: valor,
+                        descricao: descricao
+                    });
+
+                    total += valor;
+                }
+            });
+
+            // Monta o HTML da tabela
+            let html = '';
+            if (movimentacoes.length > 0) {
+                html = `
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 120px;">Data</th>
+                                <th style="width: 130px;">Valor</th>
+                                <th>Descrição</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                movimentacoes.forEach(mov => {
+                    html += `
+                        <tr>
+                            <td style="text-align: center;">${mov.data}</td>
+                            <td style="text-align: right;">R$ ${formatarMoeda(mov.valor)}</td>
+                            <td>${mov.descricao}</td>
+                        </tr>
+                    `;
+                });
+
+                html += `
+                        <tr style="background-color: #f8f9fa; font-weight: bold;">
+                            <td colspan="1" style="text-align: right;">Total:</td>
+                            <td style="text-align: right;">R$ ${formatarMoeda(total)}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    </table>
+                `;
+            } else {
+                html = `
+                    <div class="empty-state">
+                        <i class="bx bx-info-circle"></i>
+                        <p>Nenhuma movimentação encontrada para este mês.</p>
+                    </div>
+                `;
+            }
+
+            // Atualiza e exibe o modal
+            $('#modalMovimentacoesIcon').attr('class', `bx ${icone}`).css('color', cor);
+            $('#modalMovimentacoesTitulo').text(titulo + ' do Mês');
+            $('#modalMovimentacoesConteudo').html(html);
+            $('#modalMovimentacoes').modal('show');
+        }
     });
 
     function formatarMoeda(valor) {
