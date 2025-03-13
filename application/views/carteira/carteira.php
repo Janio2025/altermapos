@@ -55,62 +55,69 @@
         <h5>Carteira</h5>
     </div>
     
-    <!-- Saldo da Carteira -->
-    <div class="widget-box">
-        <div class="widget-title">
-            <span class="icon">
-                <i class="bx bx-wallet"></i>
-            </span>
-            <h5>Saldo Disponível</h5>
-        </div>
-        <div class="widget-content">
-            <div class="row-fluid" style="min-height: 100px; padding: 10px;">
-                <div class="span12">
-                    <?php if(isset($carteira)): ?>
-                    <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
-                        R$ <?php echo number_format($carteira->saldo, 2, ',', '.'); ?>
+    <!-- Saldo da Carteira e Comissão Pendente -->
+    <div class="row-fluid">
+        <!-- Saldo da Carteira -->
+        <div class="span6">
+            <div class="widget-box">
+                <div class="widget-title">
+                    <span class="icon">
+                        <i class="bx bx-wallet"></i>
+                    </span>
+                    <h5>Saldo Disponível</h5>
+                </div>
+                <div class="widget-content">
+                    <div class="row-fluid" style="min-height: 100px; padding: 10px;">
+                        <div class="span12">
+                            <?php if(isset($carteira)): ?>
+                            <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
+                                R$ <?php echo number_format($carteira->saldo, 2, ',', '.'); ?>
+                            </div>
+                            <?php if($carteira->saldo > 0): ?>
+                            
+                            <?php endif; ?>
+                            <?php else: ?>
+                            <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
+                                R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
+                            </div>
+                            <?php if($saldo > 0): ?>
+                            <div style="text-align: center; margin-top: 15px;">
+                                <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
+                                    <span class="button__icon"><i class='bx bx-money'></i></span>
+                                    <span class="button__text2">Realizar Saque via PIX</span>
+                                </button>
+                            </div>
+                            <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <?php if($carteira->saldo > 0): ?>
-                    
-                    <?php endif; ?>
-                    <?php else: ?>
-                    <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
-                        R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
-                    </div>
-                    <?php if($saldo > 0): ?>
-                    <div style="text-align: center; margin-top: 15px;">
-                        <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
-                            <span class="button__icon"><i class='bx bx-money'></i></span>
-                            <span class="button__text2">Realizar Saque via PIX</span>
-                        </button>
-                    </div>
-                    <?php endif; ?>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Comissão Pendente -->
-    <div class="widget-box">
-        <div class="widget-title">
-            <span class="icon">
-                <i class="bx bx-money"></i>
-            </span>
-            <h5>Comissão Pendente</h5>
-        </div>
-        <div class="widget-content">
-            <div class="row-fluid" style="min-height: 100px; padding: 10px;">
-                <div class="span12">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
-                        <div class="comissao-value" style="font-size: 28px; color: #ffc107; margin-top: 10px;">
-                            R$ <span id="comissao-pendente">0,00</span>
-                        </div>
-                        <div id="btn-comissao-container" style="display: none; margin-bottom: 10px;">
-                            <button type="button" onclick="receberComissao()" class="button btn btn-success" style="padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
-                                <i class="fas fa-check" style="margin-right: 5px;"></i>
-                                <span>Receber Comissão</span>
-                            </button>
+        <!-- Comissão Pendente -->
+        <div class="span6">
+            <div class="widget-box">
+                <div class="widget-title">
+                    <span class="icon">
+                        <i class="bx bx-money"></i>
+                    </span>
+                    <h5>Comissão Pendente</h5>
+                </div>
+                <div class="widget-content">
+                    <div class="row-fluid" style="min-height: 100px; padding: 10px;">
+                        <div class="span12">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+                                <div class="comissao-value" style="font-size: 28px; color: #ffc107; margin-top: 10px;">
+                                    R$ <span id="comissao-pendente">0,00</span>
+                                </div>
+                                <div id="btn-comissao-container" style="display: none; margin-bottom: 10px;">
+                                    <button type="button" onclick="receberComissao()" class="button btn btn-success" style="padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
+                                        <i class="fas fa-check" style="margin-right: 5px;"></i>
+                                        <span>Receber Comissão</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -127,37 +134,131 @@
             <h5>Resumo do Mês Atual</h5>
         </div>
         <div class="widget-content">
-            <div class="row-fluid" style="padding: 10px;">
-                <div class="span12">
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                        <!-- Card Comissões -->
-                        <div class="summary-card" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            <div style="color: #ffc107;">
-                                <i class="bx bx-money-withdraw" style="font-size: 24px;"></i>
-                                <span style="font-weight: 600; margin-left: 5px;">Comissões</span>
-                            </div>
-                            <div style="font-size: 24px; margin-top: 10px; color: #333;">
-                                R$ <span id="total-comissoes">0,00</span>
-                            </div>
-                        </div>
+            <div class="row-fluid" style="padding: 0;">
+                <div class="span12" style="padding: 0;">
+                    <style>
+                        .cards-grid {
+                            display: grid;
+                            grid-template-columns: repeat(4, 1fr);
+                            gap: 15px;
+                            padding: 1px;
+                            margin: 0;
+                            width: 100%;
+                        }
+                        
+                        .summary-card {
+                            background: #fff;
+                            border-radius: 8px;
+                            padding: 15px;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                            min-width: 0; /* Previne overflow em telas pequenas */
+                        }
+                        
+                        .summary-card .card-title {
+                            display: flex;
+                            align-items: center;
+                            gap: 5px;
+                            margin-bottom: 10px;
+                        }
+                        
+                        .summary-card .card-value {
+                            font-size: 24px;
+                            color: #333;
+                        }
+                        
+                        /* Media queries para responsividade */
+                        @media screen and (max-width: 1200px) {
+                            .cards-grid {
+                                grid-template-columns: repeat(4, 1fr);
+                                gap: 10px;
+                            }
+                            
+                            .summary-card {
+                                padding: 12px;
+                            }
+                            
+                            .summary-card .card-value {
+                                font-size: 20px;
+                            }
+                        }
+                        
+                        @media screen and (max-width: 992px) {
+                            .cards-grid {
+                                grid-template-columns: repeat(4, 1fr);
+                                gap: 8px;
+                            }
+                            
+                            .summary-card {
+                                padding: 10px;
+                            }
+                            
+                            .summary-card .card-title {
+                                font-size: 14px;
+                            }
+                            
+                            .summary-card .card-value {
+                                font-size: 18px;
+                            }
+                        }
+                        
+                        @media screen and (max-width: 768px) {
+                            .cards-grid {
+                                grid-template-columns: repeat(4, 1fr);
+                                gap: 6px;
+                            }
+                            
+                            .summary-card {
+                                padding: 8px;
+                            }
+                            
+                            .summary-card .card-title {
+                                font-size: 13px;
+                            }
+                            
+                            .summary-card .card-value {
+                                font-size: 16px;
+                            }
+                        }
+                    </style>
+                    <div class="cards-grid">
                         <!-- Card Retiradas -->
-                        <div class="summary-card" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            <div style="color: #dc3545;">
-                                <i class="bx bx-transfer-alt" style="font-size: 24px;"></i>
-                                <span style="font-weight: 600; margin-left: 5px;">Retiradas</span>
+                        <div class="summary-card">
+                            <div class="card-title" style="color: #dc3545;">
+                                <i class="bx bx-transfer-alt" style="font-size: 20px;"></i>
+                                <span style="font-weight: 600;">Retiradas</span>
                             </div>
-                            <div style="font-size: 24px; margin-top: 10px; color: #333;">
+                            <div class="card-value">
                                 R$ <span id="total-retiradas">0,00</span>
                             </div>
                         </div>
-                        <!-- Card Bônus -->
-                        <div class="summary-card" style="background: #fff; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                            <div style="color: #17a2b8;">
-                                <i class="bx bx-gift" style="font-size: 24px;"></i>
-                                <span style="font-weight: 600; margin-left: 5px;">Bônus</span>
+                        <!-- Card Comissões -->
+                        <div class="summary-card">
+                            <div class="card-title" style="color: #ffc107;">
+                                <i class="bx bx-money-withdraw" style="font-size: 20px;"></i>
+                                <span style="font-weight: 600;">Comissões</span>
                             </div>
-                            <div style="font-size: 24px; margin-top: 10px; color: #333;">
+                            <div class="card-value">
+                                R$ <span id="total-comissoes">0,00</span>
+                            </div>
+                        </div>
+                        <!-- Card Bônus -->
+                        <div class="summary-card">
+                            <div class="card-title" style="color: #17a2b8;">
+                                <i class="bx bx-gift" style="font-size: 20px;"></i>
+                                <span style="font-weight: 600;">Bônus</span>
+                            </div>
+                            <div class="card-value">
                                 R$ <span id="total-bonus">0,00</span>
+                            </div>
+                        </div>
+                        <!-- Card Total Comissões + Bônus -->
+                        <div class="summary-card">
+                            <div class="card-title" style="color: #28a745;">
+                                <i class="bx bx-money" style="font-size: 20px;"></i>
+                                <span style="font-weight: 600;">Ganhos</span>
+                            </div>
+                            <div class="card-value">
+                                R$ <span id="total-ganhos">0,00</span>
                             </div>
                         </div>
                     </div>
@@ -582,6 +683,7 @@
             $('#total-comissoes').text(formatarMoeda(totalComissoes));
             $('#total-retiradas').text(formatarMoeda(totalRetiradas));
             $('#total-bonus').text(formatarMoeda(totalBonus));
+            $('#total-ganhos').text(formatarMoeda(totalComissoes + totalBonus));
         }
 
         // Calcula os totais ao carregar a página
