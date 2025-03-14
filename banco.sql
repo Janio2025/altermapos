@@ -363,6 +363,31 @@ CREATE TABLE IF NOT EXISTS `os` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
+-- Table `os_usuarios`
+-- -----------------------------------------------------    
+CREATE TABLE IF NOT EXISTS `os_usuarios` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `os_id` int NOT NULL,
+    `usuario_id` int NOT NULL,
+    `funcao` varchar(50) DEFAULT NULL,
+    `data_adicao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `principal` tinyint(1) DEFAULT '0',
+    PRIMARY KEY (`id`),
+    KEY `fk_os_usuarios_os1` (`os_id`),
+    KEY `fk_os_usuarios_usuarios1` (`usuario_id`),
+    CONSTRAINT `fk_os_usuarios_os1` 
+        FOREIGN KEY (`os_id`) 
+        REFERENCES `os` (`idOs`) 
+        ON DELETE CASCADE 
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_os_usuarios_usuarios1` 
+        FOREIGN KEY (`usuario_id`) 
+        REFERENCES `usuarios` (`idUsuarios`) 
+        ON DELETE NO ACTION 
+        ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
 -- Table `status_os`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `status_os` (

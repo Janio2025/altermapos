@@ -40,14 +40,14 @@
                                         <div class="span4">
                                             <label for="tecnico">Técnico / Responsável<span
                                                     class="required">*</span></label>
-                                            <input id="tecnico" class="span12" type="text" name="tecnico"
-                                                value="<?= $this->session->userdata(
-                                                    "nome_admin"
-                                                ) ?>" />
+                                            <div class="input-append">
+                                                <input id="tecnico" class="span11" type="text" name="tecnico" value="<?= $this->session->userdata("nome_admin") ?>" />
+                                                <button type="button" class="btn" style="margin-left: 0" data-toggle="modal" data-target="#modalUsuarios">
+                                                    <i class="bx bx-plus"></i>
+                                                </button>
+                                            </div>
                                             <input id="usuarios_id" class="span12" type="hidden" name="usuarios_id"
-                                                value="<?= $this->session->userdata(
-                                                    "id_admin"
-                                                ) ?>" />
+                                                value="<?= $this->session->userdata("id_admin") ?>" />
                                         </div>
 
                                         <div class="span3">
@@ -180,6 +180,9 @@
                                         </div>
                                     </div>
 
+                                    <!-- Campo hidden para usuários adicionais -->
+                                    <div id="usuarios_adicionais_container">
+                                    </div>
 
                                 </form>
                             </div>
@@ -191,6 +194,81 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de Usuários Adicionais -->
+<div id="modalUsuarios" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="modalUsuariosLabel">Adicionar Técnicos/Responsáveis</h3>
+    </div>
+    <div class="modal-body">
+        <div class="span12" style="margin-left: 0">
+            <label for="usuarioAdicional">Selecionar Técnico</label>
+            <input id="usuarioAdicional" class="span12" type="text" />
+            <input id="usuarios_id_adicional" type="hidden" />
+        </div>
+        <div class="span12" style="margin-left: 0; margin-top: 10px">
+            <table id="tabelaUsuarios" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">Fechar</button>
+    </div>
+</div>
+
+<style>
+    /* Estilos para o autocomplete */
+    .ui-autocomplete {
+        max-height: 300px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 9999 !important;
+    }
+
+    .ui-autocomplete .ui-menu-item {
+        padding: 5px 10px;
+        border-bottom: 1px solid #f4f4f4;
+    }
+
+    .ui-autocomplete .ui-menu-item:hover {
+        background: #f4f4f4;
+        cursor: pointer;
+    }
+
+    /* Estilos para o modal */
+    #modalUsuarios .modal-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    #tabelaUsuarios {
+        margin-top: 15px;
+    }
+
+    #tabelaUsuarios th, #tabelaUsuarios td {
+        padding: 8px;
+        vertical-align: middle;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    /* Ajuste do z-index do modal para ficar acima do autocomplete */
+    .modal {
+        z-index: 9998 !important;
+    }
+</style>
+
 <script type="text/javascript">
     $(document).ready(function () {
         $("#cliente").autocomplete({
@@ -213,6 +291,95 @@
             select: function (event, ui) {
                 $("#garantias_id").val(ui.item.id);
             }
+        });
+
+        // Autocomplete para usuário adicional no modal
+        $("#usuarioAdicional").autocomplete({
+            source: "<?php echo base_url(); ?>index.php/os/autoCompleteUsuario",
+            minLength: 1,
+            select: function (event, ui) {
+                // Previne o comportamento padrão do autocomplete
+                event.preventDefault();
+                // Limpa o campo de busca
+                $(this).val('');
+                // Adiciona o usuário à tabela
+                adicionarUsuario(ui.item.id, ui.item.label);
+            }
+        });
+
+        // Função para adicionar usuário à tabela
+        window.adicionarUsuario = function(id, nome) {
+            console.log('Tentando adicionar usuário:', id, nome);
+            
+            // Verifica se é o usuário principal
+            if (id == $("#usuarios_id").val()) {
+                console.log('Usuário é o principal, não será adicionado');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Este usuário já é o responsável principal!'
+                });
+                return;
+            }
+
+            // Verifica se o usuário já está na tabela
+            if ($("#usuario-" + id).length > 0) {
+                console.log('Usuário já está na tabela');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Este usuário já está na lista!'
+                });
+                return;
+            }
+
+            // Adiciona linha na tabela
+            var linha = '<tr id="usuario-' + id + '">';
+            linha += '<td>' + nome + '</td>';
+            linha += '<td class="text-right">';
+            linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
+            linha += '<i class="bx bx-trash"></i></button></td>';
+            linha += '</tr>';
+            
+            $("#tabelaUsuarios tbody").append(linha);
+
+            // Adiciona o campo hidden no container dentro do formulário
+            var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + id + '">';
+            $("#usuarios_adicionais_container").append(hiddenInput);
+            
+            console.log('Usuário adicionado com sucesso');
+            console.log('Campos hidden atuais:', $("#usuarios_adicionais_container").html());
+        }
+
+        // Função para remover usuário da tabela
+        window.removerUsuario = function(id) {
+            console.log('Tentando remover usuário:', id);
+            
+            Swal.fire({
+                title: 'Atenção',
+                text: "Você tem certeza que deseja remover este técnico?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, remover!',
+                cancelButtonText: 'Não, cancelar!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $("#usuario-" + id).remove();
+                    // Remove o campo hidden correspondente
+                    $("#usuarios_adicionais_container input[value='" + id + "']").remove();
+                    console.log('Usuário removido com sucesso');
+                    console.log('Campos hidden atuais:', $("#usuarios_adicionais_container").html());
+                }
+            });
+        }
+
+        // Adiciona log antes do envio do formulário
+        $("#formOs").on('submit', function(e) {
+            console.log('Formulário sendo enviado');
+            console.log('Campos hidden de usuários:', $("#usuarios_adicionais_container").html());
+            return true;
         });
 
         $("#formOs").validate({

@@ -429,3 +429,54 @@ $(document).ready(function() {
     });
 });
 </script>
+
+<?php if ($this->session->userdata('sistema_versao') == '1.0.0') : ?>
+<div class="span12" style="padding: 1%; margin-left: 0">
+    <div class="span6">
+        <label for="cliente">Cliente<span class="required">*</span></label>
+        <input id="cliente" class="span12" type="text" name="cliente" value="<?php echo $result->nomeCliente ?>" />
+        <input id="clientes_id" class="span12" type="hidden" name="clientes_id" value="<?php echo $result->clientes_id ?>" />
+        <input id="valorTotal" type="hidden" name="valorTotal" value="" />
+    </div>
+    <div class="span6">
+        <label for="tecnico">Técnico / Responsável<span class="required">*</span></label>
+        <input id="tecnico" class="span12" type="text" name="tecnico" value="<?php echo $result->nome ?>" />
+        <input id="usuarios_id" class="span12" type="hidden" name="usuarios_id" value="<?php echo $result->usuarios_id ?>" />
+    </div>
+</div>
+
+<!-- Adicionar seção de usuários adicionais -->
+<div class="span12" style="padding: 1%; margin-left: 0">
+    <div class="span12">
+        <label>Técnicos Adicionais</label>
+        <div class="span12" style="margin-left: 0">
+            <?php
+            $usuarios_adicionais = $this->os_model->getUsuariosAdicionais($result->idOs);
+            if ($usuarios_adicionais) : ?>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Data Adição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($usuarios_adicionais as $usuario) : ?>
+                            <tr>
+                                <td><?php echo $usuario->nome; ?></td>
+                                <td><?php echo $usuario->email; ?></td>
+                                <td><?php echo $usuario->telefone; ?></td>
+                                <td><?php echo date('d/m/Y H:i:s', strtotime($usuario->data_adicao)); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else : ?>
+                <p class="text-center">Nenhum técnico adicional cadastrado</p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

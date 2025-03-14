@@ -392,4 +392,47 @@ public function autoCompleteProdutoSaida($q)
 
         return $pix->getQRCode();
     }
+
+    public function getUsuariosAdicionais($os_id)
+    {
+        $this->db->select('os_usuarios.*, usuarios.nome, usuarios.telefone, usuarios.email');
+        $this->db->from('os_usuarios');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = os_usuarios.usuario_id');
+        $this->db->where('os_id', $os_id);
+        return $this->db->get()->result();
+    }
+
+    public function removerUsuarioAdicional($os_id, $usuario_id)
+    {
+        $this->db->where('os_id', $os_id);
+        $this->db->where('usuario_id', $usuario_id);
+        return $this->db->delete('os_usuarios');
+    }
+
+    public function removerTodosUsuariosAdicionais($os_id)
+    {
+        $this->db->where('os_id', $os_id);
+        $this->db->where('principal', 0); // Não remove o usuário principal
+        return $this->db->delete('os_usuarios');
+    }
+
+    public function usuarioPrincipalExiste($os_id, $usuario_id)
+    {
+        $this->db->where('os_id', $os_id);
+        $this->db->where('usuario_id', $usuario_id);
+        $this->db->where('principal', 1);
+        return $this->db->get('os_usuarios')->num_rows() > 0;
+    }
+
+    public function adicionarUsuarioAdicional($dados)
+    {
+        return $this->db->insert('os_usuarios', $dados);
+    }
+
+    public function usuarioAdicionalExiste($os_id, $usuario_id)
+    {
+        $this->db->where('os_id', $os_id);
+        $this->db->where('usuario_id', $usuario_id);
+        return $this->db->get('os_usuarios')->num_rows() > 0;
+    }
 }

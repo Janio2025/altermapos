@@ -137,6 +137,41 @@ class Os extends MY_Controller
                 $this->load->model('mapos_model');
                 $this->load->model('usuarios_model');
 
+                // Debug dos dados do POST
+                log_info('Dados do POST: ' . print_r($_POST, true));
+                
+                // Salvar usuários adicionais
+                $usuarios_adicionais = $this->input->post('usuarios_adicionais');
+                log_info('Usuários adicionais recebidos (raw): ' . print_r($usuarios_adicionais, true));
+                
+                if ($usuarios_adicionais) {
+                    foreach ($usuarios_adicionais as $usuario_id) {
+                        $dados_usuario = [
+                            'os_id' => $id,
+                            'usuario_id' => $usuario_id,
+                            'data_adicao' => date('Y-m-d H:i:s'),
+                            'principal' => 0
+                        ];
+                        log_info('Tentando adicionar usuário adicional: ' . print_r($dados_usuario, true));
+                        $resultado = $this->os_model->add('os_usuarios', $dados_usuario, false);
+                        log_info('Resultado da adição: ' . ($resultado ? 'sucesso' : 'falha'));
+                        if (!$resultado) {
+                            log_info('Erro ao adicionar usuário: ' . print_r($this->db->error(), true));
+                        }
+                    }
+                } else {
+                    log_info('Nenhum usuário adicional recebido');
+                }
+
+                // Adiciona o usuário principal também na tabela os_usuarios
+                $dados_usuario_principal = [
+                    'os_id' => $id,
+                    'usuario_id' => $this->input->post('usuarios_id'),
+                    'data_adicao' => date('Y-m-d H:i:s'),
+                    'principal' => 1
+                ];
+                $this->os_model->add('os_usuarios', $dados_usuario_principal, false);
+
                 $idOs = $id;
                 $os = $this->os_model->getById($idOs);
                 $emitente = $this->mapos_model->getEmitente();
@@ -196,10 +231,13 @@ class Os extends MY_Controller
         $this->data['custom_error'] = '';
         $this->data['texto_de_notificacao'] = $this->data['configuration']['notifica_whats'];
 
+        // Carrega os usuários adicionais
+        $this->load->model('usuarios_model');
+        $this->data['usuarios_adicionais'] = $this->os_model->getUsuariosAdicionais($this->uri->segment(3));
+
         $this->data['editavel'] = $this->os_model->isEditable($this->input->post('idOs'));
         if (!$this->data['editavel']) {
             $this->session->set_flashdata('error', 'Esta OS já e seu status não pode ser alterado e nem suas informações atualizadas. Por favor abrir uma nova OS.');
-
             redirect(site_url('os'));
         }
 
@@ -256,9 +294,57 @@ class Os extends MY_Controller
                 $this->load->model('mapos_model');
                 $this->load->model('usuarios_model');
 
-                $idOs = $this->input->post('idOs');
+                // Atualiza os usuários adicionais
+                $os_id = $this->input->post('idOs');
+                
+                // Obtém os usuários adicionais atuais
+                $usuarios_adicionais_atuais = $this->os_model->getUsuariosAdicionais($os_id);
+                $ids_atuais = array_map(function($usuario) {
+                    return $usuario->usuario_id;
+                }, $usuarios_adicionais_atuais);
+                
+                // Obtém os novos usuários selecionados
+                $usuarios_adicionais = $this->input->post('usuarios_adicionais');
+                if (!$usuarios_adicionais) {
+                    $usuarios_adicionais = [];
+                }
+                
+                // Remove usuários que não estão mais selecionados
+                foreach ($ids_atuais as $id) {
+                    if (!in_array($id, $usuarios_adicionais)) {
+                        $this->os_model->removerUsuarioAdicional($os_id, $id);
+                    }
+                }
+                
+                // Adiciona novos usuários que ainda não existem
+                foreach ($usuarios_adicionais as $usuario_id) {
+                    if (!$this->os_model->usuarioAdicionalExiste($os_id, $usuario_id)) {
+                        $dados_usuario = [
+                            'os_id' => $os_id,
+                            'usuario_id' => $usuario_id,
+                            'data_adicao' => date('Y-m-d H:i:s'),
+                            'principal' => 0
+                        ];
+                        $this->os_model->adicionarUsuarioAdicional($dados_usuario);
+                    }
+                }
 
-                $os = $this->os_model->getById($idOs);
+                // Verifica se o usuário principal já existe
+                $usuario_principal_existe = $this->os_model->usuarioPrincipalExiste($os_id, $this->input->post('usuarios_id'));
+                
+                // Só adiciona o usuário principal se ele ainda não existir
+                if (!$usuario_principal_existe) {
+                    $dados_usuario_principal = [
+                        'os_id' => $os_id,
+                        'usuario_id' => $this->input->post('usuarios_id'),
+                        'data_adicao' => date('Y-m-d H:i:s'),
+                        'principal' => 1
+                    ];
+                    $this->os_model->adicionarUsuarioAdicional($dados_usuario_principal);
+                }
+
+                // Prepara dados para notificação por email
+                $os = $this->os_model->getById($os_id);
                 $emitente = $this->mapos_model->getEmitente();
                 $tecnico = $this->usuarios_model->getById($os->usuarios_id);
 
@@ -284,7 +370,7 @@ class Os extends MY_Controller
                             array_push($remetentes, $os->email);
                             break;
                     }
-                    $this->enviarOsPorEmail($idOs, $remetentes, 'Ordem de Serviço - Editada');
+                    $this->enviarOsPorEmail($os_id, $remetentes, 'Ordem de Serviço - Editada');
                 }
 
                 $this->session->set_flashdata('success', 'Os editada com sucesso!');
@@ -1139,6 +1225,23 @@ private function formatarChave($chave)
             echo json_encode(['result' => true]);
         } else {
             echo json_encode(['result' => false]);
+        }
+    }
+
+    public function removerUsuarioAdicional()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para editar OS.');
+            redirect(base_url());
+        }
+
+        $os_id = $this->input->post('os_id');
+        $usuario_id = $this->input->post('usuario_id');
+
+        if ($this->os_model->removerUsuarioAdicional($os_id, $usuario_id)) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erro ao remover usuário']);
         }
     }
 }
