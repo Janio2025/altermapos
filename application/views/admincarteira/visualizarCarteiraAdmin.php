@@ -97,10 +97,6 @@
                                         <span class="button__icon"><i class="bx bx-undo"></i></span>
                                         <span class="button__text2">Voltar</span>
                                     </a>
-                                    <a href="<?php echo base_url('index.php/admincarteira/historico/'.$carteira->idCarteiraUsuario); ?>" class="button btn btn-mini btn-info" style="margin-left: 10px;">
-                                        <span class="button__icon"><i class="bx bx-history"></i></span>
-                                        <span class="button__text2">Histórico</span>
-                                    </a>
                                 </div>
                             </div>
                         </div>
