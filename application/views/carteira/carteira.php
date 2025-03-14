@@ -293,15 +293,9 @@
                 <div class="widget-content">
                     <div class="row-fluid" style="min-height: 100px; padding: 10px;">
                         <div class="span12">
-                            <div style="display: flex; flex-direction: column; align-items: center; gap: 25px;">
+                            <div style="display: flex; flex-direction: column; align-items: center;">
                                 <div class="comissao-value" style="font-size: 28px; color: #ffc107; margin-top: 10px;">
                                     R$ <span id="comissao-pendente">0,00</span>
-                                </div>
-                                <div id="btn-comissao-container" style="display: none; margin-bottom: 10px;">
-                                    <button type="button" onclick="receberComissao()" class="button btn btn-success" style="padding: 8px 15px; border-radius: 4px; display: flex; align-items: center; gap: 5px;">
-                                        <i class="fas fa-check" style="margin-right: 5px;"></i>
-                                        <span>Receber Comissão</span>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -632,137 +626,15 @@
                             let comissaoPendente = (valorBase * percentualComissao) / 100;
                             
                             $('#comissao-pendente').text(formatMoneyBR(comissaoPendente));
-                            
-                            // Mostra ou esconde o botão baseado no valor da comissão
-                            if (comissaoPendente > 0) {
-                                $('#btn-comissao-container').show();
-                            } else {
-                                $('#btn-comissao-container').hide();
-                            }
                         } else {
                             $('#comissao-pendente').text('0,00');
-                            $('#btn-comissao-container').hide();
                         }
                     },
                     error: function() {
                         $('#comissao-pendente').text('0,00');
-                        $('#btn-comissao-container').hide();
                     }
                 });
             }
-        }
-
-        // Função para receber a comissão
-        window.receberComissao = function() {
-            let tipoValorBase = '<?php echo isset($config) ? $config->tipo_valor_base : "servicos"; ?>';
-            let usuarioId = '<?php echo $this->session->userdata('id_admin'); ?>';
-
-            Swal.fire({
-                title: 'Confirmação',
-                text: "Deseja realmente receber esta comissão?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sim, receber!',
-                cancelButtonText: 'Não'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '<?php echo base_url('index.php/carteira/receberComissao'); ?>',
-                        type: 'POST',
-                        data: {
-                            tipo: tipoValorBase,
-                            usuario_id: usuarioId,
-                            <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
-                        },
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.success) {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Sucesso!',
-                                    text: 'Comissão recebida com sucesso!'
-                                }).then(() => {
-                                    // Dispara o evento antes de recarregar a página
-                                    $(document).trigger('transacaoAdicionada');
-                                    window.location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Oops...',
-                                    text: response.message || 'Erro ao receber comissão!'
-                                });
-                            }
-                        },
-                        error: function() {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: 'Erro ao processar a requisição!'
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-        // Função para abrir o modal de saque
-        window.abrirModalSaque = function() {
-            let saldoAtual = <?php echo isset($carteira) ? $carteira->saldo : $saldo; ?>;
-            $('#valorSaque').text(formatarMoeda(saldoAtual));
-            $('#modalSaque').modal('show');
-        }
-
-        // Função para realizar saque via PIX
-        window.realizarSaquePix = function() {
-            $('#modalSaque').modal('hide');
-            
-            Swal.fire({
-                title: 'Processando...',
-                text: 'Aguarde enquanto processamos seu saque.',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                allowEnterKey: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            $.ajax({
-                url: '<?php echo base_url('index.php/carteira/realizarSaquePix'); ?>',
-                type: 'POST',
-                data: {
-                    <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Sucesso!',
-                            text: response.message
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: response.message || 'Erro ao realizar saque!'
-                        });
-                    }
-                },
-                error: function() {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: 'Erro ao processar a requisição!'
-                    });
-                }
-            });
         }
 
         // Atualiza o valor da comissão pendente a cada 30 segundos

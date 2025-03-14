@@ -72,19 +72,14 @@
                                 </div>
                             </div>
 
-                            <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) { ?>
-                                <div class="control-group" style="margin-bottom: 15px;">
-                                    <label for="comissao_pendente" class="control-label" style="font-weight: 500; color: #495057;">Comissão Pendente</label>
-                                    <div class="controls" style="display: flex; align-items: center; gap: 10px;">
-                                        <input id="comissao_pendente" type="text" name="comissao_pendente" value="<?php echo number_format($carteira->comissao_pendente, 2, ',', '.'); ?>" readonly style="width: calc(50% - 16px); padding: 8px; border: 1px solid #ced4da; border-radius: 4px; background-color: #e9ecef;"/>
-                                        <?php if ($carteira->comissao_pendente > 0) { ?>
-                                            <button type="button" class="btn btn-success" onclick="receberComissao()" style="padding: 8px 15px; border-radius: 4px;">
-                                                <i class="fas fa-check" style="margin-right: 5px;"></i> Receber Comissão
-                                            </button>
-                                        <?php } ?>
-                                    </div>
+                            <div class="control-group" style="margin-bottom: 15px;">
+                                <label for="comissao_pendente" class="control-label" style="font-weight: 500; color: #495057;">Comissão Pendente</label>
+                                <div class="controls">
+                                    <input id="comissao_pendente" type="text" name="comissao_pendente" value="<?php echo number_format($carteira->comissao_pendente, 2, ',', '.'); ?>" readonly style="width: calc(50% - 16px); padding: 8px; border: 1px solid #ced4da; border-radius: 4px; background-color: #e9ecef;"/>
                                 </div>
+                            </div>
 
+                            <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) { ?>
                                 <div class="control-group" style="margin-bottom: 15px;">
                                     <label for="retirada_valor" class="control-label" style="font-weight: 500; color: #495057;">Valor da Retirada<span class="required" style="color: #dc3545;">*</span></label>
                                     <div class="controls">
