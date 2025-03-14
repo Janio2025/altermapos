@@ -369,7 +369,7 @@ class Carteira extends MY_Controller
     public function getValorBase()
     {
         if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteira')) {
-            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+            echo json_encode(['success' => false, 'message' => 'Você não tem permissão para esta ação.']);
             return;
         }
 
@@ -377,16 +377,12 @@ class Carteira extends MY_Controller
         $usuario_id = $this->input->post('usuario_id');
 
         if (!$tipo || !$usuario_id) {
-            echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos']);
+            echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
             return;
         }
 
-        $valor_base = $this->carteira_model->calcularValorBase($tipo, $usuario_id);
-        
-        echo json_encode([
-            'success' => true,
-            'valor_base' => $valor_base
-        ]);
+        $valor = $this->carteira_model->getValorBase($usuario_id, $tipo);
+        echo json_encode(['success' => true, 'valor' => $valor]);
     }
 
     public function debug()

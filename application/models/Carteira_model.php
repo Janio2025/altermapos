@@ -74,7 +74,7 @@ class Carteira_model extends CI_Model
             $config = $this->getConfiguracao($id);
             if ($config) {
                 // Calcula o valor base usando o método calcularValorBase
-                $valor_base = $this->calcularValorBase($config->tipo_valor_base, $carteira->usuarios_id);
+                $valor_base = $this->calcularValorBase($carteira->usuarios_id, $config->tipo_valor_base);
                 // Calcula a comissão pendente baseada no valor base e na comissão fixa
                 $carteira->comissao_pendente = ($valor_base * $config->comissao_fixa) / 100;
             } else {
@@ -353,7 +353,7 @@ class Carteira_model extends CI_Model
 
                 // Calcula e registra a comissão do usuário principal
                 if ($config->comissao_fixa > 0) {
-                    $valor_base = $this->calcularValorBase($config->tipo_valor_base, $carteira->usuarios_id);
+                    $valor_base = $this->calcularValorBase($carteira->usuarios_id, $config->tipo_valor_base);
                     $valor_comissao = ($valor_base * $config->comissao_fixa) / 100;
                     
                     if ($valor_comissao > 0) {
@@ -377,7 +377,7 @@ class Carteira_model extends CI_Model
 
                 foreach ($configs_adicionais as $config_adicional) {
                     if ($config_adicional->comissao_porcentagem > 0) {
-                        $valor_base = $this->calcularValorBase($config_adicional->tipo_valor_base, $config_adicional->usuario_id);
+                        $valor_base = $this->calcularValorBase($config_adicional->usuario_id, $config_adicional->tipo_valor_base);
                         $valor_comissao = ($valor_base * $config_adicional->comissao_porcentagem) / 100;
 
                         if ($valor_comissao > 0) {
@@ -418,42 +418,44 @@ class Carteira_model extends CI_Model
         return $this->db->get()->row();
     }
 
-    public function calcularValorBase($tipo, $usuario_id)
+    public function calcularValorBase($usuario_id, $tipo)
     {
-        $valor_base = 0;
-        
+        if (!$usuario_id || !$tipo) {
+            return 0;
+        }
+
+        $valor = 0;
+
         // Subquery para pegar todas as OS do usuário (principal ou adicional)
         $this->db->select('os_id');
         $this->db->from('os_usuarios');
         $this->db->where('usuario_id', $usuario_id);
         $subquery = $this->db->get_compiled_select();
-        
+
         if ($tipo == 'servicos') {
-            // Soma apenas os serviços das OS do usuário do mês atual que estão Faturadas
+            // Soma apenas os serviços das OS do usuário
             $this->db->select_sum('servicos_os.subTotal');
             $this->db->from('servicos_os');
             $this->db->join('os', 'os.idOs = servicos_os.os_id');
-            $this->db->where('MONTH(os.dataFinal)', date('m'));
-            $this->db->where('YEAR(os.dataFinal)', date('Y'));
             $this->db->where('os.status', 'Faturado');
             $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
             $query = $this->db->get();
             $result = $query->row();
-            $valor_base = $result->subTotal ?: 0;
-        } else {
-            // Para tipo total, calcula baseado no valor total das OS menos produtos
+            $valor = $result->subTotal ?: 0;
+        } else if ($tipo == 'total') {
+            // Primeiro, pega todas as OS do usuário
             $this->db->select('os.idOs, os.valorTotal');
             $this->db->from('os');
-            $this->db->where('MONTH(dataFinal)', date('m'));
-            $this->db->where('YEAR(dataFinal)', date('Y'));
             $this->db->where('status', 'Faturado');
             $this->db->where("idOs IN ($subquery)"); // Usa a subquery
-            $ordens = $this->db->get()->result();
+            $query = $this->db->get();
+            $ordens = $query->result();
 
             foreach ($ordens as $ordem) {
-                $valor_base += $ordem->valorTotal;
-
-                // Subtrai o custo dos produtos
+                // Soma o valor total da OS
+                $valor += $ordem->valorTotal;
+                
+                // Busca e subtrai o precoCompra dos produtos desta OS
                 $this->db->select_sum('produtos.precoCompra');
                 $this->db->from('produtos_os');
                 $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
@@ -461,13 +463,14 @@ class Carteira_model extends CI_Model
                 $query_produtos = $this->db->get();
                 $result_produtos = $query_produtos->row();
                 
+                // Subtrai o custo dos produtos (se houver)
                 if ($result_produtos && $result_produtos->precoCompra) {
-                    $valor_base -= $result_produtos->precoCompra;
+                    $valor -= $result_produtos->precoCompra;
                 }
             }
         }
 
-        return $valor_base;
+        return $valor;
     }
 
     public function finalizarOsComissao($tipo, $usuario_id)
@@ -524,5 +527,85 @@ class Carteira_model extends CI_Model
             return null;
         }
         return $this->getConfiguracao($carteira->idCarteiraUsuario);
+    }
+
+    public function getValorBase($usuario_id, $tipo)
+    {
+        if (!$usuario_id || !$tipo) {
+            return 0;
+        }
+
+        $valor = 0;
+
+        // Subquery para pegar todas as OS do usuário (principal ou adicional)
+        $this->db->select('os_id');
+        $this->db->from('os_usuarios');
+        $this->db->where('usuario_id', $usuario_id);
+        $subquery = $this->db->get_compiled_select();
+
+        if ($tipo == 'servicos') {
+            // Soma apenas os serviços das OS do usuário
+            $this->db->select_sum('servicos_os.subTotal');
+            $this->db->from('servicos_os');
+            $this->db->join('os', 'os.idOs = servicos_os.os_id');
+            $this->db->where('os.status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
+            $query = $this->db->get();
+            $result = $query->row();
+            $valor = $result->subTotal ?: 0;
+        } else if ($tipo == 'total') {
+            // Primeiro, pega todas as OS do usuário
+            $this->db->select('os.idOs, os.valorTotal');
+            $this->db->from('os');
+            $this->db->where('status', 'Faturado');
+            $this->db->where("idOs IN ($subquery)"); // Usa a subquery
+            $query = $this->db->get();
+            $ordens = $query->result();
+
+            foreach ($ordens as $ordem) {
+                // Soma o valor total da OS
+                $valor += $ordem->valorTotal;
+                
+                // Busca e subtrai o precoCompra dos produtos desta OS
+                $this->db->select_sum('produtos.precoCompra');
+                $this->db->from('produtos_os');
+                $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
+                $this->db->where('produtos_os.os_id', $ordem->idOs);
+                $query_produtos = $this->db->get();
+                $result_produtos = $query_produtos->row();
+                
+                // Subtrai o custo dos produtos (se houver)
+                if ($result_produtos && $result_produtos->precoCompra) {
+                    $valor -= $result_produtos->precoCompra;
+                }
+            }
+        }
+
+        return $valor;
+    }
+
+    public function getComissaoPendente($carteira_id)
+    {
+        if (!$carteira_id) {
+            return 0;
+        }
+
+        // Busca a carteira
+        $carteira = $this->getById($carteira_id);
+        if (!$carteira) {
+            return 0;
+        }
+
+        // Busca a configuração da carteira
+        $config = $this->getConfiguracao($carteira_id);
+        if (!$config) {
+            return 0;
+        }
+
+        // Calcula o valor base
+        $valor_base = $this->calcularValorBase($carteira->usuarios_id, $config->tipo_valor_base);
+
+        // Calcula a comissão pendente
+        return ($valor_base * $config->comissao_fixa) / 100;
     }
 }

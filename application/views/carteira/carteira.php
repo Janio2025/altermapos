@@ -621,7 +621,7 @@
                     dataType: 'json',
                     success: function(response) {
                         if (response.success) {
-                            let valorBase = parseFloat(response.valor_base);
+                            let valorBase = parseFloat(response.valor);
                             let percentualComissao = <?php echo isset($config) ? $config->comissao_fixa : 0; ?>;
                             let comissaoPendente = (valorBase * percentualComissao) / 100;
                             
