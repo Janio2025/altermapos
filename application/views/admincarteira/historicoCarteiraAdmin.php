@@ -151,7 +151,14 @@
                                         ?>
                                     </td>
                                     <td>R$ <?php echo number_format($t->valor, 2, ',', '.'); ?></td>
-                                    <td><?php echo $t->descricao; ?></td>
+                                    <td class="col-descricao" title="<?php echo htmlspecialchars($t->descricao); ?>">
+                                        <?php 
+                                            echo htmlspecialchars($t->descricao); 
+                                            if (strlen($t->descricao) > 50) {
+                                                echo '&nbsp;<a href="#" class="btn-nwe" onclick="mostrarDescricaoCompleta(\'' . htmlspecialchars(addslashes($t->descricao)) . '\'); return false;" title="Ver descrição completa"><i class="bx bx-show"></i></a>';
+                                            }
+                                        ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -177,11 +184,30 @@
     </div>
 </div>
 
+<!-- Estilos -->
+<style>
+    .table td.col-descricao {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
 <script type="text/javascript">
     $(document).ready(function(){
         // Atualiza a página quando os filtros mudarem
         $('select[name="tipo"]').change(function(){
             $(this).closest('form').submit();
         });
+
+        // Função para mostrar descrição completa
+        window.mostrarDescricaoCompleta = function(descricao) {
+            Swal.fire({
+                title: 'Descrição Completa',
+                text: descricao,
+                confirmButtonText: 'Fechar'
+            });
+        };
     });
 </script> 

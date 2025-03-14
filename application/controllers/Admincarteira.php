@@ -1,5 +1,17 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ * @property CI_DB_query_builder $db
+ * @property CI_Session $session
+ * @property CI_Input $input
+ * @property CI_Form_validation $form_validation
+ * @property CI_Pagination $pagination
+ * @property CI_URI $uri
+ * @property CI_Output $output
+ * @property Permission $permission
+ * @property Carteira_model $carteira_model
+ * @property Usuarios_model $usuarios_model
+ */
 class Admincarteira extends MY_Controller {
     
     public function __construct() {
@@ -11,14 +23,15 @@ class Admincarteira extends MY_Controller {
         
         $this->load->model('carteira_model');
         $this->load->model('usuarios_model');
+        $this->load->library('permission');
         $this->load->library('session');
         $this->load->library('form_validation');
-        $this->load->library('permission');
         $this->load->library('pagination');
         $this->load->database();
+        $this->load->helper('url');
         
-        $this->data['menuCarteira'] = null;
-        $this->data['menuCarteiraAdmin'] = 'Admin';
+        $this->data['menuCarteiras'] = 'Carteiras';
+        $this->data['menuAdminCarteira'] = 'Admin Carteiras';
     }
     
     public function index() {
@@ -770,5 +783,153 @@ class Admincarteira extends MY_Controller {
 
         fclose($output);
         exit;
+    }
+
+    public function pagarTodasComissoes()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) {
+            echo json_encode(['success' => false, 'message' => 'Você não tem permissão para pagar comissões.']);
+            return;
+        }
+
+        $this->load->model('carteira_model');
+        $this->db->trans_begin();
+
+        try {
+            // Busca todas as carteiras ativas
+            $carteiras = $this->carteira_model->getAll();
+            if (empty($carteiras)) {
+                throw new Exception('Nenhuma carteira encontrada.');
+            }
+
+            $sucessos = 0;
+            $os_processadas = [];
+
+            // Primeiro, vamos processar todas as carteiras e suas comissões
+            foreach ($carteiras as $carteira) {
+                // Busca a configuração da carteira
+                $config = $this->carteira_model->getConfiguracao($carteira->idCarteiraUsuario);
+                if (!$config) {
+                    continue; // Pula carteiras sem configuração
+                }
+
+                // Busca todas as OS em que o usuário está envolvido (como principal ou adicional)
+                $this->db->select('os.idOs, os.valorTotal');
+                $this->db->from('os_usuarios');
+                $this->db->join('os', 'os.idOs = os_usuarios.os_id');
+                $this->db->where('os_usuarios.usuario_id', $carteira->usuarios_id);
+                $this->db->where('os.status', 'Faturado');
+                $this->db->where('MONTH(os.dataFinal)', date('m'));
+                $this->db->where('YEAR(os.dataFinal)', date('Y'));
+                $ordens = $this->db->get()->result();
+
+                $valor_base = 0;
+                $os_ids = [];
+                foreach ($ordens as $ordem) {
+                    // Calcula o valor base conforme o tipo configurado
+                    if ($config->tipo_valor_base == 'servicos') {
+                        $this->db->select_sum('servicos_os.subTotal');
+                        $this->db->from('servicos_os');
+                        $this->db->where('os_id', $ordem->idOs);
+                        $query = $this->db->get();
+                        $result = $query->row();
+                        $valor_base += $result->subTotal ?: 0;
+                    } else {
+                        // Para tipo 'total', considera o valor total menos o custo dos produtos
+                        $valor_os = $ordem->valorTotal;
+                        
+                        // Subtrai o custo dos produtos
+                        $this->db->select_sum('produtos.precoCompra');
+                        $this->db->from('produtos_os');
+                        $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
+                        $this->db->where('produtos_os.os_id', $ordem->idOs);
+                        $query_produtos = $this->db->get();
+                        $result_produtos = $query_produtos->row();
+                        
+                        if ($result_produtos && $result_produtos->precoCompra) {
+                            $valor_os -= $result_produtos->precoCompra;
+                        }
+                        
+                        $valor_base += $valor_os;
+                    }
+
+                    // Adiciona o ID da OS à lista
+                    $os_ids[] = $ordem->idOs;
+
+                    // Adiciona a OS à lista de processadas
+                    if (!in_array($ordem->idOs, $os_processadas)) {
+                        $os_processadas[] = $ordem->idOs;
+                    }
+                }
+
+                // Calcula a comissão
+                $valor_comissao = ($valor_base * $config->comissao_fixa) / 100;
+
+                if ($valor_comissao > 0 && !empty($os_ids)) {
+                    // Ordena os IDs das OS
+                    sort($os_ids, SORT_NUMERIC);
+                    
+                    // Processa os IDs para criar uma descrição concisa
+                    $descricao = 'OS: ';
+                    $start = $os_ids[0];
+                    $prev = $start;
+                    $sequence = false;
+                    
+                    for ($i = 1; $i < count($os_ids); $i++) {
+                        if ($os_ids[$i] != $prev + 1) {
+                            if ($sequence && $start != $prev) {
+                                $descricao .= $start . ' A ' . $prev . ', ';
+                            } else {
+                                $descricao .= $start . ', ';
+                            }
+                            $start = $os_ids[$i];
+                            $sequence = false;
+                        } else {
+                            $sequence = true;
+                        }
+                        $prev = $os_ids[$i];
+                    }
+                    
+                    // Adiciona o último grupo
+                    if ($sequence && $start != $prev) {
+                        $descricao .= $start . ' A ' . $prev;
+                    } else {
+                        $descricao .= $prev;
+                    }
+
+                    // Registra a transação
+                    $data = [
+                        'tipo' => 'comissao',
+                        'valor' => $valor_comissao,
+                        'data_transacao' => date('Y-m-d'),
+                        'descricao' => $descricao,
+                        'carteira_usuario_id' => $carteira->idCarteiraUsuario,
+                        'considerado_saldo' => 1
+                    ];
+
+                    if ($this->carteira_model->registrarTransacao($data)) {
+                        $sucessos++;
+                    }
+                }
+            }
+
+            // Depois que todas as comissões foram pagas, finaliza as OS processadas
+            if (!empty($os_processadas)) {
+                $this->db->where_in('idOs', $os_processadas);
+                $this->db->update('os', ['status' => 'Finalizado']);
+            }
+
+            if ($sucessos > 0) {
+                $this->db->trans_commit();
+                $message = "Comissões pagas com sucesso para {$sucessos} usuário(s)!";
+                echo json_encode(['success' => true, 'message' => $message]);
+            } else {
+                throw new Exception('Nenhuma comissão pendente para pagamento.');
+            }
+
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 } 

@@ -223,6 +223,14 @@
             margin-top: 6px;
         }
     }
+
+    /* Estilo para limitar o tamanho da descrição */
+    .table-transactions .col-descricao {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 </style>
 
 <div class="new122">
@@ -486,7 +494,14 @@
                                         ?>
                                     </td>
                                     <td class="col-valor">R$ <?php echo number_format($t->valor, 2, ',', '.'); ?></td>
-                                    <td class="col-descricao"><?php echo $t->descricao; ?></td>
+                                    <td class="col-descricao" title="<?php echo htmlspecialchars($t->descricao); ?>">
+                                        <?php 
+                                            echo htmlspecialchars($t->descricao); 
+                                            if (strlen($t->descricao) > 50) {
+                                                echo '&nbsp;<a href="#" class="btn-nwe" onclick="mostrarDescricaoCompleta(\'' . htmlspecialchars(addslashes($t->descricao)) . '\'); return false;" title="Ver descrição completa"><i class="bx bx-show"></i></a>';
+                                            }
+                                        ?>
+                                    </td>
                                     <td class="col-acoes">
                                         <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteira')) : ?>
                                             <a href="<?php echo site_url('carteira/visualizar/' . $t->idTransacoesUsuario); ?>" class="btn-nwe" title="Ver mais detalhes">
@@ -897,6 +912,14 @@
             $('#modalMovimentacoesTitulo').text(titulo + ' do Mês');
             $('#modalMovimentacoesConteudo').html(html);
             $('#modalMovimentacoes').modal('show');
+        }
+
+        function mostrarDescricaoCompleta(descricao) {
+            Swal.fire({
+                title: 'Descrição Completa',
+                text: descricao,
+                confirmButtonText: 'Fechar'
+            });
         }
     });
 

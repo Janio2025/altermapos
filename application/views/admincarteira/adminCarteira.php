@@ -38,6 +38,9 @@
     }
 </style>
 
+<script src="<?php echo base_url(); ?>assets/js/jquery.validate.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <div class="new122">
     <div class="widget-title" style="margin: -20px 0 0">
         <span class="icon">
@@ -46,13 +49,18 @@
         <h5>Carteiras</h5>
     </div>
     <div class="span12" style="margin-left: 0">
-        <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteiraAdmin')) { ?>
-            <div class="span3">
+        <div class="span3" style="display: flex; gap: 10px;">
+            <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteiraAdmin')) { ?>
                 <a href="<?= base_url() ?>index.php/admincarteira/adicionar" class="button btn btn-mini btn-success" style="max-width: 165px">
                     <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Criar Carteira</span>
                 </a>
-            </div>
-        <?php } ?>
+            <?php } ?>
+            <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) { ?>
+                <button onclick="pagarTodasComissoes()" class="button btn btn-mini btn-warning" style="max-width: 200px">
+                    <span class="button__icon"><i class='bx bx-money'></i></span><span class="button__text2">Pagar Todas as Comissões</span>
+                </button>
+            <?php } ?>
+        </div>
     </div>
 
     <div class="widget-box">
@@ -135,4 +143,78 @@
             $('#idCarteira').val(carteira);
         });
     });
+
+    function pagarTodasComissoes() {
+        console.log('Função pagarTodasComissoes chamada');
+        
+        Swal.fire({
+            title: 'Confirmação',
+            text: "Deseja realmente pagar todas as comissões pendentes?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, pagar!',
+            cancelButtonText: 'Não'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('Usuário confirmou o pagamento');
+                
+                let csrf_token = '<?php echo $this->security->get_csrf_hash(); ?>';
+                console.log('CSRF Token:', csrf_token);
+                
+                $.ajax({
+                    url: '<?php echo base_url('index.php/admincarteira/pagarTodasComissoes'); ?>',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        '<?php echo $this->security->get_csrf_token_name(); ?>': csrf_token
+                    },
+                    beforeSend: function() {
+                        console.log('Iniciando requisição AJAX');
+                        Swal.fire({
+                            title: 'Processando',
+                            text: 'Aguarde enquanto processamos o pagamento das comissões...',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                    },
+                    success: function(response) {
+                        console.log('Resposta recebida:', response);
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso',
+                                text: response.message || 'Comissões pagas com sucesso!'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro',
+                                text: response.message || 'Ocorreu um erro ao processar os pagamentos.'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro na requisição:', {
+                            xhr: xhr,
+                            status: status,
+                            error: error
+                        });
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: 'Ocorreu um erro ao processar os pagamentos. Por favor, tente novamente.'
+                        });
+                    }
+                });
+            }
+        });
+    }
 </script>

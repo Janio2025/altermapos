@@ -27,25 +27,38 @@ class Carteira_model extends CI_Model
         return $result;
     }
 
-    public function getAll($limit = 0, $start = 0)
+    public function getAll()
     {
-        $this->db->select('cu.*, u.nome as nome_usuario,
-            COALESCE((SELECT SUM(valor) FROM transacoes_usuario 
-                WHERE carteira_usuario_id = cu.idCarteiraUsuario 
-                AND tipo = "bonus" 
-                AND MONTH(data_transacao) = MONTH(CURRENT_DATE())
-                AND YEAR(data_transacao) = YEAR(CURRENT_DATE())), 0) as total_bonus,
-            COALESCE((SELECT SUM(valor) FROM transacoes_usuario 
-                WHERE carteira_usuario_id = cu.idCarteiraUsuario 
-                AND tipo = "comissao" 
-                AND MONTH(data_transacao) = MONTH(CURRENT_DATE())
-                AND YEAR(data_transacao) = YEAR(CURRENT_DATE())), 0) as total_comissoes');
-        $this->db->from('carteira_usuario cu');
-        $this->db->join('usuarios u', 'u.idUsuarios = cu.usuarios_id');
-        if ($limit > 0) {
-            $this->db->limit($limit, $start);
+        $this->db->select('carteira_usuario.*, usuarios.nome as nome_usuario, usuarios.idUsuarios as usuarios_id');
+        $this->db->from('carteira_usuario');
+        $this->db->join('usuarios', 'usuarios.idUsuarios = carteira_usuario.usuarios_id');
+        $this->db->where('carteira_usuario.ativo', 1); // Apenas carteiras ativas
+        $carteiras = $this->db->get()->result();
+
+        // Calcula os totais para cada carteira
+        foreach ($carteiras as $carteira) {
+            // Total de bônus do mês atual
+            $this->db->select_sum('valor');
+            $this->db->from('transacoes_usuario');
+            $this->db->where('carteira_usuario_id', $carteira->idCarteiraUsuario);
+            $this->db->where('tipo', 'bonus');
+            $this->db->where('MONTH(data_transacao)', date('m'));
+            $this->db->where('YEAR(data_transacao)', date('Y'));
+            $bonus = $this->db->get()->row();
+            $carteira->total_bonus = $bonus ? $bonus->valor : 0;
+
+            // Total de comissões do mês atual
+            $this->db->select_sum('valor');
+            $this->db->from('transacoes_usuario');
+            $this->db->where('carteira_usuario_id', $carteira->idCarteiraUsuario);
+            $this->db->where('tipo', 'comissao');
+            $this->db->where('MONTH(data_transacao)', date('m'));
+            $this->db->where('YEAR(data_transacao)', date('Y'));
+            $comissoes = $this->db->get()->row();
+            $carteira->total_comissoes = $comissoes ? $comissoes->valor : 0;
         }
-        return $this->db->get()->result();
+
+        return $carteiras;
     }
 
     public function getById($id)
@@ -231,61 +244,10 @@ class Carteira_model extends CI_Model
         $this->db->trans_begin();
 
         try {
-            // Busca a carteira e configuração antes de qualquer operação
+            // Busca a carteira antes de qualquer operação
             $carteira = $this->getById($data['carteira_usuario_id']);
             if (!$carteira) {
                 throw new Exception('Carteira não encontrada');
-            }
-            
-            $config = $this->getConfiguracao($data['carteira_usuario_id']);
-            if (!$config) {
-                throw new Exception('Configuração não encontrada');
-            }
-
-            // Se for comissão, finaliza as OS relacionadas e atualiza a descrição
-            if ($data['tipo'] == 'comissao') {
-                // Subquery para pegar todas as OS do usuário (principal ou adicional)
-                $this->db->select('os_id');
-                $this->db->from('os_usuarios');
-                $this->db->where('usuario_id', $carteira->usuarios_id);
-                $subquery = $this->db->get_compiled_select();
-
-                // Busca as OS relacionadas
-                if ($config->tipo_valor_base == 'servicos') {
-                    $this->db->select('DISTINCT os.idOs');
-                    $this->db->from('servicos_os');
-                    $this->db->join('os', 'os.idOs = servicos_os.os_id');
-                    $this->db->where('MONTH(os.dataFinal)', date('m'));
-                    $this->db->where('YEAR(os.dataFinal)', date('Y'));
-                    $this->db->where('os.status', 'Faturado');
-                    $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
-                } else {
-                    $this->db->select('idOs');
-                    $this->db->from('os');
-                    $this->db->where('MONTH(dataFinal)', date('m'));
-                    $this->db->where('YEAR(dataFinal)', date('Y'));
-                    $this->db->where('status', 'Faturado');
-                    $this->db->where("idOs IN ($subquery)"); // Usa a subquery
-                }
-
-                $query = $this->db->get();
-                $ordens = $query->result();
-                
-                if (!empty($ordens)) {
-                    // Formata os IDs das OS para a descrição
-                    $os_ids = array_map(function($ordem) {
-                        return $ordem->idOs;
-                    }, $ordens);
-                    
-                    // Atualiza a descrição com os IDs das OS
-                    $data['descricao'] = 'OS: ' . implode(', ', $os_ids);
-
-                    // Atualiza o status das OS para Finalizado
-                    $this->db->where_in('idOs', $os_ids);
-                    if (!$this->db->update('os', ['status' => 'Finalizado'])) {
-                        throw new Exception('Erro ao finalizar OS');
-                    }
-                }
             }
 
             // Insere a transação
@@ -293,36 +255,26 @@ class Carteira_model extends CI_Model
                 throw new Exception('Erro ao inserir transação');
             }
 
-            $novo_saldo = $carteira->saldo;
-
-            // Atualiza o saldo baseado no tipo de transação
-            if ($data['tipo'] == 'retirada') {
-                $novo_saldo -= $data['valor'];
+            // Atualiza o saldo da carteira se a transação deve ser considerada no saldo
+            if (isset($data['considerado_saldo']) && $data['considerado_saldo'] == 1) {
+                // Se for retirada, subtrai o valor. Caso contrário, soma
+                $valor_ajuste = ($data['tipo'] == 'retirada') ? -$data['valor'] : $data['valor'];
+                $novo_saldo = $carteira->saldo + $valor_ajuste;
                 
-                // Atualiza também o salário base na configuração
-                $novo_salario_base = $config->salario_base - $data['valor'];
-                $this->salvarConfiguracao([
-                    'carteira_usuario_id' => $data['carteira_usuario_id'],
-                    'salario_base' => $novo_salario_base,
-                    'comissao_fixa' => $config->comissao_fixa,
-                    'data_salario' => $config->data_salario,
-                    'tipo_repeticao' => $config->tipo_repeticao,
-                    'tipo_valor_base' => $config->tipo_valor_base
-                ]);
-            } 
-            else if (in_array($data['tipo'], array('salario', 'bonus', 'comissao'))) {
-                $novo_saldo += $data['valor'];
-            }
-
-            // Atualiza o saldo da carteira
-            if (!$this->edit('carteira_usuario', array('saldo' => $novo_saldo), 'idCarteiraUsuario', $data['carteira_usuario_id'])) {
-                throw new Exception('Erro ao atualizar saldo');
+                if ($novo_saldo < 0) {
+                    throw new Exception('Saldo não pode ficar negativo');
+                }
+                
+                if (!$this->edit('carteira_usuario', ['saldo' => $novo_saldo], 'idCarteiraUsuario', $carteira->idCarteiraUsuario)) {
+                    throw new Exception('Erro ao atualizar saldo');
+                }
             }
 
             $this->db->trans_commit();
             return true;
         } catch (Exception $e) {
             $this->db->trans_rollback();
+            log_info('Erro ao registrar transação: ' . $e->getMessage());
             return false;
         }
     }
@@ -489,7 +441,7 @@ class Carteira_model extends CI_Model
             $result = $query->row();
             $valor_base = $result->subTotal ?: 0;
         } else {
-            // Para outros tipos, calcula baseado no valor total das OS menos produtos
+            // Para tipo total, calcula baseado no valor total das OS menos produtos
             $this->db->select('os.idOs, os.valorTotal');
             $this->db->from('os');
             $this->db->where('MONTH(dataFinal)', date('m'));
