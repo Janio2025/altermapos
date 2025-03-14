@@ -244,22 +244,28 @@ class Carteira_model extends CI_Model
 
             // Se for comissão, finaliza as OS relacionadas e atualiza a descrição
             if ($data['tipo'] == 'comissao') {
+                // Subquery para pegar todas as OS do usuário (principal ou adicional)
+                $this->db->select('os_id');
+                $this->db->from('os_usuarios');
+                $this->db->where('usuario_id', $carteira->usuarios_id);
+                $subquery = $this->db->get_compiled_select();
+
                 // Busca as OS relacionadas
                 if ($config->tipo_valor_base == 'servicos') {
                     $this->db->select('DISTINCT os.idOs');
                     $this->db->from('servicos_os');
                     $this->db->join('os', 'os.idOs = servicos_os.os_id');
-                    $this->db->where('os.usuarios_id', $carteira->usuarios_id);
                     $this->db->where('MONTH(os.dataFinal)', date('m'));
                     $this->db->where('YEAR(os.dataFinal)', date('Y'));
                     $this->db->where('os.status', 'Faturado');
+                    $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
                 } else {
                     $this->db->select('idOs');
                     $this->db->from('os');
-                    $this->db->where('usuarios_id', $carteira->usuarios_id);
                     $this->db->where('MONTH(dataFinal)', date('m'));
                     $this->db->where('YEAR(dataFinal)', date('Y'));
                     $this->db->where('status', 'Faturado');
+                    $this->db->where("idOs IN ($subquery)"); // Usa a subquery
                 }
 
                 $query = $this->db->get();
@@ -393,9 +399,9 @@ class Carteira_model extends CI_Model
                     ));
                 }
 
-                // Calcula e registra a comissão
+                // Calcula e registra a comissão do usuário principal
                 if ($config->comissao_fixa > 0) {
-                    $valor_base = $this->calcularComissaoOS($carteira->usuarios_id, $config->tipo_valor_base);
+                    $valor_base = $this->calcularValorBase($config->tipo_valor_base, $carteira->usuarios_id);
                     $valor_comissao = ($valor_base * $config->comissao_fixa) / 100;
                     
                     if ($valor_comissao > 0) {
@@ -407,6 +413,35 @@ class Carteira_model extends CI_Model
                             'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                             'considerado_saldo' => 1
                         ));
+                    }
+                }
+
+                // Busca e processa as comissões dos usuários adicionais
+                $this->db->select('c.*, u.nome');
+                $this->db->from('configuracao_carteira_usuarios_adicionais c');
+                $this->db->join('usuarios u', 'u.idUsuarios = c.usuario_id');
+                $this->db->where('c.carteira_usuario_id', $carteira->idCarteiraUsuario);
+                $configs_adicionais = $this->db->get()->result();
+
+                foreach ($configs_adicionais as $config_adicional) {
+                    if ($config_adicional->comissao_porcentagem > 0) {
+                        $valor_base = $this->calcularValorBase($config_adicional->tipo_valor_base, $config_adicional->usuario_id);
+                        $valor_comissao = ($valor_base * $config_adicional->comissao_porcentagem) / 100;
+
+                        if ($valor_comissao > 0) {
+                            // Busca a carteira do usuário adicional
+                            $carteira_adicional = $this->getByUsuarioId($config_adicional->usuario_id);
+                            if ($carteira_adicional) {
+                                $this->registrarTransacao(array(
+                                    'tipo' => 'comissao',
+                                    'valor' => $valor_comissao,
+                                    'data_transacao' => date('Y-m-d'),
+                                    'descricao' => 'Comissão (Técnico Adicional) - ' . date('m/Y'),
+                                    'carteira_usuario_id' => $carteira_adicional->idCarteiraUsuario,
+                                    'considerado_saldo' => 1
+                                ));
+                            }
+                        }
                     }
                 }
             }
@@ -435,15 +470,21 @@ class Carteira_model extends CI_Model
     {
         $valor_base = 0;
         
+        // Subquery para pegar todas as OS do usuário (principal ou adicional)
+        $this->db->select('os_id');
+        $this->db->from('os_usuarios');
+        $this->db->where('usuario_id', $usuario_id);
+        $subquery = $this->db->get_compiled_select();
+        
         if ($tipo == 'servicos') {
             // Soma apenas os serviços das OS do usuário do mês atual que estão Faturadas
             $this->db->select_sum('servicos_os.subTotal');
             $this->db->from('servicos_os');
             $this->db->join('os', 'os.idOs = servicos_os.os_id');
-            $this->db->where('os.usuarios_id', $usuario_id);
             $this->db->where('MONTH(os.dataFinal)', date('m'));
             $this->db->where('YEAR(os.dataFinal)', date('Y'));
             $this->db->where('os.status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
             $query = $this->db->get();
             $result = $query->row();
             $valor_base = $result->subTotal ?: 0;
@@ -451,10 +492,10 @@ class Carteira_model extends CI_Model
             // Para outros tipos, calcula baseado no valor total das OS menos produtos
             $this->db->select('os.idOs, os.valorTotal');
             $this->db->from('os');
-            $this->db->where('usuarios_id', $usuario_id);
             $this->db->where('MONTH(dataFinal)', date('m'));
             $this->db->where('YEAR(dataFinal)', date('Y'));
             $this->db->where('status', 'Faturado');
+            $this->db->where("idOs IN ($subquery)"); // Usa a subquery
             $ordens = $this->db->get()->result();
 
             foreach ($ordens as $ordem) {
@@ -479,22 +520,28 @@ class Carteira_model extends CI_Model
 
     public function finalizarOsComissao($tipo, $usuario_id)
     {
+        // Subquery para pegar todas as OS do usuário (principal ou adicional)
+        $this->db->select('os_id');
+        $this->db->from('os_usuarios');
+        $this->db->where('usuario_id', $usuario_id);
+        $subquery = $this->db->get_compiled_select();
+
         // Busca as OS relacionadas
         if ($tipo == 'servicos') {
             $this->db->select('DISTINCT os.idOs');
             $this->db->from('servicos_os');
             $this->db->join('os', 'os.idOs = servicos_os.os_id');
-            $this->db->where('os.usuarios_id', $usuario_id);
             $this->db->where('MONTH(os.dataFinal)', date('m'));
             $this->db->where('YEAR(os.dataFinal)', date('Y'));
             $this->db->where('os.status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
         } else {
             $this->db->select('idOs');
             $this->db->from('os');
-            $this->db->where('usuarios_id', $usuario_id);
             $this->db->where('MONTH(dataFinal)', date('m'));
             $this->db->where('YEAR(dataFinal)', date('Y'));
             $this->db->where('status', 'Faturado');
+            $this->db->where("idOs IN ($subquery)"); // Usa a subquery
         }
 
         $query = $this->db->get();

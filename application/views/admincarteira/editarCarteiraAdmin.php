@@ -260,19 +260,45 @@
         function calcularComissao() {
             let valorBase = parseMoneyBR($('#comissao_base').val());
             let porcentagem = parseFloat($('#comissao_porcentagem').val() || 0);
+            let tipoValorBase = $('#tipo_valor_base').val();
+            let usuarioId = $('#usuario').val();
             
-            if (!isNaN(valorBase) && !isNaN(porcentagem)) {
-                let valorComissao = (valorBase * (porcentagem / 100));
-                $('#comissao_valor').val(formatMoneyBR(valorComissao));
-                calcularTotal();
+            if (tipoValorBase && usuarioId) {
+                $.ajax({
+                    url: '<?php echo base_url('index.php/admincarteira/getValorBase'); ?>',
+                    type: 'POST',
+                    data: {
+                        tipo: tipoValorBase,
+                        usuario_id: usuarioId,
+                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            let valor = parseFloat(response.valor) || 0;
+                            // Formata o valor para exibição
+                            $('#comissao_base').val(formatMoneyBR(valor));
+                            
+                            if (!isNaN(valor) && !isNaN(porcentagem)) {
+                                let valorComissao = (valor * (porcentagem / 100));
+                                $('#comissao_valor').val(formatMoneyBR(valorComissao));
+                                $('#tem_comissao').val(valorComissao > 0 ? '1' : '0');
+                                calcularTotal();
+                            }
+                        }
+                    }
+                });
             }
         }
 
         // Eventos para recalcular os valores
-        $('#tipo_valor_base, #usuario').on('change', function() {
-            buscarValorBase();
-            // Salva a seleção no localStorage
-            localStorage.setItem('tipo_valor_base', $('#tipo_valor_base').val());
+        $('#tipo_valor_base').on('change', function() {
+            calcularComissao();
+            localStorage.setItem('tipo_valor_base', $(this).val());
+        });
+
+        $('#comissao_porcentagem').on('change keyup', function() {
+            calcularComissao();
         });
 
         // Função para atualizar valor base periodicamente

@@ -407,15 +407,21 @@ class Admincarteira extends MY_Controller {
 
         $valor = 0;
 
+        // Subquery para pegar todas as OS do usuário (principal ou adicional)
+        $this->db->select('os_id');
+        $this->db->from('os_usuarios');
+        $this->db->where('usuario_id', $usuario_id);
+        $subquery = $this->db->get_compiled_select();
+
         if ($tipo == 'servicos') {
             // Soma apenas os serviços das OS do usuário do mês atual
             $this->db->select_sum('servicos_os.subTotal');
             $this->db->from('servicos_os');
             $this->db->join('os', 'os.idOs = servicos_os.os_id');
-            $this->db->where('os.usuarios_id', $usuario_id);
             $this->db->where('MONTH(os.dataFinal)', date('m'));
             $this->db->where('YEAR(os.dataFinal)', date('Y'));
             $this->db->where('os.status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
             $query = $this->db->get();
             $result = $query->row();
             $valor = $result->subTotal ?: 0;
@@ -423,10 +429,10 @@ class Admincarteira extends MY_Controller {
             // Primeiro, pega todas as OS do usuário do mês atual
             $this->db->select('os.idOs, os.valorTotal');
             $this->db->from('os');
-            $this->db->where('usuarios_id', $usuario_id);
             $this->db->where('MONTH(dataFinal)', date('m'));
             $this->db->where('YEAR(dataFinal)', date('Y'));
             $this->db->where('status', 'Faturado');
+            $this->db->where("idOs IN ($subquery)"); // Usa a subquery
             $query = $this->db->get();
             $ordens = $query->result();
 
@@ -481,33 +487,40 @@ class Admincarteira extends MY_Controller {
             $comissao_fixa = floatval($config->comissao_fixa);
             $tipo_valor_base = $config->tipo_valor_base;
             
+            // Subquery para pegar todas as OS do usuário (principal ou adicional)
+            $this->db->select('os_id');
+            $this->db->from('os_usuarios');
+            $this->db->where('usuario_id', $carteira->usuarios_id);
+            $subquery = $this->db->get_compiled_select();
+            
             // Get base value for commission
             $valor_base = 0;
             if ($tipo_valor_base) {
-                $this->db->select_sum($tipo_valor_base == 'servicos' ? 'servicos_os.subTotal' : 'os.valorTotal');
-                $this->db->from($tipo_valor_base == 'servicos' ? 'servicos_os' : 'os');
                 if ($tipo_valor_base == 'servicos') {
+                    $this->db->select_sum('servicos_os.subTotal');
+                    $this->db->from('servicos_os');
                     $this->db->join('os', 'os.idOs = servicos_os.os_id');
-                }
-                $this->db->where('os.usuarios_id', $carteira->usuarios_id);
-                $this->db->where('MONTH(os.dataFinal)', date('m'));
-                $this->db->where('YEAR(os.dataFinal)', date('Y'));
-                $this->db->where('os.status', 'Faturado');
-                $query = $this->db->get();
-                $result = $query->row();
-                $valor_base = $result ? ($tipo_valor_base == 'servicos' ? $result->subTotal : $result->valorTotal) : 0;
-                
-                // If total type, subtract product costs
-                if ($tipo_valor_base == 'total') {
-                    $this->db->select('os.idOs');
+                    $this->db->where('MONTH(os.dataFinal)', date('m'));
+                    $this->db->where('YEAR(os.dataFinal)', date('Y'));
+                    $this->db->where('os.status', 'Faturado');
+                    $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
+                    $query = $this->db->get();
+                    $result = $query->row();
+                    $valor_base = $result->subTotal ?: 0;
+                } else {
+                    // Para tipo total
+                    $this->db->select('os.idOs, os.valorTotal');
                     $this->db->from('os');
-                    $this->db->where('usuarios_id', $carteira->usuarios_id);
                     $this->db->where('MONTH(dataFinal)', date('m'));
                     $this->db->where('YEAR(dataFinal)', date('Y'));
                     $this->db->where('status', 'Faturado');
+                    $this->db->where("idOs IN ($subquery)"); // Usa a subquery
                     $ordens = $this->db->get()->result();
                     
                     foreach ($ordens as $ordem) {
+                        $valor_base += $ordem->valorTotal;
+
+                        // Subtrai o custo dos produtos
                         $this->db->select_sum('produtos.precoCompra');
                         $this->db->from('produtos_os');
                         $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
