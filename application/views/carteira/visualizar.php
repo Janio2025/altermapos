@@ -61,7 +61,7 @@
     <div class="widget-box" style="margin-top: 20px;">
         <div class="widget-content nopadding" style="padding: 20px !important">
             <div style="display: flex; gap: 10px; justify-content: center;">
-                <a href="<?php echo base_url('carteira'); ?>" class="button btn btn-warning">
+                <a href="<?php echo base_url('index.php/carteira'); ?>" class="button btn btn-warning">
                     <span class="button__icon"><i class="bx bx-undo"></i></span>
                     <span class="button__text2">Voltar</span>
                 </a>

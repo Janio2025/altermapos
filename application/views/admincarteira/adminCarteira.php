@@ -49,7 +49,7 @@
         <h5>Carteiras</h5>
     </div>
     <div class="span12" style="margin-left: 0">
-        <div class="span3" style="display: flex; gap: 10px;">
+        <div class="span4" style="display: flex; gap: 10px;">
             <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'aCarteiraAdmin')) { ?>
                 <a href="<?= base_url() ?>index.php/admincarteira/adicionar" class="button btn btn-mini btn-success" style="max-width: 165px">
                     <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2">Criar Carteira</span>
@@ -57,7 +57,7 @@
             <?php } ?>
             <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) { ?>
                 <button onclick="pagarTodasComissoes()" class="button btn btn-mini btn-warning" style="max-width: 200px">
-                    <span class="button__icon"><i class='bx bx-money'></i></span><span class="button__text2">Pagar Todas as Comissões</span>
+                    <span class="button__icon"><i class='bx bx-money'></i></span><span class="button__text2">Pagar Comissões</span>
                 </button>
             <?php } ?>
         </div>
