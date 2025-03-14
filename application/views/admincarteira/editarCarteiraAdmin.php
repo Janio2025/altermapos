@@ -151,6 +151,8 @@
                         <input type="hidden" name="tem_bonus" id="tem_bonus" value="0">
                         <input type="hidden" name="tem_comissao" id="tem_comissao" value="0">
 
+                        
+
                         <div class="form-actions">
                             <div class="span12">
                                 <div class="span6 offset3" style="display:flex;justify-content: center">
@@ -346,6 +348,96 @@
             buscarValorBase();
         }
 
+        // Função para calcular a comissão de um usuário adicional
+        function calcularComissaoUsuarioAdicional(usuarioId, tipoValorBase, elementoBase) {
+            if (tipoValorBase && usuarioId) {
+                $.ajax({
+                    url: '<?php echo base_url('index.php/admincarteira/getValorBase'); ?>',
+                    type: 'POST',
+                    data: {
+                        tipo: tipoValorBase,
+                        usuario_id: usuarioId,
+                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            let valor = parseFloat(response.valor) || 0;
+                            // Atualiza o valor base no elemento correspondente
+                            $(elementoBase).val(formatMoneyBR(valor));
+                            
+                            // Calcula a comissão para este usuário adicional
+                            let porcentagem = parseFloat($(elementoBase).closest('.usuario-adicional').find('.comissao-porcentagem').val() || 0);
+                            if (!isNaN(valor) && !isNaN(porcentagem)) {
+                                let valorComissao = (valor * (porcentagem / 100));
+                                $(elementoBase).closest('.usuario-adicional').find('.comissao-valor').val(formatMoneyBR(valorComissao));
+                            }
+                        } else {
+                            console.log('Erro ao buscar valor base:', response.message);
+                            // Limpa os campos em caso de erro
+                            $(elementoBase).val('0,00');
+                            $(elementoBase).closest('.usuario-adicional').find('.comissao-valor').val('0,00');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('Erro na requisição:', error);
+                        // Limpa os campos em caso de erro
+                        $(elementoBase).val('0,00');
+                        $(elementoBase).closest('.usuario-adicional').find('.comissao-valor').val('0,00');
+                    }
+                });
+            } else {
+                // Se não tiver tipo ou usuário, limpa os campos
+                $(elementoBase).val('0,00');
+                $(elementoBase).closest('.usuario-adicional').find('.comissao-valor').val('0,00');
+            }
+        }
+
+        // Evento para quando mudar o tipo de valor base de um usuário adicional
+        $(document).on('change', '.tipo-valor-base-adicional', function() {
+            let usuarioId = $(this).closest('.usuario-adicional').find('.usuario-id').val();
+            let tipoValorBase = $(this).val();
+            let elementoBase = $(this).closest('.usuario-adicional').find('.comissao-base');
+            
+            calcularComissaoUsuarioAdicional(usuarioId, tipoValorBase, elementoBase);
+        });
+
+        // Evento para quando mudar a porcentagem de comissão de um usuário adicional
+        $(document).on('change keyup', '.comissao-porcentagem', function() {
+            let usuarioId = $(this).closest('.usuario-adicional').find('.usuario-id').val();
+            let tipoValorBase = $(this).closest('.usuario-adicional').find('.tipo-valor-base-adicional').val();
+            let elementoBase = $(this).closest('.usuario-adicional').find('.comissao-base');
+            
+            calcularComissaoUsuarioAdicional(usuarioId, tipoValorBase, elementoBase);
+        });
+
+        // Atualiza os valores base dos usuários adicionais periodicamente
+        function atualizarValoresBaseUsuariosAdicionais() {
+            $('.usuario-adicional').each(function() {
+                let usuarioId = $(this).find('.usuario-id').val();
+                let tipoValorBase = $(this).find('.tipo-valor-base-adicional').val();
+                let elementoBase = $(this).find('.comissao-base');
+                
+                if (tipoValorBase && usuarioId) {
+                    calcularComissaoUsuarioAdicional(usuarioId, tipoValorBase, elementoBase);
+                }
+            });
+        }
+
+        // Verifica por atualizações a cada 30 segundos para usuários adicionais
+        setInterval(atualizarValoresBaseUsuariosAdicionais, 30000);
+
+        // Inicializa os valores base para usuários adicionais
+        $('.usuario-adicional').each(function() {
+            let usuarioId = $(this).find('.usuario-id').val();
+            let tipoValorBase = $(this).find('.tipo-valor-base-adicional').val();
+            let elementoBase = $(this).find('.comissao-base');
+            
+            if (tipoValorBase && usuarioId) {
+                calcularComissaoUsuarioAdicional(usuarioId, tipoValorBase, elementoBase);
+            }
+        });
+
         // Validação do formulário
         $('#formCarteira').validate({
             rules: {
@@ -393,6 +485,37 @@
         // Calcula o total inicial
         calcularTotal();
     });
+
+    function adicionarUsuario() {
+        // Clona o template
+        var template = $('#template-usuario-adicional').html();
+        $('#usuarios_adicionais').append(template);
+
+        // Inicializa os campos money do novo usuário
+        $('#usuarios_adicionais .money').maskMoney({
+            prefix: '',
+            allowNegative: false,
+            thousands: '.',
+            decimal: ',',
+            affixesStay: false
+        });
+    }
+
+    function removerUsuario(button) {
+        $(button).closest('.usuario-adicional').remove();
+    }
+
+    function atualizarUsuarioId(select) {
+        var usuarioId = $(select).val();
+        $(select).closest('.usuario-adicional').find('.usuario-id').val(usuarioId);
+        
+        // Limpa os campos de comissão
+        var container = $(select).closest('.usuario-adicional');
+        container.find('.tipo-valor-base-adicional').val('');
+        container.find('.comissao-base').val('0,00');
+        container.find('.comissao-porcentagem').val('');
+        container.find('.comissao-valor').val('0,00');
+    }
 </script>
 
 
