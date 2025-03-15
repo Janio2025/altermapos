@@ -492,7 +492,7 @@
                                         <?php 
                                             echo htmlspecialchars($t->descricao); 
                                             if (strlen($t->descricao) > 50) {
-                                                echo '&nbsp;<a href="#" class="btn-nwe" onclick="mostrarDescricaoCompleta(\'' . htmlspecialchars(addslashes($t->descricao)) . '\'); return false;" title="Ver descrição completa"><i class="bx bx-show"></i></a>';
+                                                echo '&nbsp;<a href="#" class="btn-nwe" onclick="mostrarDescricaoCompleta(\'' . htmlspecialchars(addslashes($t->descricao)) . '\'); return false;" title="Ver descrição completa"><i class=""></i></a>';
                                             }
                                         ?>
                                     </td>
