@@ -99,7 +99,6 @@
                                                 value="" />
                                         </div>
 
-
                                     </div>
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         <div class="span3">
@@ -133,7 +132,6 @@
 
                                     </div>
 
-
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         
                                         <div class="span4">
@@ -154,19 +152,12 @@
                                             <input name="analiseBasica" class="span12" type="text" id="analiseBasica" value="" />
 
                                         </div>
-
-                                        
-
                                     </div>
-
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
 
-                                        
-
                                     </div>
 
-                                    
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         <div class="span6 offset3" style="display:flex">
                                             <button class="button btn btn-success" id="btnContinuar">
@@ -267,6 +258,37 @@
     .modal {
         z-index: 9998 !important;
     }
+
+    /* Estilos para o badge de usuários fixados */
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #d9534f;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 11px;
+    }
+
+    /* Ajuste para o botão de adicionar com badge */
+    [data-target="#modalUsuarios"] {
+        position: relative;
+    }
+
+    /* Estilos para botões de ação na tabela */
+    #tabelaUsuarios .btn {
+        margin: 0 2px;
+    }
+
+    #tabelaUsuarios .btn-fix-user.btn-success {
+        background-color: #28a745;
+    }
+
+    /* Ajuste para o botão de adicionar quando tem fixados */
+    [data-target="#modalUsuarios"].btn-info {
+        background-color: #17a2b8;
+    }
 </style>
 
 <script type="text/javascript">
@@ -309,27 +331,15 @@
 
         // Função para adicionar usuário à tabela
         window.adicionarUsuario = function(id, nome) {
-            console.log('Tentando adicionar usuário:', id, nome);
-            
-            // Verifica se é o usuário principal
-            if (id == $("#usuarios_id").val()) {
-                console.log('Usuário é o principal, não será adicionado');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Atenção',
-                    text: 'Este usuário já é o responsável principal!'
-                });
-                return;
-            }
-
             // Verifica se o usuário já está na tabela
             if ($("#usuario-" + id).length > 0) {
-                console.log('Usuário já está na tabela');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Atenção',
-                    text: 'Este usuário já está na lista!'
-                });
+                if (!window.carregandoUsuariosFixados) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atenção',
+                        text: 'Este usuário já está na lista!'
+                    });
+                }
                 return;
             }
 
@@ -337,24 +347,38 @@
             var linha = '<tr id="usuario-' + id + '">';
             linha += '<td>' + nome + '</td>';
             linha += '<td class="text-right">';
-            linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
-            linha += '<i class="bx bx-trash"></i></button></td>';
-            linha += '</tr>';
             
-            $("#tabelaUsuarios tbody").append(linha);
+            // Verifica se é o usuário principal para decidir o que mostrar
+            if (id == $("#usuarios_id").val()) {
+                linha += '<span class="label label-info">Responsável</span>'; // Texto indicativo para o usuário principal
+            } else {
+                const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+                const isFixado = usuariosFixados.some(u => u.id === id);
+                
+                linha += '<button type="button" class="btn ' + (isFixado ? 'btn-success' : 'btn-info') + ' btn-fix-user" onclick="fixarUsuario(' + id + ', \'' + nome + '\')" title="' + (isFixado ? 'Usuário fixado' : 'Fixar usuário') + '">';
+                linha += '<i class="bx bx-pin"></i></button> ';
+                linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
+                linha += '<i class="bx bx-trash"></i></button>';
+            }
+            
+            linha += '</td></tr>';
+            
+            // Se for o usuário principal, adiciona no início da tabela
+            if (id == $("#usuarios_id").val()) {
+                $("#tabelaUsuarios tbody").prepend(linha);
+            } else {
+                $("#tabelaUsuarios tbody").append(linha);
+            }
 
-            // Adiciona o campo hidden no container dentro do formulário
-            var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + id + '">';
-            $("#usuarios_adicionais_container").append(hiddenInput);
-            
-            console.log('Usuário adicionado com sucesso');
-            console.log('Campos hidden atuais:', $("#usuarios_adicionais_container").html());
+            // Adiciona o campo hidden apenas se não existir
+            if ($("#formOs input[name='usuarios_adicionais[]'][value='" + id + "']").length === 0) {
+                var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + id + '">';
+                $("#formOs").append(hiddenInput);
+            }
         }
 
         // Função para remover usuário da tabela
         window.removerUsuario = function(id) {
-            console.log('Tentando remover usuário:', id);
-            
             Swal.fire({
                 title: 'Atenção',
                 text: "Você tem certeza que deseja remover este técnico?",
@@ -366,13 +390,84 @@
                 cancelButtonText: 'Não, cancelar!'
             }).then((result) => {
                 if (result.isConfirmed) {
+                    // Verifica se o usuário está fixado
+                    const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+                    const usuarioFixado = usuariosFixados.some(u => u.id === id);
+                    
+                    if (usuarioFixado) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Atenção',
+                            text: 'Desfixe o usuário primeiro antes de removê-lo!'
+                        });
+                        return;
+                    }
+
+                    // Remove o usuário da tabela
                     $("#usuario-" + id).remove();
-                    // Remove o campo hidden correspondente
+                    // Remove o campo hidden
                     $("#usuarios_adicionais_container input[value='" + id + "']").remove();
-                    console.log('Usuário removido com sucesso');
-                    console.log('Campos hidden atuais:', $("#usuarios_adicionais_container").html());
+                    
+                    // Mostra mensagem de sucesso
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Removido!',
+                        text: 'O técnico foi removido com sucesso.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
                 }
             });
+        }
+
+        // Função para desfixar usuário
+        window.desfixarUsuario = function(id) {
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            const index = usuariosFixados.findIndex(u => u.id === id);
+            
+            if (index > -1) {
+                usuariosFixados.splice(index, 1);
+                localStorage.setItem('usuariosFixadosOS', JSON.stringify(usuariosFixados));
+                
+                $('#usuario-' + id + ' .btn-fix-user')
+                    .removeClass('btn-success')
+                    .addClass('btn-info')
+                    .attr('title', 'Fixar usuário');
+                
+                atualizarBotaoAdicionar();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso',
+                    text: 'Usuário desfixado com sucesso!'
+                });
+            }
+        }
+
+        // Atualiza a função fixarUsuario para alternar entre fixar/desfixar
+        window.fixarUsuario = function(id, nome) {
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            const jaFixado = usuariosFixados.some(u => u.id === id);
+            
+            if (jaFixado) {
+                desfixarUsuario(id);
+            } else {
+                usuariosFixados.push({ id, nome });
+                localStorage.setItem('usuariosFixadosOS', JSON.stringify(usuariosFixados));
+
+                $('#usuario-' + id + ' .btn-fix-user')
+                    .removeClass('btn-info')
+                    .addClass('btn-success')
+                    .attr('title', 'Usuário fixado');
+
+                atualizarBotaoAdicionar();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso',
+                    text: 'Usuário fixado com sucesso!'
+                });
+            }
         }
 
         // Adiciona log antes do envio do formulário
@@ -428,17 +523,61 @@
         $('.editor').trumbowyg({
             lang: 'pt_br'
         });
+
+        // Função para limpar a tabela de usuários
+        function limparTabelaUsuarios() {
+            $("#tabelaUsuarios tbody").empty();
+            $("#usuarios_adicionais_container").empty();
+        }
+
+        // Função para carregar usuários fixados
+        function carregarUsuariosFixados() {
+            window.carregandoUsuariosFixados = true;
+            limparTabelaUsuarios();
+            
+            // Primeiro adiciona o usuário principal
+            const usuarioPrincipalId = $("#usuarios_id").val();
+            const usuarioPrincipalNome = $("#tecnico").val();
+            if (usuarioPrincipalId && usuarioPrincipalNome) {
+                adicionarUsuario(usuarioPrincipalId, usuarioPrincipalNome);
+            }
+            
+            // Depois adiciona os usuários fixados
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            usuariosFixados.forEach(usuario => {
+                if (usuario.id != usuarioPrincipalId) { // Não adiciona o usuário principal novamente
+                    adicionarUsuario(usuario.id, usuario.nome);
+                }
+            });
+            
+            window.carregandoUsuariosFixados = false;
+            
+            // Atualiza o ícone do botão de adicionar se houver usuários fixados
+            atualizarBotaoAdicionar();
+        }
+
+        // Função para atualizar o botão de adicionar
+        function atualizarBotaoAdicionar() {
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            const btnAdicionar = $('[data-target="#modalUsuarios"]');
+            
+            if (usuariosFixados.length > 0) {
+                btnAdicionar.addClass('btn-info').attr('title', 'Há usuários fixados');
+                // Adiciona um badge com o número de usuários fixados
+                if (!btnAdicionar.find('.badge').length) {
+                    btnAdicionar.append('<span class="badge">' + usuariosFixados.length + '</span>');
+                } else {
+                    btnAdicionar.find('.badge').text(usuariosFixados.length);
+                }
+            } else {
+                btnAdicionar.removeClass('btn-info').attr('title', 'Adicionar técnicos');
+                btnAdicionar.find('.badge').remove();
+            }
+        }
+
+        // Carrega os usuários fixados ao iniciar
+        carregarUsuariosFixados();
     });
-
-
-    
-
-
-
-
-
-
-    
 
 </script>
 

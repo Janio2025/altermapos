@@ -775,6 +775,8 @@
                             echo '<tr id="usuario-' . $usuario->usuario_id . '">';
                             echo '<td>' . $usuario->nome . '</td>';
                             echo '<td class="text-right">';
+                            echo '<button type="button" class="btn btn-info btn-fix-user" onclick="fixarUsuario(' . $usuario->usuario_id . ', \'' . $usuario->nome . '\')" title="Fixar usuário">';
+                            echo '<i class="bx bx-pin"></i></button> ';
                             echo '<button type="button" class="btn btn-danger" onclick="removerUsuario(' . $usuario->usuario_id . ')">';
                             echo '<i class="bx bx-trash"></i></button></td>';
                             echo '</tr>';
@@ -831,6 +833,37 @@
     /* Ajuste do z-index do modal para ficar acima do autocomplete */
     .modal {
         z-index: 9998 !important;
+    }
+
+    /* Estilos para o badge de usuários fixados */
+    .badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #d9534f;
+        color: white;
+        border-radius: 50%;
+        padding: 2px 6px;
+        font-size: 11px;
+    }
+
+    /* Ajuste para o botão de adicionar com badge */
+    [data-target="#modalUsuarios"] {
+        position: relative;
+    }
+
+    /* Estilos para botões de ação na tabela */
+    #tabelaUsuarios .btn {
+        margin: 0 2px;
+    }
+
+    #tabelaUsuarios .btn-fix-user.btn-success {
+        background-color: #28a745;
+    }
+
+    /* Ajuste para o botão de adicionar quando tem fixados */
+    [data-target="#modalUsuarios"].btn-info {
+        background-color: #17a2b8;
     }
 </style>
 
@@ -1535,27 +1568,15 @@
 
         // Função para adicionar usuário à tabela
         window.adicionarUsuario = function(id, nome) {
-            console.log('Tentando adicionar usuário:', id, nome);
-            
-            // Verifica se é o usuário principal
-            if (id == $("#usuarios_id").val()) {
-                console.log('Usuário é o principal, não será adicionado');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Atenção',
-                    text: 'Este usuário já é o responsável principal!'
-                });
-                return;
-            }
-
             // Verifica se o usuário já está na tabela
             if ($("#usuario-" + id).length > 0) {
-                console.log('Usuário já está na tabela');
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Atenção',
-                    text: 'Este usuário já está na lista!'
-                });
+                if (!window.carregandoUsuariosFixados) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atenção',
+                        text: 'Este usuário já está na lista!'
+                    });
+                }
                 return;
             }
 
@@ -1563,123 +1584,249 @@
             var linha = '<tr id="usuario-' + id + '">';
             linha += '<td>' + nome + '</td>';
             linha += '<td class="text-right">';
-            linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
-            linha += '<i class="bx bx-trash"></i></button></td>';
-            linha += '</tr>';
             
-            $("#tabelaUsuarios tbody").append(linha);
+            // Verifica se é o usuário principal para decidir o que mostrar
+            if (id == $("#usuarios_id").val()) {
+                linha += '<span class="label label-info">Responsável</span>'; // Texto indicativo para o usuário principal
+            } else {
+                const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+                const isFixado = usuariosFixados.some(u => u.id === id);
+                
+                linha += '<button type="button" class="btn ' + (isFixado ? 'btn-success' : 'btn-info') + ' btn-fix-user" onclick="fixarUsuario(' + id + ', \'' + nome + '\')" title="' + (isFixado ? 'Usuário fixado' : 'Fixar usuário') + '">';
+                linha += '<i class="bx bx-pin"></i></button> ';
+                linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
+                linha += '<i class="bx bx-trash"></i></button>';
+            }
+            
+            linha += '</td></tr>';
+            
+            // Se for o usuário principal, adiciona no início da tabela
+            if (id == $("#usuarios_id").val()) {
+                $("#tabelaUsuarios tbody").prepend(linha);
+            } else {
+                $("#tabelaUsuarios tbody").append(linha);
+            }
 
             // Adiciona o campo hidden apenas se não existir
             if ($("#formOs input[name='usuarios_adicionais[]'][value='" + id + "']").length === 0) {
                 var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + id + '">';
                 $("#formOs").append(hiddenInput);
             }
-            
-            console.log('Usuário adicionado com sucesso');
-            console.log('Campos hidden atuais:', $("#formOs input[name='usuarios_adicionais[]']").length);
         }
 
-        // Função para remover usuário da tabela
-        window.removerUsuario = function(id) {
-            console.log('Tentando remover usuário:', id);
-            
-            Swal.fire({
-                title: 'Atenção',
-                text: "Você tem certeza que deseja remover este técnico?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sim, remover!',
-                cancelButtonText: 'Não, cancelar!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Faz uma requisição AJAX para remover o usuário do banco de dados
-                    $.ajax({
-                        url: '<?php echo base_url(); ?>index.php/os/removerUsuarioAdicional',
-                        type: 'POST',
-                        data: {
-                            os_id: <?php echo $result->idOs; ?>,
-                            usuario_id: id,
-                            <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
-                        },
-                        success: function(response) {
-                            response = JSON.parse(response);
-                            if (response.success) {
-                                // Remove a linha da tabela
-                                $("#usuario-" + id).remove();
-                                // Remove o campo hidden
-                                $("#formOs input[name='usuarios_adicionais[]'][value='" + id + "']").remove();
-                                console.log('Usuário removido com sucesso');
-                                console.log('Campos hidden restantes:', $("#formOs input[name='usuarios_adicionais[]']").length);
-                                
-                                // Atualiza os campos hidden
-                                var usuariosAtuais = [];
-                                $("#tabelaUsuarios tbody tr").each(function() {
-                                    var userId = $(this).attr('id').replace('usuario-', '');
-                                    usuariosAtuais.push(userId);
-                                });
-                                
-                                // Remove todos os campos hidden existentes
-                                $("#formOs input[name='usuarios_adicionais[]']").remove();
-                                
-                                // Adiciona os campos hidden atualizados
-                                usuariosAtuais.forEach(function(userId) {
-                                    var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + userId + '">';
-                                    $("#formOs").append(hiddenInput);
-                                });
-                                
-                                console.log('Campos hidden atualizados:', $("#formOs input[name='usuarios_adicionais[]']").length);
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Erro',
-                                    text: response.message || 'Erro ao remover usuário'
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Erro ao remover usuário:', error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Erro',
-                                text: 'Erro ao remover usuário. Por favor, tente novamente.'
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-        // Adiciona log antes do envio do formulário
-        $("#formOs").on('submit', function(e) {
-            console.log('Formulário sendo enviado');
-            var usuariosAtuais = [];
-            $("#tabelaUsuarios tbody tr").each(function() {
-                var userId = $(this).attr('id').replace('usuario-', '');
-                usuariosAtuais.push(userId);
-            });
-            
-            // Remove todos os campos hidden existentes
+        // Função para carregar usuários fixados
+        function carregarUsuariosFixados() {
+            window.carregandoUsuariosFixados = true;
+            $("#tabelaUsuarios tbody").empty();
             $("#formOs input[name='usuarios_adicionais[]']").remove();
             
-            // Adiciona os campos hidden atualizados
-            usuariosAtuais.forEach(function(userId) {
-                var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + userId + '">';
-                $("#formOs").append(hiddenInput);
+            // Adiciona o usuário principal primeiro
+            const usuarioPrincipalId = $("#usuarios_id").val();
+            const usuarioPrincipalNome = $("#tecnico").val();
+            if (usuarioPrincipalId && usuarioPrincipalNome) {
+                adicionarUsuario(usuarioPrincipalId, usuarioPrincipalNome);
+            }
+            
+            // Depois adiciona os usuários fixados
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            usuariosFixados.forEach(usuario => {
+                if (usuario.id != usuarioPrincipalId) {
+                    adicionarUsuario(usuario.id, usuario.nome);
+                }
             });
             
-            console.log('Usuários adicionais sendo enviados:', usuariosAtuais);
-            return true;
+            window.carregandoUsuariosFixados = false;
+            atualizarBotaoAdicionar();
+        }
+
+        // Função para atualizar o visual do botão de adicionar
+        function atualizarBotaoAdicionar() {
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            const btnAdicionar = $('[data-target="#modalUsuarios"]');
+            
+            if (usuariosFixados.length > 0) {
+                btnAdicionar.addClass('btn-info');
+                // Remove badge existente se houver
+                btnAdicionar.find('.badge').remove();
+                // Adiciona nova badge
+                btnAdicionar.append('<span class="badge">' + usuariosFixados.length + '</span>');
+            } else {
+                btnAdicionar.removeClass('btn-info');
+                btnAdicionar.find('.badge').remove();
+            }
+        }
+
+        // Chama carregarUsuariosFixados quando o documento estiver pronto
+        $(document).ready(function() {
+            carregarUsuariosFixados();
         });
     });
-</script>
 
-<script>
-    function limparOutroCampo(atual, outroId) {
-        document.getElementById(outroId).value = "";
+    window.fixarUsuario = function(id, nome) {
+        const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+        
+        // Verifica se o usuário já está fixado
+        if (usuariosFixados.some(u => u.id === id)) {
+            // Se já está fixado, vamos desfixar
+            const novaLista = usuariosFixados.filter(u => u.id !== id);
+            localStorage.setItem('usuariosFixadosOS', JSON.stringify(novaLista));
+            
+            // Atualiza o visual do botão
+            $('#usuario-' + id + ' .btn-fix-user')
+                .removeClass('btn-success')
+                .addClass('btn-info')
+                .attr('title', 'Fixar usuário');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso',
+                text: 'Usuário desfixado com sucesso!'
+            });
+        } else {
+            // Se não está fixado, vamos fixar
+            usuariosFixados.push({ id: id, nome: nome });
+            localStorage.setItem('usuariosFixadosOS', JSON.stringify(usuariosFixados));
+            
+            // Atualiza o visual do botão
+            $('#usuario-' + id + ' .btn-fix-user')
+                .removeClass('btn-info')
+                .addClass('btn-success')
+                .attr('title', 'Usuário fixado');
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Sucesso',
+                text: 'Usuário fixado com sucesso!'
+            });
+        }
+        
+        atualizarBotaoAdicionar();
     }
+
+    window.removerUsuario = function(id) {
+        Swal.fire({
+            title: 'Atenção',
+            text: "Você tem certeza que deseja remover este usuário?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sim, remover!',
+            cancelButtonText: 'Não, cancelar!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Remove o usuário da tabela
+                $('#usuario-' + id).remove();
+                
+                // Remove o input hidden
+                $("#formOs input[name='usuarios_adicionais[]'][value='" + id + "']").remove();
+                
+                // Remove da lista de fixados se estiver fixado
+                const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+                const novaLista = usuariosFixados.filter(u => u.id !== id);
+                localStorage.setItem('usuariosFixadosOS', JSON.stringify(novaLista));
+                
+                atualizarBotaoAdicionar();
+                
+                Swal.fire(
+                    'Removido!',
+                    'O usuário foi removido com sucesso.',
+                    'success'
+                );
+            }
+        });
+    }
+
+    window.adicionarUsuario = function(id, nome) {
+        // Verifica se o usuário já está na tabela
+        if ($("#usuario-" + id).length > 0) {
+            if (!window.carregandoUsuariosFixados) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Atenção',
+                    text: 'Este usuário já está na lista!'
+                });
+            }
+            return;
+        }
+
+        // Adiciona linha na tabela
+        var linha = '<tr id="usuario-' + id + '">';
+        linha += '<td>' + nome + '</td>';
+        linha += '<td class="text-right">';
+        
+        // Verifica se é o usuário principal para decidir o que mostrar
+        if (id == $("#usuarios_id").val()) {
+            linha += '<span class="label label-info">Responsável</span>'; // Texto indicativo para o usuário principal
+        } else {
+            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+            const isFixado = usuariosFixados.some(u => u.id === id);
+            
+            linha += '<button type="button" class="btn ' + (isFixado ? 'btn-success' : 'btn-info') + ' btn-fix-user" onclick="fixarUsuario(' + id + ', \'' + nome + '\')" title="' + (isFixado ? 'Usuário fixado' : 'Fixar usuário') + '">';
+            linha += '<i class="bx bx-pin"></i></button> ';
+            linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
+            linha += '<i class="bx bx-trash"></i></button>';
+        }
+        
+        linha += '</td></tr>';
+        
+        // Se for o usuário principal, adiciona no início da tabela
+        if (id == $("#usuarios_id").val()) {
+            $("#tabelaUsuarios tbody").prepend(linha);
+        } else {
+            $("#tabelaUsuarios tbody").append(linha);
+        }
+
+        // Adiciona o campo hidden apenas se não existir
+        if ($("#formOs input[name='usuarios_adicionais[]'][value='" + id + "']").length === 0) {
+            var hiddenInput = '<input type="hidden" name="usuarios_adicionais[]" value="' + id + '">';
+            $("#formOs").append(hiddenInput);
+        }
+    }
+
+    function carregarUsuariosFixados() {
+        window.carregandoUsuariosFixados = true;
+        $("#tabelaUsuarios tbody").empty();
+        $("#formOs input[name='usuarios_adicionais[]']").remove();
+        
+        // Adiciona o usuário principal primeiro
+        const usuarioPrincipalId = $("#usuarios_id").val();
+        const usuarioPrincipalNome = $("#tecnico").val();
+        if (usuarioPrincipalId && usuarioPrincipalNome) {
+            adicionarUsuario(usuarioPrincipalId, usuarioPrincipalNome);
+        }
+        
+        // Depois adiciona os usuários fixados
+        const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+        usuariosFixados.forEach(usuario => {
+            if (usuario.id != usuarioPrincipalId) {
+                adicionarUsuario(usuario.id, usuario.nome);
+            }
+        });
+        
+        window.carregandoUsuariosFixados = false;
+        atualizarBotaoAdicionar();
+    }
+
+    // Função para atualizar o visual do botão de adicionar
+    function atualizarBotaoAdicionar() {
+        const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
+        const btnAdicionar = $('[data-target="#modalUsuarios"]');
+        
+        if (usuariosFixados.length > 0) {
+            btnAdicionar.addClass('btn-info');
+            // Remove badge existente se houver
+            btnAdicionar.find('.badge').remove();
+            // Adiciona nova badge
+            btnAdicionar.append('<span class="badge">' + usuariosFixados.length + '</span>');
+        } else {
+            btnAdicionar.removeClass('btn-info');
+            btnAdicionar.find('.badge').remove();
+        }
+    }
+
+    // Chama carregarUsuariosFixados quando o documento estiver pronto
+    $(document).ready(function() {
+        carregarUsuariosFixados();
+    });
 </script>
-
-
-
