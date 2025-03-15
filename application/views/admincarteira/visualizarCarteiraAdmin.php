@@ -1,107 +1,94 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed'); ?>
 
-<div class="new122">
-    <div class="widget-title" style="margin: -20px 0 0">
-        <span class="icon">
-            <i class="bx bxs-wallet"></i>
+<div class="new122" style="padding: 20px; max-width: 800px; margin: 0 auto;">
+    <div class="widget-title" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <span class="icon" style="margin-right: 10px;">
+            <i class="bx bxs-wallet" style="font-size: 24px; color: #2c3e50;"></i>
         </span>
-        <h5>Visualizar Carteira</h5>
+        <h5 style="display: inline-block; margin: 0; color: #2c3e50;">Visualizar Carteira</h5>
     </div>
 
-    <div class="widget-box">
-        <div class="widget-content nopadding tab-content">
-            <div id="tab1" class="tab-pane active" style="min-height: 300px">
-                <div class="widget_box_Painel2">
-                    <div class="form-horizontal">
-                        <!-- Usuário -->
-                        <div class="control-group">
-                            <label class="control-label">Usuário</label>
-                            <div class="controls">
-                                <input type="text" class="input-xlarge" value="<?php echo $carteira->nome; ?>" readonly>
-                            </div>
-                        </div>
+    <div class="widget-box" style="background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div class="widget-content" style="padding: 20px;">
+            <!-- Informações Básicas -->
+            <div style="margin-bottom: 25px;">
+                <h6 style="color: #7f8c8d; font-size: 0.9em; margin-bottom: 8px;">USUÁRIO</h6>
+                <p style="color: #2c3e50; font-size: 1.1em; margin: 0;"><?php echo $carteira->nome; ?></p>
+            </div>
 
-                        <!-- Configurações de Pagamento -->
-                        <div class="control-group">
-                            <label class="control-label">Configurações de Pagamento</label>
-                            <div class="controls">
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <span class="add-on">R$</span>
-                                    <input type="text" class="money" value="<?php echo isset($config) ? number_format($config->salario_base, 2, ',', '.') : ''; ?>" readonly>
-                                </div>
-                                
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <span class="add-on">%</span>
-                                    <input type="number" value="<?php echo isset($config) ? $config->comissao_fixa : ''; ?>" readonly>
-                                </div>
-                                
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <span class="add-on"><i class="bx bx-calendar"></i></span>
-                                    <input type="number" value="<?php echo isset($config) ? $config->data_salario : ''; ?>" readonly>
-                                </div>
-                                
-                                <div style="margin-bottom: 10px;">
-                                    <label class="radio" style="display: inline-block; margin-right: 15px;">
-                                        <input type="radio" <?php echo (!isset($config) || $config->tipo_repeticao == 'mensal') ? 'checked' : ''; ?> disabled> Mensal
-                                    </label>
-                                    <label class="radio" style="display: inline-block;">
-                                        <input type="radio" <?php echo (isset($config) && $config->tipo_repeticao == 'quinzenal') ? 'checked' : ''; ?> disabled> Quinzenal
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Seção de Comissão -->
-                        <div class="control-group">
-                            <label class="control-label">Comissão Adicional</label>
-                            <div class="controls">
-                                <div style="margin-bottom: 10px;">
-                                    <select class="input-xlarge" disabled>
-                                        <option value="servicos" <?php echo (isset($config) && $config->tipo_valor_base == 'servicos') ? 'selected' : ''; ?>>Serviços</option>
-                                        <option value="total" <?php echo (isset($config) && $config->tipo_valor_base == 'total') ? 'selected' : ''; ?>>Produtos e Serviços</option>
-                                    </select>
-                                </div>
-
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <span class="add-on">R$</span>
-                                    <input type="text" class="money" id="comissao_base" readonly>
-                                </div>
-                                
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <input type="number" id="comissao_porcentagem" readonly>
-                                    <span class="add-on">%</span>
-                                </div>
-
-                                <div class="input-prepend" style="margin-bottom: 10px;">
-                                    <span class="add-on">R$</span>
-                                    <input type="text" class="money" id="comissao_valor" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Campo para mostrar o total -->
-                        <div class="control-group">
-                            <label class="control-label">Total</label>
-                            <div class="controls">
-                                <div class="input-prepend">
-                                    <span class="add-on">R$</span>
-                                    <input type="text" id="total" class="money" value="<?php echo number_format($total, 2, ',', '.'); ?>" readonly>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-actions" style="background-color: transparent;">
-                            <div class="span12">
-                                <div class="span6 offset3" style="display:flex;justify-content: center">
-                                    <a href="<?php echo base_url('index.php/admincarteira'); ?>" class="button btn btn-mini btn-warning">
-                                        <span class="button__icon"><i class="bx bx-undo"></i></span>
-                                        <span class="button__text2">Voltar</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Configurações de Pagamento -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h6 style="color: #34495e; font-size: 1em; margin-bottom: 15px; font-weight: 600;">Configurações de Pagamento</h6>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Salário Base</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;">R$ <?php echo isset($config) ? number_format($config->salario_base, 2, ',', '.') : '0,00'; ?></span>
+                    </div>
+                    
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Comissão Fixa</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;"><?php echo isset($config) ? $config->comissao_fixa : '0'; ?>%</span>
+                    </div>
+                    
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Data do Salário</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;">Dia <?php echo isset($config) ? $config->data_salario : '-'; ?></span>
+                    </div>
+                    
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Tipo de Pagamento</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;">
+                            <?php echo (!isset($config) || $config->tipo_repeticao == 'mensal') ? 'Mensal' : 'Quinzenal'; ?>
+                        </span>
                     </div>
                 </div>
+            </div>
+
+            <!-- Seção de Comissão -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <h6 style="color: #34495e; font-size: 1em; margin-bottom: 15px; font-weight: 600;">Comissão Adicional</h6>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Base de Cálculo</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;">
+                            <?php echo (isset($config) && $config->tipo_valor_base == 'servicos') ? 'Serviços' : 'Produtos e Serviços'; ?>
+                        </span>
+                    </div>
+
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Valor Base</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;" id="comissao_base_text">R$ 0,00</span>
+                    </div>
+                    
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Porcentagem</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;" id="comissao_porcentagem_text">0%</span>
+                    </div>
+
+                    <div>
+                        <span style="color: #7f8c8d; font-size: 0.9em; display: block; margin-bottom: 5px;">Valor da Comissão</span>
+                        <span style="color: #2c3e50; font-size: 1.1em; font-weight: 500;" id="comissao_valor_text">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total -->
+            <div style="background: #2c3e50; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #fff; font-size: 1.1em;">Total</span>
+                    <span style="color: #fff; font-size: 1.4em; font-weight: 600;" id="total_text">
+                        R$ <?php echo number_format($total, 2, ',', '.'); ?>
+                    </span>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="<?php echo base_url('index.php/admincarteira'); ?>" class="button btn btn-warning" style="padding: 10px 20px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: #f39c12; border: none; color: white; transition: all 0.3s ease;">
+                    <i class="bx bx-undo"></i>
+                    <span>Voltar</span>
+                </a>
             </div>
         </div>
     </div>
@@ -110,27 +97,15 @@
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <script type="text/javascript">
     $(document).ready(function(){
-        // Máscara para campos de dinheiro
-        $('.money').maskMoney({
-            prefix: '',
-            allowNegative: false,
-            thousands: '.',
-            decimal: ',',
-            affixesStay: false
-        });
+        function formatMoneyBR(value) {
+            return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
 
-        // Função para converter valor do formato brasileiro para número
         function parseMoneyBR(value) {
             if (!value) return 0;
             return parseFloat(value.replace('.', '').replace(',', '.'));
         }
 
-        // Função para formatar número para dinheiro BR
-        function formatMoneyBR(value) {
-            return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        // Função para buscar o valor base da comissão
         function buscarValorBase() {
             let tipoValorBase = '<?php echo isset($config) ? $config->tipo_valor_base : ""; ?>';
             let usuarioId = '<?php echo $carteira->usuarios_id; ?>';
@@ -147,12 +122,12 @@
                     success: function(response) {
                         if (response.success) {
                             let valor = parseFloat(response.valor) || 0;
-                            $('#comissao_base').val(formatMoneyBR(valor));
+                            $('#comissao_base_text').text('R$ ' + formatMoneyBR(valor));
                             
                             let comissaoFixa = <?php echo isset($config) ? $config->comissao_fixa : 0; ?>;
                             if (comissaoFixa > 0) {
-                                $('#comissao_porcentagem').val(comissaoFixa);
-                                calcularComissao();
+                                $('#comissao_porcentagem_text').text(comissaoFixa + '%');
+                                calcularComissao(valor, comissaoFixa);
                             }
                         }
                     }
@@ -160,30 +135,21 @@
             }
         }
 
-        // Calcula comissão quando valor base ou porcentagem mudar
-        function calcularComissao() {
-            let valorBase = parseMoneyBR($('#comissao_base').val());
-            let porcentagem = parseFloat($('#comissao_porcentagem').val() || 0);
-            
+        function calcularComissao(valorBase, porcentagem) {
             if (!isNaN(valorBase) && !isNaN(porcentagem)) {
                 let valorComissao = (valorBase * (porcentagem / 100));
-                $('#comissao_valor').val(formatMoneyBR(valorComissao));
-                calcularTotal();
+                $('#comissao_valor_text').text('R$ ' + formatMoneyBR(valorComissao));
+                calcularTotal(valorComissao);
             }
         }
 
-        // Função para calcular o total
-        function calcularTotal() {
+        function calcularTotal(comissao) {
             let salarioBase = <?php echo isset($config) ? $config->salario_base : 0; ?>;
-            let comissao = parseMoneyBR($('#comissao_valor').val());
             let total = salarioBase + comissao;
-            $('#total').val(formatMoneyBR(total));
+            $('#total_text').text('R$ ' + formatMoneyBR(total));
         }
 
-        // Busca o valor base inicial
         buscarValorBase();
-
-        // Atualiza o valor base a cada 30 segundos
         setInterval(buscarValorBase, 30000);
     });
 </script> 

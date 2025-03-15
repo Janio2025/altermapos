@@ -429,7 +429,6 @@ $(document).ready(function() {
     });
 });
 </script>
-
 <?php if ($this->session->userdata('sistema_versao') == '1.0.0') : ?>
 <div class="span12" style="padding: 1%; margin-left: 0">
     <div class="span6">
