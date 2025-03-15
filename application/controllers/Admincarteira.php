@@ -979,4 +979,23 @@ class Admincarteira extends MY_Controller {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function getValorBase()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) {
+            echo json_encode(['success' => false, 'message' => 'Você não tem permissão para esta ação.']);
+            return;
+        }
+
+        $tipo = $this->input->post('tipo');
+        $usuario_id = $this->input->post('usuario_id');
+
+        if (!$tipo || !$usuario_id) {
+            echo json_encode(['success' => false, 'message' => 'Parâmetros inválidos.']);
+            return;
+        }
+
+        $valor = $this->carteira_model->getValorBase($usuario_id, $tipo);
+        echo json_encode(['success' => true, 'valor' => $valor]);
+    }
 } 

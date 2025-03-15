@@ -220,10 +220,22 @@
         function buscarValorBase() {
             let tipoValorBase = $('#tipo_valor_base').val();
             let usuarioId = $('#usuario').val();
+            let comissaoFixa = parseFloat($('#comissao_fixa').val()) || 0;
+            
+            // Primeiro, copiamos o valor da comissão fixa para o campo de porcentagem
+            $('#comissao_porcentagem').val(comissaoFixa);
+            
+            console.log('Tipo selecionado:', tipoValorBase);
+            console.log('ID do usuário:', usuarioId);
             
             if (tipoValorBase && usuarioId) {
+                // Constrói a URL completa
+                let baseUrl = '<?php echo base_url(); ?>';
+                let apiUrl = baseUrl + 'index.php/admincarteira/getValorBase';
+                console.log('URL da API:', apiUrl);
+
                 $.ajax({
-                    url: '<?php echo base_url('index.php/admincarteira/getValorBase'); ?>',
+                    url: apiUrl,
                     type: 'POST',
                     data: {
                         tipo: tipoValorBase,
@@ -232,120 +244,83 @@
                     },
                     dataType: 'json',
                     success: function(response) {
+                        console.log('Resposta da API:', response);
+                        
                         if (response.success) {
                             let valor = parseFloat(response.valor) || 0;
-                            // Formata o valor para exibição
-                            $('#comissao_base').val(formatMoneyBR(valor));
+                            console.log('Valor base recebido:', valor);
                             
-                            // Calcula e atualiza a comissão pendente
-                            let comissaoFixa = parseFloat($('#comissao_fixa').val()) || 0;
-                            let comissaoPendente = valor * (comissaoFixa / 100);
-                            $('#comissao-pendente').text(formatMoneyBR(comissaoPendente));
+                            // Formata o valor para exibição no campo base
+                            let valorFormatado = formatMoneyBR(valor);
+                            console.log('Valor formatado:', valorFormatado);
+                            $('#comissao_base').val(valorFormatado);
                             
-                            // Usa a comissão fixa como porcentagem
-                            if (comissaoFixa > 0) {
-                                $('#comissao_porcentagem').val(comissaoFixa);
-                                calcularComissao();
-                            }
+                            // Calcula o valor da comissão usando a comissão fixa
+                            let valorComissao = valor * (comissaoFixa / 100);
+                            console.log('Valor da comissão calculado:', valorComissao);
+                            
+                            // Atualiza os campos com os valores calculados
+                            $('#comissao_valor').val(formatMoneyBR(valorComissao));
+                            $('#tem_comissao').val(valorComissao > 0 ? '1' : '0');
+                            $('#comissao-pendente').text(formatMoneyBR(valorComissao));
+                            
+                            // Força o recálculo do total
+                            calcularTotal();
                         } else {
                             console.log('Erro ao buscar valor base:', response.message);
+                            // Limpa os campos em caso de erro
+                            $('#comissao_base').val('0,00');
+                            $('#comissao_valor').val('0,00');
+                            $('#comissao-pendente').text('0,00');
                         }
                     },
-                    error: function() {
-                        console.log('Erro ao buscar valor base');
+                    error: function(xhr, status, error) {
+                        console.log('Erro na requisição:', error);
+                        console.log('Status:', status);
+                        console.log('URL tentada:', apiUrl);
+                        console.log('Resposta:', xhr.responseText);
+                        // Limpa os campos em caso de erro
+                        $('#comissao_base').val('0,00');
+                        $('#comissao_valor').val('0,00');
+                        $('#comissao-pendente').text('0,00');
                     }
                 });
-            }
-        }
-
-        // Calcula comissão quando valor base ou porcentagem mudar
-        function calcularComissao() {
-            let valorBase = parseMoneyBR($('#comissao_base').val());
-            let porcentagem = parseFloat($('#comissao_porcentagem').val() || 0);
-            let tipoValorBase = $('#tipo_valor_base').val();
-            let usuarioId = $('#usuario').val();
-            
-            if (tipoValorBase && usuarioId) {
-                $.ajax({
-                    url: '<?php echo base_url('index.php/admincarteira/getValorBase'); ?>',
-                    type: 'POST',
-                    data: {
-                        tipo: tipoValorBase,
-                        usuario_id: usuarioId,
-                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            let valor = parseFloat(response.valor) || 0;
-                            // Formata o valor para exibição
-                            $('#comissao_base').val(formatMoneyBR(valor));
-                            
-                            if (!isNaN(valor) && !isNaN(porcentagem)) {
-                                let valorComissao = (valor * (porcentagem / 100));
-                                $('#comissao_valor').val(formatMoneyBR(valorComissao));
-                                $('#tem_comissao').val(valorComissao > 0 ? '1' : '0');
-                                calcularTotal();
-                            }
-                        }
-                    }
-                });
+            } else {
+                console.log('Tipo ou usuário não selecionado');
+                // Limpa os campos se não tiver tipo ou usuário selecionado
+                $('#comissao_base').val('0,00');
+                $('#comissao_valor').val('0,00');
+                $('#comissao-pendente').text('0,00');
             }
         }
 
         // Eventos para recalcular os valores
         $('#tipo_valor_base').on('change', function() {
-            calcularComissao();
+            console.log('Tipo alterado para:', $(this).val());
+            buscarValorBase();
             localStorage.setItem('tipo_valor_base', $(this).val());
         });
 
-        $('#comissao_porcentagem').on('change keyup', function() {
-            calcularComissao();
+        // Quando a comissão fixa mudar, atualizar o campo de porcentagem e recalcular
+        $('#comissao_fixa').on('change keyup', function() {
+            console.log('Comissão fixa alterada para:', $(this).val());
+            buscarValorBase();
         });
 
-        // Função para atualizar valor base periodicamente
-        function atualizarValorBase() {
-            let tipoValorBase = $('#tipo_valor_base').val();
-            let usuarioId = $('#usuario').val();
-            
-            if (tipoValorBase && usuarioId) {
-                $.ajax({
-                    url: '<?php echo base_url('index.php/admincarteira/getValorBase'); ?>',
-                    type: 'POST',
-                    data: {
-                        tipo: tipoValorBase,
-                        usuario_id: usuarioId,
-                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
-                    },
-                    dataType: 'json',
-                    success: function(response) {
-                        if (response.success) {
-                            let valorAtual = parseMoneyBR($('#comissao_base').val());
-                            let novoValor = parseFloat(response.valor) || 0;
-                            
-                            // Só atualiza se o valor mudou
-                            if (valorAtual !== novoValor) {
-                                $('#comissao_base').val(formatMoneyBR(novoValor));
-                                calcularComissao();
-                            }
-                        }
-                    }
-                });
-            }
+        // Torna o campo de porcentagem somente leitura
+        $('#comissao_porcentagem').prop('readonly', true);
+
+        // Inicializa os valores quando a página carrega
+        if ($('#tipo_valor_base').val() && $('#usuario').val()) {
+            console.log('Inicializando valores...');
+            buscarValorBase();
         }
 
-        // Verifica por atualizações a cada 30 segundos
-        setInterval(atualizarValorBase, 30000);
-
-        // Carrega a seleção anterior do tipo de valor base
+        // Carrega a seleção anterior do tipo de valor base e força a atualização
         let tipoSalvo = localStorage.getItem('tipo_valor_base');
         if (tipoSalvo) {
-            $('#tipo_valor_base').val(tipoSalvo);
-        }
-
-        // Carrega o valor base inicial se houver usuário selecionado
-        if ($('#usuario').val()) {
-            buscarValorBase();
+            console.log('Carregando tipo salvo:', tipoSalvo);
+            $('#tipo_valor_base').val(tipoSalvo).trigger('change');
         }
 
         // Função para calcular a comissão de um usuário adicional

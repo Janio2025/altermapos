@@ -38,10 +38,10 @@
                                                 value="" />
                                         </div>
                                         <div class="span4">
-                                            <label for="tecnico">Técnico / Responsável<span
+                                            <label for="tecnico">Técnicos / Responsáveis<span
                                                     class="required">*</span></label>
-                                            <div class="input-append">
-                                                <input id="tecnico" class="span11" type="text" name="tecnico" value="<?= $this->session->userdata("nome_admin") ?>" />
+                                            <div class="">
+                                                <input id="tecnico" class="span9" type="text" name="tecnico" value="<?= $this->session->userdata("nome_admin") ?>" />
                                                 <button type="button" class="btn" style="margin-left: 0" data-toggle="modal" data-target="#modalUsuarios">
                                                     <i class="bx bx-plus"></i>
                                                 </button>
