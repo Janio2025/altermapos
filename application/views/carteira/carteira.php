@@ -449,6 +449,18 @@
                 <i class="bx bx-chart"></i>
             </span>
             <h5>Resumo do Mês Atual</h5>
+            <div class="filtro-periodo" style="float: right; margin-right: 10px;">
+                <select id="tipo-filtro" class="form-control" style="width: auto; display: inline-block;">
+                    <option value="mes">Mês</option>
+                    <option value="ano">Ano</option>
+                    <option value="periodo">Período</option>
+                </select>
+                <div id="filtro-periodo-campos" style="display: none; margin-top: 10px;">
+                    <input type="date" id="data-inicio" class="form-control" style="width: auto; display: inline-block;">
+                    <input type="date" id="data-fim" class="form-control" style="width: auto; display: inline-block;">
+                    <button id="btn-buscar" class="btn btn-primary">Buscar</button>
+                </div>
+            </div>
         </div>
         <div class="widget-content">
             <div class="row-fluid" style="padding: 0;">
@@ -865,16 +877,33 @@
         buscarValorBase(); // Chama imediatamente ao carregar
         setInterval(buscarValorBase, 30000); // Atualiza a cada 30 segundos
 
-        // Calcula os totais mensais
+        // Função para atualizar os totais baseado no filtro selecionado
         function atualizarTotais() {
             let totalRetiradas = 0;
             let totalComissoes = 0;
             let totalBonus = 0;
             let totalSalario = 0;
 
-            // Calcula totais do mês atual
-            let mesAtual = new Date().getMonth();
-            let anoAtual = new Date().getFullYear();
+            const tipoFiltro = $('#tipo-filtro').val();
+            let dataInicio, dataFim;
+
+            if (tipoFiltro === 'mes') {
+                // Mantém a lógica atual para mês
+                const dataAtual = new Date();
+                dataInicio = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
+                dataFim = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0);
+            } else if (tipoFiltro === 'ano') {
+                // Filtro por ano
+                const dataAtual = new Date();
+                dataInicio = new Date(dataAtual.getFullYear(), 0, 1);
+                dataFim = new Date(dataAtual.getFullYear(), 11, 31);
+            } else {
+                // Filtro por período personalizado
+                dataInicio = new Date($('#data-inicio').val());
+                dataFim = new Date($('#data-fim').val());
+                // Adiciona um dia à data final para incluir todas as transações do dia
+                dataFim.setDate(dataFim.getDate() + 1);
+            }
 
             $('.table-transactions tbody tr').each(function() {
                 let data = $(this).find('.col-data').text();
@@ -891,9 +920,8 @@
                 let [dia, mes, ano] = dataParte.split('/');
                 let dataTransacao = new Date(ano, mes - 1, dia);
                 
-                if (dataTransacao.getMonth() === mesAtual && 
-                    dataTransacao.getFullYear() === anoAtual) {
-                    
+                // Verifica se a data está dentro do período selecionado
+                if (dataTransacao >= dataInicio && dataTransacao < dataFim) {
                     switch (tipo) {
                         case 'retirada':
                             totalRetiradas += valor;
@@ -917,15 +945,48 @@
             $('#total-bonus').text(formatarMoeda(totalBonus));
             $('#total-salario').text(formatarMoeda(totalSalario));
             $('#total-ganhos').text(formatarMoeda(totalComissoes + totalBonus + totalSalario));
+
+            // Atualiza o título do widget baseado no filtro
+            let titulo = 'Resumo do ';
+            if (tipoFiltro === 'mes') {
+                titulo += 'Mês Atual';
+            } else if (tipoFiltro === 'ano') {
+                titulo += 'Ano ' + new Date().getFullYear();
+            } else {
+                titulo += 'Período Selecionado';
+            }
+            $('.widget-title h5').text(titulo);
         }
+
+        // Manipuladores de eventos para o filtro
+        $('#tipo-filtro').change(function() {
+            const tipoFiltro = $(this).val();
+            if (tipoFiltro === 'periodo') {
+                $('#filtro-periodo-campos').show();
+            } else {
+                $('#filtro-periodo-campos').hide();
+                atualizarTotais();
+            }
+        });
+
+        $('#btn-buscar').click(function() {
+            if ($('#data-inicio').val() && $('#data-fim').val()) {
+                atualizarTotais();
+            } else {
+                alert('Por favor, selecione as datas de início e fim do período.');
+            }
+        });
+
+        // Inicializa os campos de data com valores padrão
+        const hoje = new Date();
+        const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+        
+        $('#data-inicio').val(primeiroDiaMes.toISOString().split('T')[0]);
+        $('#data-fim').val(ultimoDiaMes.toISOString().split('T')[0]);
 
         // Calcula os totais ao carregar a página
         atualizarTotais();
-
-        // Recalcula os totais quando uma nova transação é adicionada
-        $(document).on('transacaoAdicionada', function() {
-            atualizarTotais();
-        });
 
         // Função para abrir o modal de movimentações
         window.abrirModalMovimentacoes = function(tipo, titulo, cor, icone) {
