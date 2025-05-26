@@ -229,8 +229,19 @@ class Os extends MY_Controller
         $this->data['custom_error'] = '';
         $this->data['texto_de_notificacao'] = $this->data['configuration']['notifica_whats'];
 
+        // Get the OS data first
+        $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
+
         // Carrega os usuários adicionais
         $this->load->model('usuarios_model');
+        $this->load->model('organizadores_model');
+        $this->load->model('compartimentos_model');
+        $this->data['organizadores'] = $this->organizadores_model->get('organizadores', '*');
+        if ($this->data['result']->organizador_id) {
+            $this->data['compartimentos'] = $this->compartimentos_model->getCompartimentosByOrganizador($this->data['result']->organizador_id);
+        } else {
+            $this->data['compartimentos'] = [];
+        }
         $this->data['usuarios_adicionais'] = $this->os_model->getUsuariosAdicionais($this->uri->segment(3));
 
         $this->data['editavel'] = $this->os_model->isEditable($this->input->post('idOs'));
@@ -366,8 +377,6 @@ class Os extends MY_Controller
                 $this->data['custom_error'] = '<div class="form_error"><p>Ocorreu um erro</p></div>';
             }
         }
-
-        $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
 
         $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
         $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
@@ -1234,7 +1243,7 @@ private function formatarChave($chave)
 
     public function buscarCompartimentos() {
         $this->load->model('compartimentos_model');
-        $organizador_id = $this->input->get('organizador_id');
+        $organizador_id = $this->input->post('organizador_id') ?: $this->input->get('organizador_id');
         
         if ($organizador_id) {
             $compartimentos = $this->compartimentos_model->getCompartimentosByOrganizador($organizador_id);

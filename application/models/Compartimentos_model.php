@@ -12,8 +12,17 @@ class Compartimentos_model extends CI_Model
         $this->db->select('*');
         $this->db->from('compartimentos');
         $this->db->where('organizador_id', $organizador_id);
-        $this->db->where('ativa', 1);
+        $this->db->where('ativa', true);
         $this->db->order_by('nome_compartimento', 'asc');
         return $this->db->get()->result();
+    }
+
+    public function getById($id)
+    {
+        $this->db->select('*');
+        $this->db->from('compartimentos');
+        $this->db->where('id', $id);
+        $this->db->limit(1);
+        return $this->db->get()->row();
     }
 } 

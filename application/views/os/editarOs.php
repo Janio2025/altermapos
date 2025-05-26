@@ -8,6 +8,38 @@
 
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/custom.css" />
 
+<script>
+    $(document).ready(function() {
+        // Dynamic compartimentos loading
+        $('#organizador_id').change(function() {
+            var organizadorId = $(this).val();
+            if (organizadorId) {
+                $.ajax({
+                    url: '<?php echo base_url(); ?>index.php/os/buscarCompartimentos',
+                    type: 'POST',
+                    data: {organizador_id: organizadorId},
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#compartimento_id').empty();
+                        $('#compartimento_id').append('<option value="">Selecione um compartimento</option>');
+                        $.each(data, function(key, value) {
+                            $('#compartimento_id').append('<option value="' + value.id + '">' + value.nome_compartimento + '</option>');
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro ao buscar compartimentos:', error);
+                        $('#compartimento_id').empty();
+                        $('#compartimento_id').append('<option value="">Erro ao carregar compartimentos</option>');
+                    }
+                });
+            } else {
+                $('#compartimento_id').empty();
+                $('#compartimento_id').append('<option value="">Selecione primeiro um organizador</option>');
+            }
+        });
+    });
+</script>
+
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
         <div class="widget-box">
@@ -224,37 +256,40 @@
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
 
-                                        <div class="span4">
-                                            <label for="localizacaoProdutoOs">LOCALIZAÇÃO</label>
-                                            <input name="localizacaoProdutoOs" class="span12" type="text"
-                                                id="localizacaoProdutoOs"
-                                                value="<?php echo $result->localizacaoProdutoOs ?>"
-                                                onChange="javascript:this.value=this.value.toUpperCase();" />
-                                        </div>
-
-                                        <div class="span4">
-                                            <label for="defeito">Defeito descrito pelo cliente</label>
-                                            <input name="defeito" class="span12" type="text" id="defeito"
-                                                value="<?php echo $result->defeito ?>" />
-
-                                        </div>
-
-                                        <div class="span4">
-                                            <label for="analiseBasica">Defeito constatado em análise básica</label>
-                                            <input name="analiseBasica" class="span12" type="text" id="analiseBasica"
-                                                value="<?php echo $result->analiseBasica ?>" />
-
-                                        </div>
+                                        
 
                                         
-                                    </div>
+                                        <div class="span3">
+                                            <label for="organizador_id">Organizador</label>
+                                            <select id="organizador_id" name="organizador_id" class="span12 select2">
+                                                <option value="">Buscar organizador...</option>
+                                                <?php foreach ($organizadores as $organizador) : ?>
+                                                    <option value="<?php echo $organizador->id; ?>" <?php echo ($result->organizador_id == $organizador->id) ? 'selected' : ''; ?>>
+                                                        <?php echo $organizador->nome_organizador; ?>
+                                                        <label for="">-</label> 
+                                                        <?php echo $organizador->localizacao; ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
 
-                                    <div>
+                                        <div class="span3">
+                                            <label for="compartimento_id">Compartimento</label>
+                                            <select id="compartimento_id" name="compartimento_id" class="span12">
+                                                <option value="">Selecione primeiro um organizador</option>
+                                                <?php if ($result->organizador_id && $result->compartimento_id): ?>
+                                                    <?php 
+                                                    $compartimentos = $this->db->where('organizador_id', $result->organizador_id)->where('ativa', true)->get('compartimentos')->result();
+                                                    foreach ($compartimentos as $compartimento): 
+                                                    ?>
+                                                        <option value="<?php echo $compartimento->id; ?>" <?php echo ($result->compartimento_id == $compartimento->id) ? 'selected' : ''; ?>>
+                                                            <?php echo $compartimento->nome_compartimento; ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            </select>
+                                        </div>
 
-
-                                    </div>
-
-                                    <div class="span12" style="padding: 1%; margin-left: 0">
                                         <div class="span3">
                                             <label for="ucProdutoOs">UNIDADE CONSUMIDORA</label>
                                             <input name="ucProdutoOs" class="span12" type="text" id="ucProdutoOs"
@@ -269,6 +304,28 @@
                                                 value="<?php echo $result->contrato_seguradora ?>"
                                                 oninput="limparOutroCampo(this, 'ucProdutoOs')" 
                                                 onchange="this.value = this.value.toUpperCase();" />
+                                        </div>
+
+                                       
+
+                                    </div>
+
+                                    <div>
+
+
+                                    </div>
+
+                                    <div class="span12" style="padding: 1%; margin-left: 0">
+                                    <div class="span6">
+                                            <label for="defeito">Defeito descrito pelo cliente</label>
+                                            <input name="defeito" class="span12" type="text" id="defeito"
+                                                value="<?php echo $result->defeito ?>" />
+                                        </div>
+
+                                        <div class="span6">
+                                            <label for="analiseBasica">Defeito constatado em pré-análise</label>
+                                            <input name="analiseBasica" class="span12" type="text" id="analiseBasica"
+                                                value="<?php echo $result->analiseBasica ?>" />
                                         </div>
                                     </div>
 
@@ -1864,6 +1921,68 @@
                     text: "É necessário faturar a OS antes de alterar o status para Faturado"
                 });
                 $(this).val($(this).find('option:not([value="Faturado"]):first').val());
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        // Inicializa o Select2 no select do organizador
+        $('#organizador_id').select2({
+            placeholder: "Buscar organizador...",
+            allowClear: true,
+            language: {
+                noResults: function() {
+                    return "Nenhum resultado encontrado";
+                }
+            }
+        });
+
+        // Evento quando um organizador é selecionado
+        $('#organizador_id').on('change', function() {
+            var organizador_id = $(this).val();
+            if (organizador_id) {
+                $.get('<?php echo site_url('os/buscarCompartimentos'); ?>', {
+                    organizador_id: organizador_id
+                }, function(data) {
+                    var compartimentos = JSON.parse(data);
+                    var options = '<option value="">Selecione um compartimento</option>';
+                    compartimentos.forEach(function(compartimento) {
+                        options += '<option value="' + compartimento.id + '">' + compartimento.nome_compartimento + '</option>';
+                    });
+                    $('#compartimento_id').html(options);
+                });
+            } else {
+                $('#compartimento_id').html('<option value="">Selecione primeiro um organizador</option>');
+            }
+        });
+    });
+
+    // Dynamic compartimentos loading
+    $(document).ready(function() {
+        $('#organizador_id').change(function() {
+            var organizadorId = $(this).val();
+            if (organizadorId) {
+                $.ajax({
+                    url: '<?php echo base_url(); ?>index.php/os/buscarCompartimentos',
+                    type: 'POST',
+                    data: {organizador_id: organizadorId},
+                    dataType: 'json',
+                    success: function(data) {
+                        $('#compartimento_id').empty();
+                        $('#compartimento_id').append('<option value="">Selecione um compartimento</option>');
+                        $.each(data, function(key, value) {
+                            $('#compartimento_id').append('<option value="' + value.id + '">' + value.nome_compartimento + '</option>');
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro ao buscar compartimentos:', error);
+                        $('#compartimento_id').empty();
+                        $('#compartimento_id').append('<option value="">Erro ao carregar compartimentos</option>');
+                    }
+                });
+            } else {
+                $('#compartimento_id').empty();
+                $('#compartimento_id').append('<option value="">Selecione primeiro um organizador</option>');
             }
         });
     });
