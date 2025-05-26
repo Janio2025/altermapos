@@ -1082,6 +1082,9 @@
                 confirmButtonText: 'Fechar'
             });
         }
+
+        // Executa a atualização dos totais assim que a página carregar
+        atualizarTotais();
     });
 
     function formatarMoeda(valor) {
