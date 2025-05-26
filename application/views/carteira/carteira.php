@@ -901,6 +901,8 @@
                 // Filtro por período personalizado
                 dataInicio = new Date($('#data-inicio').val());
                 dataFim = new Date($('#data-fim').val());
+                // Adiciona um dia à data final para incluir todo o dia selecionado
+                dataFim.setDate(dataFim.getDate() + 1);
             }
 
             $('.table-transactions tbody tr').each(function() {
