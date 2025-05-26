@@ -337,7 +337,7 @@ class Admincarteira extends MY_Controller {
             }
             
             // Registra a comissão se houver
-            if ($this->input->post('tem_comissao') == '1') {
+            if ($this->input->post('tem_comissao') == '1' && $this->input->post('comissao_descricao') && $this->input->post('comissao_valor') > 0) {
                 $comissao = str_replace(',', '.', str_replace('.', '', $this->input->post('comissao_valor')));
                 $comissao_data = array(
                     'tipo' => 'comissao',
