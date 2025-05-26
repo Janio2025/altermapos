@@ -341,7 +341,7 @@ class Carteira_model extends CI_Model
                     $this->registrarTransacao(array(
                         'tipo' => 'salario',
                         'valor' => $config->salario_base,
-                        'data_transacao' => date('Y-m-d'),
+                        'data_transacao' => date('Y-m-d H:i:s'),
                         'descricao' => 'Salário Base - ' . date('m/Y'),
                         'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                         'considerado_saldo' => 1
@@ -357,7 +357,7 @@ class Carteira_model extends CI_Model
                         $this->registrarTransacao(array(
                             'tipo' => 'comissao',
                             'valor' => $valor_comissao,
-                            'data_transacao' => date('Y-m-d'),
+                            'data_transacao' => date('Y-m-d H:i:s'),
                             'descricao' => 'Comissão - ' . date('m/Y'),
                             'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                             'considerado_saldo' => 1
@@ -384,7 +384,7 @@ class Carteira_model extends CI_Model
                                 $this->registrarTransacao(array(
                                     'tipo' => 'comissao',
                                     'valor' => $valor_comissao,
-                                    'data_transacao' => date('Y-m-d'),
+                                    'data_transacao' => date('Y-m-d H:i:s'),
                                     'descricao' => 'Comissão (Técnico Adicional) - ' . date('m/Y'),
                                     'carteira_usuario_id' => $carteira_adicional->idCarteiraUsuario,
                                     'considerado_saldo' => 1

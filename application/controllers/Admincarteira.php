@@ -328,7 +328,7 @@ class Admincarteira extends MY_Controller {
                 $bonus_data = array(
                     'tipo' => 'bonus',
                     'valor' => $bonus,
-                    'data_transacao' => date('Y-m-d'),
+                    'data_transacao' => date('Y-m-d H:i:s'),
                     'descricao' => $this->input->post('bonus_descricao'),
                     'carteira_usuario_id' => $id
 
@@ -342,7 +342,7 @@ class Admincarteira extends MY_Controller {
                 $comissao_data = array(
                     'tipo' => 'comissao',
                     'valor' => $comissao,
-                    'data_transacao' => date('Y-m-d'),
+                    'data_transacao' => date('Y-m-d H:i:s'),
                     'descricao' => $this->input->post('comissao_descricao'),
                     'carteira_usuario_id' => $id
                 );
@@ -363,7 +363,7 @@ class Admincarteira extends MY_Controller {
                 $retirada_data = array(
                     'tipo' => 'retirada',
                     'valor' => $retirada,
-                    'data_transacao' => date('Y-m-d'),
+                    'data_transacao' => date('Y-m-d H:i:s'),
                     'descricao' => $this->input->post('retirada_descricao'),
                     'carteira_usuario_id' => $id,
                     'considerado_saldo' => 0
@@ -371,7 +371,7 @@ class Admincarteira extends MY_Controller {
                 
                 // Marca todas as transações anteriores como consideradas
                 $this->db->where('carteira_usuario_id', $id);
-                $this->db->where('data_transacao <=', date('Y-m-d'));
+                $this->db->where('data_transacao <=', date('Y-m-d H:i:s'));
                 $this->db->where('tipo !=', 'retirada');
                 $this->db->update('transacoes_usuario', array('considerado_saldo' => 1));
                 
@@ -979,7 +979,7 @@ class Admincarteira extends MY_Controller {
                     $data = [
                         'tipo' => 'comissao',
                         'valor' => $valor_comissao,
-                        'data_transacao' => date('Y-m-d'),
+                        'data_transacao' => date('Y-m-d H:i:s'),
                         'descricao' => $descricao,
                         'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                         'considerado_saldo' => 1
@@ -1196,7 +1196,7 @@ class Admincarteira extends MY_Controller {
                         $data_transacao = array(
                             'tipo' => 'salario',
                             'valor' => $valor_salario,
-                            'data_transacao' => date('Y-m-d'),
+                            'data_transacao' => date('Y-m-d H:i:s'),
                             'descricao' => $config->tipo_repeticao == 'quinzenal' 
                                 ? 'Pagamento Quinzenal - Salário Base - ' . (date('d') <= 15 ? '1ª Quinzena' : '2ª Quinzena') . ' - ' . date('m/Y')
                                 : 'Pagamento Mensal - Salário Base - ' . date('m/Y'),
@@ -1224,7 +1224,7 @@ class Admincarteira extends MY_Controller {
                             $data_comissao = array(
                                 'tipo' => 'comissao',
                                 'valor' => $valor_comissao,
-                                'data_transacao' => date('Y-m-d'),
+                                'data_transacao' => date('Y-m-d H:i:s'),
                                 'descricao' => $config->tipo_repeticao == 'quinzenal'
                                     ? 'Pagamento Quinzenal - Comissão - ' . (date('d') <= 15 ? '1ª Quinzena' : '2ª Quinzena') . ' - ' . date('m/Y')
                                     : 'Pagamento Mensal - Comissão - ' . date('m/Y'),

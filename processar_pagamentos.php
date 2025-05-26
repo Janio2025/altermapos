@@ -15,7 +15,7 @@ $query = "SELECT * FROM configuracao_carteira";
 $result = $mysqli->query($query);
 
 $dia_atual = (int)date('d');
-$data_atual = date('Y-m-d');
+$data_atual = date('Y-m-d H:i:s');
 
 while ($config = $result->fetch_object()) {
     // Verifica se é dia de pagamento
