@@ -328,7 +328,7 @@ class Admincarteira extends MY_Controller {
                 $bonus_data = array(
                     'tipo' => 'bonus',
                     'valor' => $bonus,
-                    'data_transacao' => date('Y-m-d H:i:s'),
+                    'data_transacao' => date('Y-m-d'),
                     'descricao' => $this->input->post('bonus_descricao'),
                     'carteira_usuario_id' => $id
 
@@ -363,7 +363,7 @@ class Admincarteira extends MY_Controller {
                 $retirada_data = array(
                     'tipo' => 'retirada',
                     'valor' => $retirada,
-                    'data_transacao' => date('Y-m-d H:i:s'),
+                    'data_transacao' => date('Y-m-d'),
                     'descricao' => $this->input->post('retirada_descricao'),
                     'carteira_usuario_id' => $id,
                     'considerado_saldo' => 0
@@ -371,7 +371,7 @@ class Admincarteira extends MY_Controller {
                 
                 // Marca todas as transações anteriores como consideradas
                 $this->db->where('carteira_usuario_id', $id);
-                $this->db->where('data_transacao <=', date('Y-m-d H:i:s'));
+                $this->db->where('data_transacao <=', date('Y-m-d'));
                 $this->db->where('tipo !=', 'retirada');
                 $this->db->update('transacoes_usuario', array('considerado_saldo' => 1));
                 

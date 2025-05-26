@@ -15,7 +15,7 @@ $query = "SELECT * FROM configuracao_carteira";
 $result = $mysqli->query($query);
 
 $dia_atual = (int)date('d');
-$data_atual = date('Y-m-d H:i:s');
+$data_atual = date('Y-m-d');
 
 while ($config = $result->fetch_object()) {
     // Verifica se é dia de pagamento
@@ -67,6 +67,7 @@ while ($config = $result->fetch_object()) {
                          VALUES ('comissao', ?, ?, ?, ?)";
                 $stmt = $mysqli->prepare($query);
                 $descricao = !empty($os_ids) ? 'OS: ' . implode(', ', $os_ids) : 'Comissão Fixa ' . ($config->tipo_repeticao == 'quinzenal' ? 'Quinzenal' : 'Mensal');
+                $data_atual = date('Y-m-d H:i:s');
                 $stmt->bind_param('dssi', $comissao, $data_atual, $descricao, $config->carteira_usuario_id);
                 $stmt->execute();
                 

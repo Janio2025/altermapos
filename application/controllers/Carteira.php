@@ -460,7 +460,7 @@ class Carteira extends MY_Controller
             $dados_transacao = [
                 'tipo' => 'comissao',
                 'valor' => $valor_comissao,
-                'data_transacao' => date('Y-m-d H:i:s'),
+                'data_transacao' => date('Y-m-d'),
                 'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                 'considerado_saldo' => 1
             ];
@@ -555,7 +555,7 @@ class Carteira extends MY_Controller
                 $transacao = array(
                     'tipo' => 'retirada',
                     'valor' => $valor_saque,
-                    'data_transacao' => date('Y-m-d H:i:s'),
+                    'data_transacao' => date('Y-m-d'),
                     'descricao' => 'Saque via PIX em processamento',
                     'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                     'considerado_saldo' => 1
