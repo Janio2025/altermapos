@@ -448,16 +448,16 @@
             <span class="icon">
                 <i class="bx bx-chart"></i>
             </span>
-            <div class="filtro-periodo" style="margin-left: 10px;">
+            <div class="filtro-periodo" style="margin-left: 10px; display: flex; align-items: center;">
                 <select id="tipo-filtro" class="form-control" style="width: auto; display: inline-block;">
                     <option value="mes">Mês</option>
                     <option value="ano">Ano</option>
                     <option value="periodo">Período</option>
                 </select>
-                <div id="filtro-periodo-campos" style="display: none; margin-top: 10px;">
+                <div id="filtro-periodo-campos" style="display: none; margin-left: 10px;">
                     <input type="date" id="data-inicio" class="form-control" style="width: auto; display: inline-block;">
                     <input type="date" id="data-fim" class="form-control" style="width: auto; display: inline-block;">
-                    <button id="btn-buscar" style="margin-left: -10px;" class="btn btn-primary">Buscar</button>
+                    <button id="btn-buscar" style="margin-top: -10px;" class="btn btn-primary">Buscar</button>
                 </div>
             </div>
         </div>
