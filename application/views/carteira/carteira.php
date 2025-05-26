@@ -680,7 +680,7 @@
                         <?php else : ?>
                             <?php foreach ($transacoes as $t) : ?>
                                 <tr>
-                                    <td class="col-data"><?php echo date('d/m/Y', strtotime($t->data_transacao)); ?></td>
+                                    <td class="col-data"><?php echo date('d/m/Y H:i:s', strtotime($t->data_transacao)); ?></td>
                                     <td class="col-tipo">
                                         <?php
                                         switch ($t->tipo) {
@@ -886,8 +886,9 @@
                 
                 if (isNaN(valor)) return;
 
-                // Verifica se a data é do mês atual
-                let [dia, mes, ano] = data.split('/');
+                // Extrai apenas a parte da data (antes do espaço)
+                let dataParte = data.split(' ')[0];
+                let [dia, mes, ano] = dataParte.split('/');
                 let dataTransacao = new Date(ano, mes - 1, dia);
                 
                 if (dataTransacao.getMonth() === mesAtual && 
