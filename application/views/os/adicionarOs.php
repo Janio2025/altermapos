@@ -141,7 +141,7 @@
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         
-                                        <div class="span4">
+                                        <div class="span3">
                                             <label for="organizador_id">Organizador<span class="required">*</span></label>
                                             <select id="organizador_id" name="organizador_id" class="span12 select2">
                                                 <option value="">Buscar organizador...</option>
@@ -155,28 +155,28 @@
                                             </select>
                                         </div>
 
-                                        <div class="span4">
+                                        <div class="span3">
                                             <label for="compartimento_id">Compartimento</label>
                                             <select id="compartimento_id" name="compartimento_id" class="span12">
                                                 <option value="">Selecione primeiro um organizador</option>
                                             </select>
                                         </div>
 
-                                    </div>
-
-                                    <div class="span12" style="padding: 1%; margin-left: 0">
-                                        <div class="span4">
+                                        <div class="span3">
                                             <label for="defeito">Defeito reclamado pelo cliente</label>
                                             <input name="defeito" class="span12" type="text" id="defeito" value="" />
 
                                         </div>
 
-                                        <div class="span4">
+                                        <div class="span3">
                                             <label for="analiseBasica">Defeito constatado em pré-análise</label>
                                             <input name="analiseBasica" class="span12" type="text" id="analiseBasica" value="" />
 
                                         </div>
+
                                     </div>
+
+                                   
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
 
