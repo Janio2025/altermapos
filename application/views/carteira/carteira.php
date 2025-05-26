@@ -444,12 +444,11 @@
 
     <!-- Resumo Mensal -->
     <div class="widget-box">
-        <div class="widget-title">
+        <div class="widget-title" style="display: flex; align-items: center; padding: 10px 20px;">
             <span class="icon">
                 <i class="bx bx-chart"></i>
             </span>
-            <h5>Resumo do Mês Atual</h5>
-            <div class="filtro-periodo" style="float: right; margin-right: 10px;">
+            <div class="filtro-periodo" style="margin-left: 10px;">
                 <select id="tipo-filtro" class="form-control" style="width: auto; display: inline-block;">
                     <option value="mes">Mês</option>
                     <option value="ano">Ano</option>
@@ -458,7 +457,7 @@
                 <div id="filtro-periodo-campos" style="display: none; margin-top: 10px;">
                     <input type="date" id="data-inicio" class="form-control" style="width: auto; display: inline-block;">
                     <input type="date" id="data-fim" class="form-control" style="width: auto; display: inline-block;">
-                    <button id="btn-buscar" class="btn btn-primary">Buscar</button>
+                    <button id="btn-buscar" style="margin-left: -10px;" class="btn btn-primary">Buscar</button>
                 </div>
             </div>
         </div>
@@ -945,18 +944,6 @@
             $('#total-bonus').text(formatarMoeda(totalBonus));
             $('#total-salario').text(formatarMoeda(totalSalario));
             $('#total-ganhos').text(formatarMoeda(totalComissoes + totalBonus + totalSalario));
-
-            // Atualiza o título do widget baseado no filtro
-            let titulo = 'Resumo do ';
-            if (tipoFiltro === 'mes') {
-                titulo += 'Mês Atual';
-            } else if (tipoFiltro === 'ano') {
-                titulo += 'Ano ' + new Date().getFullYear();
-            } else {
-                titulo += 'Período Selecionado';
-            }
-            // Atualiza apenas o título do widget de resumo mensal
-            $('.widget-box:has(.filtro-periodo) .widget-title h5').text(titulo);
         }
 
         // Manipuladores de eventos para o filtro
