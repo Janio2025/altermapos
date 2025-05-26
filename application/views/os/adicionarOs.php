@@ -2,6 +2,11 @@
 <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery-ui/js/jquery-ui-1.9.2.custom.js"></script>
 <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.validate.js"></script>
 
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/trumbowyg/ui/trumbowyg.css">
 <script type="text/javascript" src="<?php echo base_url(); ?>assets/trumbowyg/trumbowyg.js"></script>
 <script type="text/javascript" src="<?php echo base_url(); ?>assets/trumbowyg/langs/pt_br.js"></script>
@@ -137,12 +142,29 @@
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         
                                         <div class="span4">
-                                            <label for="localizacaoProdutoOs">LOCALIZAÇÃO</label>
-                                            <input name="localizacaoProdutoOs" class="span12" type="text" id="localizacaoProdutoOs"
-                                                value="" onChange="javascript:this.value=this.value.toUpperCase();"/>
-
+                                            <label for="organizador_id">Organizador<span class="required">*</span></label>
+                                            <select id="organizador_id" name="organizador_id" class="span12 select2">
+                                                <option value="">Buscar organizador...</option>
+                                                <?php foreach ($organizadores as $organizador) : ?>
+                                                    <option value="<?php echo $organizador->id; ?>">
+                                                        <?php echo $organizador->nome_organizador; ?>
+                                                        <label for="">-</label> 
+                                                        <?php echo $organizador->localizacao; ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
 
+                                        <div class="span4">
+                                            <label for="compartimento_id">Compartimento</label>
+                                            <select id="compartimento_id" name="compartimento_id" class="span12">
+                                                <option value="">Selecione primeiro um organizador</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="span12" style="padding: 1%; margin-left: 0">
                                         <div class="span4">
                                             <label for="defeito">Defeito reclamado pelo cliente</label>
                                             <input name="defeito" class="span12" type="text" id="defeito" value="" />
@@ -579,6 +601,51 @@
 
         // Carrega os usuários fixados ao iniciar
         carregarUsuariosFixados();
+
+        // Inicializar o Select2 para o campo de organizador
+        $('#organizador_id').select2({
+            placeholder: "Buscar organizador...",
+            allowClear: true
+        });
+
+        // Quando um organizador é selecionado
+        $('#organizador_id').change(function() {
+            var organizador_id = $(this).val();
+            var compartimento_select = $('#compartimento_id');
+            
+            // Limpar o select de compartimentos
+            compartimento_select.empty();
+            
+            if (organizador_id) {
+                // Carregar compartimentos via AJAX
+                $.ajax({
+                    url: '<?php echo site_url('os/buscarCompartimentos'); ?>',
+                    type: 'GET',
+                    data: { organizador_id: organizador_id },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data && data.length > 0) {
+                            // Se houver compartimentos, adiciona a opção de selecionar
+                            compartimento_select.append('<option value="">Selecione um compartimento</option>');
+                            // Adicionar os compartimentos ao select
+                            $.each(data, function(index, item) {
+                                compartimento_select.append(
+                                    $('<option></option>').val(item.id).text(item.nome_compartimento)
+                                );
+                            });
+                        } else {
+                            // Se não houver compartimentos, mostra mensagem apropriada
+                            compartimento_select.append('<option value="">Organizador sem compartimentos</option>');
+                        }
+                    },
+                    error: function() {
+                        compartimento_select.append('<option value="">Erro ao carregar compartimentos</option>');
+                    }
+                });
+            } else {
+                compartimento_select.append('<option value="">Selecione primeiro um organizador</option>');
+            }
+        });
     });
 
 </script>

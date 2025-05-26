@@ -134,4 +134,25 @@ class Organizadores_model extends CI_Model
         $this->db->limit(1);
         return $this->db->get()->row();
     }
+
+    // Método genérico para buscar registros
+    public function get($table, $fields = '*', $where = null, $order = null, $limit = null)
+    {
+        $this->db->select($fields);
+        $this->db->from($table);
+        
+        if ($where) {
+            $this->db->where($where);
+        }
+        
+        if ($order) {
+            $this->db->order_by($order);
+        }
+        
+        if ($limit) {
+            $this->db->limit($limit);
+        }
+        
+        return $this->db->get()->result();
+    }
 }

@@ -83,10 +83,15 @@ class Os extends MY_Controller
         }
 
         $this->load->library('form_validation');
+        $this->load->model('clientes_model');
+        $this->load->model('usuarios_model');
+        $this->load->model('organizadores_model');
+        
+        $this->data['organizadores'] = $this->organizadores_model->get('organizadores', '*');
         $this->data['custom_error'] = '';
 
         if ($this->form_validation->run('os') == false) {
-            $this->data['custom_error'] = (validation_errors() ? true : false);
+            $this->data['custom_error'] = (validation_errors() ? '<div class="alert alert-danger">' . validation_errors() . '</div>' : false);
         } else {
             $dataInicial = $this->input->post('dataInicial');
             $dataFinal = $this->input->post('dataFinal');
@@ -113,8 +118,8 @@ class Os extends MY_Controller
 
             $data = [
                 'dataInicial' => $dataInicial,
-                'clientes_id' => $this->input->post('clientes_id'), //set_value('idCliente'),
-                'usuarios_id' => $this->input->post('usuarios_id'), //set_value('idUsuario'),
+                'clientes_id' => $this->input->post('clientes_id'),
+                'usuarios_id' => $this->input->post('usuarios_id'),
                 'dataFinal' => $dataFinal,
                 'garantia' => set_value('garantia'),
                 'garantias_id' => $termoGarantiaId,
@@ -131,6 +136,8 @@ class Os extends MY_Controller
                 'observacoes' => set_value('observacoes'),
                 'laudoTecnico' => set_value('laudoTecnico'),
                 'faturado' => 0,
+                'organizador_id' => $this->input->post('organizador_id'),
+                'compartimento_id' => $this->input->post('compartimento_id')
             ];
 
             if (is_numeric($id = $this->os_model->add('os', $data, true))) {
@@ -268,6 +275,8 @@ class Os extends MY_Controller
                 'laudoTecnico' => $this->input->post('laudoTecnico'),
                 'usuarios_id' => $this->input->post('usuarios_id'),
                 'clientes_id' => $this->input->post('clientes_id'),
+                'organizador_id' => $this->input->post('organizador_id'),
+                'compartimento_id' => $this->input->post('compartimento_id')
             ];
             $os = $this->os_model->getById($this->input->post('idOs'));
 
@@ -1220,6 +1229,22 @@ private function formatarChave($chave)
             echo json_encode(['success' => true]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Erro ao remover usuário']);
+        }
+    }
+
+    public function buscarCompartimentos() {
+        $this->load->model('compartimentos_model');
+        $organizador_id = $this->input->get('organizador_id');
+        
+        if ($organizador_id) {
+            $compartimentos = $this->compartimentos_model->getCompartimentosByOrganizador($organizador_id);
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode($compartimentos));
+        } else {
+            return $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode([]));
         }
     }
 }
