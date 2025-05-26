@@ -901,8 +901,6 @@
                 // Filtro por período personalizado
                 dataInicio = new Date($('#data-inicio').val());
                 dataFim = new Date($('#data-fim').val());
-                // Adiciona um dia à data final para incluir todas as transações do dia
-                dataFim.setDate(dataFim.getDate() + 1);
             }
 
             $('.table-transactions tbody tr').each(function() {
@@ -921,7 +919,7 @@
                 let dataTransacao = new Date(ano, mes - 1, dia);
                 
                 // Verifica se a data está dentro do período selecionado
-                if (dataTransacao >= dataInicio && dataTransacao < dataFim) {
+                if (dataTransacao >= dataInicio && dataTransacao <= dataFim) {
                     switch (tipo) {
                         case 'retirada':
                             totalRetiradas += valor;
@@ -955,7 +953,8 @@
             } else {
                 titulo += 'Período Selecionado';
             }
-            $('.widget-title h5').text(titulo);
+            // Atualiza apenas o título do widget de resumo mensal
+            $('.widget-box:has(.filtro-periodo) .widget-title h5').text(titulo);
         }
 
         // Manipuladores de eventos para o filtro
@@ -984,9 +983,6 @@
         
         $('#data-inicio').val(primeiroDiaMes.toISOString().split('T')[0]);
         $('#data-fim').val(ultimoDiaMes.toISOString().split('T')[0]);
-
-        // Calcula os totais ao carregar a página
-        atualizarTotais();
 
         // Função para abrir o modal de movimentações
         window.abrirModalMovimentacoes = function(tipo, titulo, cor, icone) {
