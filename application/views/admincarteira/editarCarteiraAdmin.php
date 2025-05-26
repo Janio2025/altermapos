@@ -210,29 +210,7 @@
 <script src="<?php echo base_url(); ?>assets/js/jquery.validate.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/maskmoney.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="<?php echo base_url(); ?>assets/js/csrf.js"></script>
-
-<!-- Meta tags para CSRF -->
-<meta name="csrf-token-name" content="<?php echo $this->security->get_csrf_token_name(); ?>">
-
 <script type="text/javascript">
-    // Configuração global do AJAX para incluir o token CSRF
-    $.ajaxSetup({
-        beforeSend: function(xhr, settings) {
-            if (settings.type === 'POST') {
-                var csrfTokenName = '<?php echo $this->security->get_csrf_token_name(); ?>';
-                var csrfToken = $('input[name="' + csrfTokenName + '"]').val();
-                if (typeof settings.data === 'object') {
-                    settings.data[csrfTokenName] = csrfToken;
-                } else {
-                    settings.data += '&' + $.param({
-                        [csrfTokenName]: csrfToken
-                    });
-                }
-            }
-        }
-    });
-
     // Função para converter valor do formato brasileiro para número
     function parseMoneyBR(value) {
         if (!value) return 0;
@@ -669,23 +647,6 @@
                     });
                 }
             });
-        });
-
-        // Atualiza o token CSRF após cada requisição AJAX
-        $(document).ajaxComplete(function(event, xhr, settings) {
-            var csrf_token = xhr.getResponseHeader('X-CSRF-TOKEN');
-            if (csrf_token) {
-                $('input[name="<?php echo $this->security->get_csrf_token_name(); ?>"]').val(csrf_token);
-            }
-        });
-
-        // Adiciona o token CSRF em todas as requisições AJAX
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (settings.type === 'POST') {
-                    xhr.setRequestHeader('X-CSRF-TOKEN', $('input[name="<?php echo $this->security->get_csrf_token_name(); ?>"]').val());
-                }
-            }
         });
     });
 

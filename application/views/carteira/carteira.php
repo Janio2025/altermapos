@@ -368,46 +368,6 @@
     .table-transactions .btn-nwe i {
         font-size: 16px;
     }
-    /* Estilos para os controles de filtro */
-    #filtroPeriodo {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 6px 12px;
-        background-color: #fff;
-        transition: border-color 0.15s ease-in-out;
-    }
-    #filtroPeriodo:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-    }
-    #camposPeriodo input[type="date"] {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 6px 12px;
-        background-color: #fff;
-        transition: border-color 0.15s ease-in-out;
-    }
-    #camposPeriodo input[type="date"]:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-    }
-    #camposPeriodo .btn-primary {
-        padding: 6px 12px;
-        border-radius: 4px;
-        background-color: #007bff;
-        border-color: #007bff;
-        color: #fff;
-        transition: all 0.15s ease-in-out;
-    }
-    #camposPeriodo .btn-primary:hover {
-        background-color: #0069d9;
-        border-color: #0062cc;
-    }
-    #camposPeriodo .btn-primary i {
-        margin-right: 5px;
-    }
 </style>
 
 <div class="new122">
@@ -484,29 +444,15 @@
 
     <!-- Resumo Mensal -->
     <div class="widget-box">
-        
+        <div class="widget-title">
+            <span class="icon">
+                <i class="bx bx-chart"></i>
+            </span>
+            <h5>Resumo do Mês Atual</h5>
+        </div>
         <div class="widget-content">
-            
             <div class="row-fluid" style="padding: 0;">
                 <div class="span12" style="padding: 0;">
-                    <!-- Controles de Filtro -->
-                    <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
-                        <select id="filtroPeriodo" class="form-control" style="width: 150px;">
-                            <option value="mes">Resumo Mês</option>
-                            <option value="ano">Resumo Ano</option>
-                            <option value="periodo">Resumo Período</option>
-                        </select>
-                        
-                        <!-- Campos de data (inicialmente ocultos) -->
-                        <div id="camposPeriodo" style="display: none; flex: 1; gap: 10px;">
-                            <input type="date" id="dataInicial" class="form-control" style="width: 150px;">
-                            <input type="date" id="dataFinal" class="form-control" style="width: 150px;">
-                            <button type="button" style="margin-top: -10px;" class="btn btn-primary" onclick="buscarPorPeriodo()">
-                                <i class="bx bx-search"></i> Buscar
-                            </button>
-                        </div>
-                    </div>
-
                     <div class="cards-grid">
                         <!-- Card Retiradas -->
                         <div class="summary-card" onclick="abrirModalMovimentacoes('retirada', 'Retiradas', '#dc3545', 'bx-transfer-alt')">
@@ -734,7 +680,7 @@
                         <?php else : ?>
                             <?php foreach ($transacoes as $t) : ?>
                                 <tr>
-                                    <td class="col-data"><?php echo date('d/m/Y H:i:s', strtotime($t->data_transacao)); ?></td>
+                                    <td class="col-data"><?php echo date('d/m/Y', strtotime($t->data_transacao)); ?></td>
                                     <td class="col-tipo">
                                         <?php
                                         switch ($t->tipo) {
@@ -882,45 +828,6 @@
             return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // Controle do select de período
-        $('#filtroPeriodo').change(function() {
-            const valor = $(this).val();
-            if (valor === 'periodo') {
-                $('#camposPeriodo').show();
-            } else {
-                $('#camposPeriodo').hide();
-                atualizarTotais(valor);
-            }
-        });
-
-        // Função para buscar por período
-        window.buscarPorPeriodo = function() {
-            const dataInicial = $('#dataInicial').val();
-            const dataFinal = $('#dataFinal').val();
-            
-            if (!dataInicial || !dataFinal) {
-                Swal.fire({
-                    title: 'Atenção',
-                    text: 'Por favor, selecione as datas inicial e final',
-                    icon: 'warning'
-                });
-                return;
-            }
-            
-            // Converte as datas para o formato correto (YYYY-MM-DD)
-            const dataIni = new Date(dataInicial);
-            const dataFim = new Date(dataFinal);
-            
-            // Ajusta para o início do dia na data inicial
-            dataIni.setHours(0, 0, 0, 0);
-            
-            // Ajusta a data final para o dia seguinte às 00:00:00
-            dataFim.setDate(dataFim.getDate() + 1);
-            dataFim.setHours(0, 0, 0, 0);
-            
-            atualizarTotais('periodo', dataIni, dataFim);
-        };
-
         // Função para buscar o valor base da comissão
         function buscarValorBase() {
             let tipoValorBase = '<?php echo isset($config) ? $config->tipo_valor_base : "servicos"; ?>';
@@ -958,70 +865,35 @@
         buscarValorBase(); // Chama imediatamente ao carregar
         setInterval(buscarValorBase, 30000); // Atualiza a cada 30 segundos
 
-        // Calcula os totais
-        function atualizarTotais(tipo = 'mes', dataInicial = null, dataFinal = null) {
+        // Calcula os totais mensais
+        function atualizarTotais() {
             let totalRetiradas = 0;
             let totalComissoes = 0;
             let totalBonus = 0;
             let totalSalario = 0;
 
-            // Função para comparar apenas as datas (ignorando horários)
-            function compararDatas(data1, data2) {
-                return data1.getFullYear() === data2.getFullYear() &&
-                       data1.getMonth() === data2.getMonth() &&
-                       data1.getDate() === data2.getDate();
-            }
-
-            // Verifica se a data é hoje
-            function eHoje(data) {
-                const hoje = new Date();
-                return compararDatas(data, hoje);
-            }
+            // Calcula totais do mês atual
+            let mesAtual = new Date().getMonth();
+            let anoAtual = new Date().getFullYear();
 
             $('.table-transactions tbody tr').each(function() {
                 let data = $(this).find('.col-data').text();
                 if (!data) return;
 
-                let tipoTransacao = $(this).find('.col-tipo span').attr('data-tipo');
+                let tipo = $(this).find('.col-tipo span').attr('data-tipo');
                 let valorText = $(this).find('.col-valor').text().replace('R$ ', '');
                 let valor = parseFloat(valorText.replace('.', '').replace(',', '.'));
                 
                 if (isNaN(valor)) return;
 
-                // Converte a data do formato dd/mm/yyyy H:i:s para objeto Date
-                let [dataPart, horaPart] = data.split(' ');
-                let [dia, mes, ano] = dataPart.split('/');
-                let [hora, minuto, segundo] = horaPart.split(':');
-                let dataTransacao = new Date(ano, mes - 1, dia, hora, minuto, segundo);
+                // Verifica se a data é do mês atual
+                let [dia, mes, ano] = data.split('/');
+                let dataTransacao = new Date(ano, mes - 1, dia);
                 
-                // Verifica se a data está dentro do período selecionado
-                let incluir = false;
-                
-                switch (tipo) {
-                    case 'mes':
-                        let mesAtual = new Date().getMonth();
-                        let anoAtual = new Date().getFullYear();
-                        incluir = dataTransacao.getMonth() === mesAtual && 
-                                dataTransacao.getFullYear() === anoAtual;
-                        break;
-                        
-                    case 'ano':
-                        let anoAtual2 = new Date().getFullYear();
-                        incluir = dataTransacao.getFullYear() === anoAtual2;
-                        break;
-                        
-                    case 'periodo':
-                        // Se a data final for hoje, inclui todas as transações do dia atual
-                        if (eHoje(dataFinal)) {
-                            incluir = dataTransacao >= dataInicial || eHoje(dataTransacao);
-                        } else {
-                            incluir = dataTransacao >= dataInicial && dataTransacao <= dataFinal;
-                        }
-                        break;
-                }
-                
-                if (incluir) {
-                    switch (tipoTransacao) {
+                if (dataTransacao.getMonth() === mesAtual && 
+                    dataTransacao.getFullYear() === anoAtual) {
+                    
+                    switch (tipo) {
                         case 'retirada':
                             totalRetiradas += valor;
                             break;
@@ -1051,7 +923,7 @@
 
         // Recalcula os totais quando uma nova transação é adicionada
         $(document).on('transacaoAdicionada', function() {
-            atualizarTotais($('#filtroPeriodo').val());
+            atualizarTotais();
         });
 
         // Função para abrir o modal de movimentações

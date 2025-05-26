@@ -379,15 +379,11 @@ CREATE TABLE IF NOT EXISTS `os` (
     `lancamento` int DEFAULT NULL,
     `faturado` tinyint(1) NOT NULL,
     `garantias_id` int DEFAULT NULL,
-    `organizador_id` int DEFAULT NULL,
-    `compartimento_id` int DEFAULT NULL,
     PRIMARY KEY (`idOs`),
     KEY `fk_os_clientes1` (`clientes_id`),
     KEY `fk_os_usuarios1` (`usuarios_id`),
     KEY `fk_os_lancamentos1` (`lancamento`),
     KEY `fk_os_garantias1` (`garantias_id`),
-    KEY `fk_os_organizador` (`organizador_id`),
-    KEY `fk_os_compartimento` (`compartimento_id`),
     CONSTRAINT `fk_os_clientes1`
         FOREIGN KEY (`clientes_id`)
         REFERENCES `clientes` (`idClientes`)
@@ -402,18 +398,9 @@ CREATE TABLE IF NOT EXISTS `os` (
         FOREIGN KEY (`usuarios_id`)
         REFERENCES `usuarios` (`idUsuarios`)
         ON DELETE NO ACTION
-        ON UPDATE NO ACTION,
-    CONSTRAINT `fk_os_organizador`
-        FOREIGN KEY (`organizador_id`)
-        REFERENCES `organizadores` (`id`)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT `fk_os_compartimento`
-        FOREIGN KEY (`compartimento_id`)
-        REFERENCES `compartimentos` (`id`)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
+        ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- -----------------------------------------------------
 -- Table `os_usuarios`
 -- -----------------------------------------------------    

@@ -7,13 +7,6 @@
 <script type="text/javascript" src="<?php echo base_url(); ?>assets/trumbowyg/langs/pt_br.js"></script>
 
 <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/custom.css" />
-
-<!-- Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
         <div class="widget-box">
@@ -100,12 +93,12 @@
                                         </div>
 
                                         <div class="span3">
-                                            <div class="control-group span12">
-                                                <label for="termoGarantia" class="control-label">Termo de Garantia<span class="required">*</span></label>
-                                                <div class="controls">
-                                                    <input id="termoGarantia" class="span12" name="termoGarantia" type="text" value="<?php echo set_value('termoGarantia'); ?>" />
-                                                </div>
-                                            </div>
+
+                                            <label for="termoGarantia">Termo Garantia</label>
+                                            <input id="termoGarantia" class="span12" type="text" name="termoGarantia"
+                                                value="" />
+                                            <input id="garantias_id" class="span12" type="hidden" name="garantias_id"
+                                                value="" />
                                         </div>
 
                                     </div>
@@ -142,58 +135,41 @@
                                     </div>
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
-                                        <div class="row-fluid">
-                                            <div class="control-group span3">
-                                                <label for="organizador_id" class="control-label">Organizador<span class="required">*</span></label>
-                                                <div class="controls">
-                                                    <select name="organizador_id" id="organizador_id" class="span12">
-                                                        <option value="">Selecione um organizador</option>
-                                                        <?php foreach ($organizadores as $organizador) : ?>
-                                                    <option value="<?php echo $organizador->id; ?>">
-                                                        <?php echo $organizador->nome_organizador; ?>
-                                                        <label for="">-</label> 
-                                                        <?php echo $organizador->localizacao; ?>
-                                                    </option>
-                                                <?php endforeach; ?>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                        
+                                        <div class="span4">
+                                            <label for="localizacaoProdutoOs">LOCALIZAÇÃO</label>
+                                            <input name="localizacaoProdutoOs" class="span12" type="text" id="localizacaoProdutoOs"
+                                                value="" onChange="javascript:this.value=this.value.toUpperCase();"/>
 
-                                            <div class="control-group span3">
-                                                <label for="compartimento_id" class="control-label">Compartimento</label>
-                                                <div class="controls">
-                                                    <select name="compartimento_id" id="compartimento_id" class="span12">
-                                                        <option value="">Selecione um compartimento</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="control-group span3">
-                                                <label for="defeito" class="control-label">Defeito reclamado pelo cliente</label>
-                                                <div class="controls">
-                                                    <input id="defeito" class="span12" name="defeito" type="text" value="<?php echo set_value('defeito'); ?>" />
-                                                </div>
-                                            </div>
-
-                                            <div class="control-group span3">
-                                                <label for="analiseBasica" class="control-label">Análise Básica</label>
-                                                <div class="controls">
-                                                    <input id="analiseBasica" class="span12" name="analiseBasica" type="text" value="<?php echo set_value('analiseBasica'); ?>" />
-                                                </div>
-                                            </div>
                                         </div>
+
+                                        <div class="span4">
+                                            <label for="defeito">Defeito reclamado pelo cliente</label>
+                                            <input name="defeito" class="span12" type="text" id="defeito" value="" />
+
+                                        </div>
+
+                                        <div class="span4">
+                                            <label for="analiseBasica">Defeito constatado em pré-análise</label>
+                                            <input name="analiseBasica" class="span12" type="text" id="analiseBasica" value="" />
+
+                                        </div>
+                                    </div>
+
+                                    <div class="span12" style="padding: 1%; margin-left: 0">
+
                                     </div>
 
                                     <div class="span12" style="padding: 1%; margin-left: 0">
                                         <div class="span6 offset3" style="display:flex">
                                             <button class="button btn btn-success" id="btnContinuar">
-                                                <span class="button__icon"><i class='bx bx-chevrons-right'></i></span>
-                                                <span class="button__text2">Continuar</span>
-                                            </button>
-                                            <a href="<?php echo base_url(); ?>index.php/os" class="button btn btn-mini btn-warning" style="max-width: 160px">
-                                                <span class="button__icon"><i class="bx bx-undo"></i></span>
-                                                <span class="button__text2">Voltar</span>
-                                            </a>
+                                                <span class="button__icon"><i
+                                                        class='bx bx-chevrons-right'></i></span><span
+                                                    class="button__text2">Continuar</span></button>
+                                            <a href="<?php echo base_url(); ?>index.php/os"
+                                                class="button btn btn-mini btn-warning" style="max-width: 160px">
+                                                <span class="button__icon"><i class="bx bx-undo"></i></span><span
+                                                    class="button__text2">Voltar</span></a>
                                         </div>
                                     </div>
 
@@ -516,10 +492,8 @@
                 },
                 dataFinal: {
                     required: true
-                },
-                organizador_id: {
-                    required: true
                 }
+
             },
             messages: {
                 cliente: {
@@ -533,9 +507,6 @@
                 },
                 dataFinal: {
                     required: 'Campo Requerido.'
-                },
-                organizador_id: {
-                    required: 'Selecione um organizador.'
                 }
             },
             errorClass: "help-inline",
@@ -608,40 +579,6 @@
 
         // Carrega os usuários fixados ao iniciar
         carregarUsuariosFixados();
-
-        // Inicializar Select2 para o organizador
-        $('#organizador_id').select2({
-            placeholder: "Buscar organizador...",
-            allowClear: true
-        });
-
-        // Inicializar Select2 para o compartimento
-        $('#compartimento_id').select2({
-            placeholder: "Selecione primeiro um organizador",
-            allowClear: true
-        });
-
-        // Quando um organizador é selecionado
-        $('#organizador_id').change(function() {
-            var organizadorId = $(this).val();
-            if (organizadorId) {
-                $.ajax({
-                    url: '<?php echo site_url('os/buscarCompartimentos'); ?>',
-                    type: 'GET',
-                    data: { organizador_id: organizadorId },
-                    dataType: 'json',
-                    success: function(data) {
-                        var options = '<option value="">Selecione um compartimento</option>';
-                        $.each(data, function(key, value) {
-                            options += '<option value="' + value.id + '">' + value.nome_compartimento + '</option>';
-                        });
-                        $("#compartimento_id").html(options);
-                    }
-                });
-            } else {
-                $("#compartimento_id").html('<option value="">Selecione um compartimento</option>');
-            }
-        });
     });
 
 </script>

@@ -11,11 +11,9 @@ class Os_model extends CI_Model
 
     public function get($table, $fields, $where = '', $perpage = 0, $start = 0, $one = false, $array = 'array')
     {
-        $this->db->select($fields . ',clientes.nomeCliente, clientes.celular as celular_cliente, organizadores.nome_organizador, compartimentos.nome_compartimento');
+        $this->db->select($fields . ',clientes.nomeCliente, clientes.celular as celular_cliente');
         $this->db->from($table);
         $this->db->join('clientes', 'clientes.idClientes = os.clientes_id');
-        $this->db->join('organizadores', 'organizadores.id = os.organizador_id', 'left');
-        $this->db->join('compartimentos', 'compartimentos.id = os.compartimento_id', 'left');
         $this->db->limit($perpage, $start);
         $this->db->order_by('idOs', 'desc');
         if ($where) {
@@ -46,13 +44,11 @@ class Os_model extends CI_Model
             }
         }
 
-        $this->db->select($fields . ',clientes.idClientes, clientes.nomeCliente, clientes.celular as celular_cliente, usuarios.nome, garantias.*, organizadores.nome_organizador, compartimentos.nome_compartimento');
+        $this->db->select($fields . ',clientes.idClientes, clientes.nomeCliente, clientes.celular as celular_cliente, usuarios.nome, garantias.*');
         $this->db->from($table);
         $this->db->join('clientes', 'clientes.idClientes = os.clientes_id');
         $this->db->join('usuarios', 'usuarios.idUsuarios = os.usuarios_id');
         $this->db->join('garantias', 'garantias.idGarantias = os.garantias_id', 'left');
-        $this->db->join('organizadores', 'organizadores.id = os.organizador_id', 'left');
-        $this->db->join('compartimentos', 'compartimentos.id = os.compartimento_id', 'left');
         $this->db->join('produtos_os', 'produtos_os.os_id = os.idOs', 'left');
         $this->db->join('servicos_os', 'servicos_os.os_id = os.idOs', 'left');
 
@@ -92,13 +88,11 @@ class Os_model extends CI_Model
 
     public function getById($id)
     {
-        $this->db->select('os.*, clientes.*, clientes.celular as celular_cliente, clientes.telefone as telefone_cliente, clientes.contato as contato_cliente, garantias.refGarantia, garantias.textoGarantia, usuarios.telefone as telefone_usuario, usuarios.email as email_usuario, usuarios.nome, organizadores.nome_organizador, compartimentos.nome_compartimento');
+        $this->db->select('os.*, clientes.*, clientes.celular as celular_cliente, clientes.telefone as telefone_cliente, clientes.contato as contato_cliente, garantias.refGarantia, garantias.textoGarantia, usuarios.telefone as telefone_usuario, usuarios.email as email_usuario, usuarios.nome');
         $this->db->from('os');
         $this->db->join('clientes', 'clientes.idClientes = os.clientes_id');
         $this->db->join('usuarios', 'usuarios.idUsuarios = os.usuarios_id');
         $this->db->join('garantias', 'garantias.idGarantias = os.garantias_id', 'left');
-        $this->db->join('organizadores', 'organizadores.id = os.organizador_id', 'left');
-        $this->db->join('compartimentos', 'compartimentos.id = os.compartimento_id', 'left');
         $this->db->where('os.idOs', $id);
         $this->db->limit(1);
 

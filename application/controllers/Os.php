@@ -85,11 +85,6 @@ class Os extends MY_Controller
         $this->load->library('form_validation');
         $this->data['custom_error'] = '';
 
-        // Carrega o modelo de organizadores
-        $this->load->model('Organizadores_model');
-        // Busca apenas organizadores ativos
-        $this->data['organizadores'] = $this->db->where('ativa', true)->get('organizadores')->result();
-
         if ($this->form_validation->run('os') == false) {
             $this->data['custom_error'] = (validation_errors() ? true : false);
         } else {
@@ -136,8 +131,6 @@ class Os extends MY_Controller
                 'observacoes' => set_value('observacoes'),
                 'laudoTecnico' => set_value('laudoTecnico'),
                 'faturado' => 0,
-                'organizador_id' => $this->input->post('organizador_id'),
-                'compartimento_id' => $this->input->post('compartimento_id'),
             ];
 
             if (is_numeric($id = $this->os_model->add('os', $data, true))) {
@@ -275,8 +268,6 @@ class Os extends MY_Controller
                 'laudoTecnico' => $this->input->post('laudoTecnico'),
                 'usuarios_id' => $this->input->post('usuarios_id'),
                 'clientes_id' => $this->input->post('clientes_id'),
-                'organizador_id' => $this->input->post('organizador_id'),
-                'compartimento_id' => $this->input->post('compartimento_id'),
             ];
             $os = $this->os_model->getById($this->input->post('idOs'));
 
@@ -382,11 +373,6 @@ class Os extends MY_Controller
         $this->load->model('mapos_model');
         $this->data['emitente'] = $this->mapos_model->getEmitente();
 
-        // Carrega o modelo de organizadores
-        $this->load->model('Organizadores_model');
-        // Busca apenas organizadores ativos
-        $this->data['organizadores'] = $this->db->where('ativa', true)->get('organizadores')->result();
-
         $this->data['view'] = 'os/editarOs';
         return $this->layout();
     }
@@ -438,89 +424,89 @@ class Os extends MY_Controller
     }
 
     public function imprimir()
-    {
-        if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
-            $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
-            redirect('mapos');
-        }
-
-        if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
-            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
-            redirect(base_url());
-        }
-
-        $this->data['custom_error'] = '';
-        $this->load->model('mapos_model');
-        $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
-
-        $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
-        $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
-        $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
-        $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
-        $this->data['emitente'] = $this->mapos_model->getEmitente();
-
-        if (!empty($this->data['configuration']['pix_key'])) {
-            $this->data['qrCode'] = $this->os_model->getQrCode(
-                $this->uri->segment(3),
-                $this->data['configuration']['pix_key'],
-                $this->data['emitente']
-            );
-            
-            // Chamando o método formatarChave corretamente
-            $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
-        }
-
-        $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
-
-        $this->load->view('os/imprimirOs', $this->data);
+{
+    if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
+        $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
+        redirect('mapos');
     }
 
-    public function imprimirLaudo()
-    {
-        if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
-            $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
-            redirect('mapos');
-        }
-
-        if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
-            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
-            redirect(base_url());
-        }
-
-        $this->data['custom_error'] = '';
-        $this->load->model('mapos_model');
-        $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
-
-        $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
-        $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
-        $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
-        $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
-        $this->data['emitente'] = $this->mapos_model->getEmitente();
-
-        if (!empty($this->data['configuration']['pix_key'])) {
-            $this->data['qrCode'] = $this->os_model->getQrCode(
-                $this->uri->segment(3),
-                $this->data['configuration']['pix_key'],
-                $this->data['emitente']
-            );
-            
-            // Chamando o método formatarChave corretamente
-            $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
-        }
-
-        $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
-
-        $this->load->view('os/imprimirLaudo', $this->data);
+    if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
+        $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
+        redirect(base_url());
     }
 
-    /**
-     * Método para formatar a chave PIX
-     */
-    private function formatarChave($chave)
-    {
-        // Exemplo: removendo espaços e caracteres especiais
-        return preg_replace('/[^a-zA-Z0-9]/', '', $chave);
+    $this->data['custom_error'] = '';
+    $this->load->model('mapos_model');
+    $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
+
+    $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
+    $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
+    $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
+    $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
+    $this->data['emitente'] = $this->mapos_model->getEmitente();
+
+    if (!empty($this->data['configuration']['pix_key'])) {
+        $this->data['qrCode'] = $this->os_model->getQrCode(
+            $this->uri->segment(3),
+            $this->data['configuration']['pix_key'],
+            $this->data['emitente']
+        );
+        
+        // Chamando o método formatarChave corretamente
+        $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
     }
+
+    $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
+
+    $this->load->view('os/imprimirOs', $this->data);
+}
+
+public function imprimirLaudo()
+{
+    if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
+        $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
+        redirect('mapos');
+    }
+
+    if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
+        $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
+        redirect(base_url());
+    }
+
+    $this->data['custom_error'] = '';
+    $this->load->model('mapos_model');
+    $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
+
+    $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
+    $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
+    $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
+    $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
+    $this->data['emitente'] = $this->mapos_model->getEmitente();
+
+    if (!empty($this->data['configuration']['pix_key'])) {
+        $this->data['qrCode'] = $this->os_model->getQrCode(
+            $this->uri->segment(3),
+            $this->data['configuration']['pix_key'],
+            $this->data['emitente']
+        );
+        
+        // Chamando o método formatarChave corretamente
+        $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
+    }
+
+    $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
+
+    $this->load->view('os/imprimirLaudo', $this->data);
+}
+
+/**
+ * Método para formatar a chave PIX
+ */
+private function formatarChave($chave)
+{
+    // Exemplo: removendo espaços e caracteres especiais
+    return preg_replace('/[^a-zA-Z0-9]/', '', $chave);
+}
 
     public function imprimirTermica()
     {
@@ -1235,18 +1221,5 @@ class Os extends MY_Controller
         } else {
             echo json_encode(['success' => false, 'message' => 'Erro ao remover usuário']);
         }
-    }
-
-    public function buscarCompartimentos() {
-        if (!$this->input->is_ajax_request()) {
-            exit('Acesso não permitido');
-        }
-
-        $organizador_id = $this->input->get('organizador_id');
-        $this->db->where('organizador_id', $organizador_id);
-        $this->db->where('ativa', true);
-        $compartimentos = $this->db->get('compartimentos')->result();
-
-        echo json_encode($compartimentos);
     }
 }

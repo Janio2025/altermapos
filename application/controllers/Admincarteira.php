@@ -328,9 +328,10 @@ class Admincarteira extends MY_Controller {
                 $bonus_data = array(
                     'tipo' => 'bonus',
                     'valor' => $bonus,
-                    'data_transacao' => date('Y-m-d H:i:s'),
+                    'data_transacao' => date('Y-m-d'),
                     'descricao' => $this->input->post('bonus_descricao'),
                     'carteira_usuario_id' => $id
+
                 );
                 $this->db->insert('transacoes_usuario', $bonus_data);
             }
@@ -341,7 +342,7 @@ class Admincarteira extends MY_Controller {
                 $comissao_data = array(
                     'tipo' => 'comissao',
                     'valor' => $comissao,
-                    'data_transacao' => date('Y-m-d H:i:s'),
+                    'data_transacao' => date('Y-m-d'),
                     'descricao' => $this->input->post('comissao_descricao'),
                     'carteira_usuario_id' => $id
                 );
@@ -978,7 +979,7 @@ class Admincarteira extends MY_Controller {
                     $data = [
                         'tipo' => 'comissao',
                         'valor' => $valor_comissao,
-                        'data_transacao' => date('Y-m-d H:i:s'),
+                        'data_transacao' => date('Y-m-d'),
                         'descricao' => $descricao,
                         'carteira_usuario_id' => $carteira->idCarteiraUsuario,
                         'considerado_saldo' => 1
@@ -1223,7 +1224,7 @@ class Admincarteira extends MY_Controller {
                             $data_comissao = array(
                                 'tipo' => 'comissao',
                                 'valor' => $valor_comissao,
-                                'data_transacao' => date('Y-m-d H:i:s'),
+                                'data_transacao' => date('Y-m-d'),
                                 'descricao' => $config->tipo_repeticao == 'quinzenal'
                                     ? 'Pagamento Quinzenal - Comissão - ' . (date('d') <= 15 ? '1ª Quinzena' : '2ª Quinzena') . ' - ' . date('m/Y')
                                     : 'Pagamento Mensal - Comissão - ' . date('m/Y'),
