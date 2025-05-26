@@ -328,10 +328,9 @@ class Admincarteira extends MY_Controller {
                 $bonus_data = array(
                     'tipo' => 'bonus',
                     'valor' => $bonus,
-                    'data_transacao' => date('Y-m-d'),
+                    'data_transacao' => date('Y-m-d H:i:s'),
                     'descricao' => $this->input->post('bonus_descricao'),
                     'carteira_usuario_id' => $id
-
                 );
                 $this->db->insert('transacoes_usuario', $bonus_data);
             }
