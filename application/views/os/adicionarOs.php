@@ -214,7 +214,7 @@
 <div id="modalUsuarios" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalUsuariosLabel" aria-hidden="true">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="modalUsuariosLabel">Adicionar Técnicos/Responsáveis</h3>
+        <h3 id="modalUsuariosLabel">Adicionar Técnicos Responsáveis</h3>
     </div>
     <div class="modal-body">
         <div class="span12" style="margin-left: 0">
