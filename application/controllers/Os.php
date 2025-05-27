@@ -1256,4 +1256,57 @@ private function formatarChave($chave)
                 ->set_output(json_encode([]));
         }
     }
+
+    public function fixarUsuario()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para editar O.S.');
+            redirect(base_url());
+        }
+
+        $usuario_id = $this->input->post('usuario_id');
+        $usuario_fixador_id = $this->session->userdata('id_admin');
+
+        $this->load->model('usuarios_fixados_model');
+        
+        if ($this->usuarios_fixados_model->fixarUsuario($usuario_id, $usuario_fixador_id)) {
+            echo json_encode(['result' => true]);
+        } else {
+            echo json_encode(['result' => false]);
+        }
+    }
+
+    public function desfixarUsuario()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'eOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para editar O.S.');
+            redirect(base_url());
+        }
+
+        $usuario_id = $this->input->post('usuario_id');
+        $usuario_fixador_id = $this->session->userdata('id_admin');
+
+        $this->load->model('usuarios_fixados_model');
+        
+        if ($this->usuarios_fixados_model->desfixarUsuario($usuario_id, $usuario_fixador_id)) {
+            echo json_encode(['result' => true]);
+        } else {
+            echo json_encode(['result' => false]);
+        }
+    }
+
+    public function getUsuariosFixados()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
+            redirect(base_url());
+        }
+
+        $usuario_fixador_id = $this->session->userdata('id_admin');
+
+        $this->load->model('usuarios_fixados_model');
+        $usuarios_fixados = $this->usuarios_fixados_model->getByUsuarioId($usuario_fixador_id);
+        
+        echo json_encode(['result' => true, 'usuarios' => $usuarios_fixados]);
+    }
 }

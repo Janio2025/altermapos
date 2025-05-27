@@ -376,10 +376,7 @@
             if (id == $("#usuarios_id").val()) {
                 linha += '<span class="label label-info">Responsável</span>'; // Texto indicativo para o usuário principal
             } else {
-                const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
-                const isFixado = usuariosFixados.some(u => u.id === id);
-                
-                linha += '<button type="button" class="btn ' + (isFixado ? 'btn-success' : 'btn-info') + ' btn-fix-user" onclick="fixarUsuario(' + id + ', \'' + nome + '\')" title="' + (isFixado ? 'Usuário fixado' : 'Fixar usuário') + '">';
+                linha += '<button type="button" class="btn btn-info btn-fix-user" onclick="fixarUsuario(' + id + ', \'' + nome + '\')" title="Fixar usuário">';
                 linha += '<i class="bx bx-pin"></i></button> ';
                 linha += '<button type="button" class="btn btn-danger" onclick="removerUsuario(' + id + ')">';
                 linha += '<i class="bx bx-trash"></i></button>';
@@ -401,97 +398,97 @@
             }
         }
 
-        // Função para remover usuário da tabela
-        window.removerUsuario = function(id) {
-            Swal.fire({
-                title: 'Atenção',
-                text: "Você tem certeza que deseja remover este técnico?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sim, remover!',
-                cancelButtonText: 'Não, cancelar!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Verifica se o usuário está fixado
-                    const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
-                    const usuarioFixado = usuariosFixados.some(u => u.id === id);
-                    
-                    if (usuarioFixado) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Atenção',
-                            text: 'Desfixe o usuário primeiro antes de removê-lo!'
-                        });
-                        return;
+        // Função para desfixar usuário
+        window.desfixarUsuario = function(id) {
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/os/desfixarUsuario',
+                type: 'POST',
+                data: { usuario_id: id },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result) {
+                        $('#usuario-' + id + ' .btn-fix-user')
+                            .removeClass('btn-success')
+                            .addClass('btn-info')
+                            .attr('title', 'Fixar usuário');
+                        
+                        atualizarBotaoAdicionar();
                     }
-
-                    // Remove o usuário da tabela
-                    $("#usuario-" + id).remove();
-                    // Remove o campo hidden
-                    $("#usuarios_adicionais_container input[value='" + id + "']").remove();
-                    
-                    // Mostra mensagem de sucesso
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Removido!',
-                        text: 'O técnico foi removido com sucesso.',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
                 }
             });
         }
 
-        // Função para desfixar usuário
-        window.desfixarUsuario = function(id) {
-            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
-            const index = usuariosFixados.findIndex(u => u.id === id);
-            
-            if (index > -1) {
-                usuariosFixados.splice(index, 1);
-                localStorage.setItem('usuariosFixadosOS', JSON.stringify(usuariosFixados));
-                
-                $('#usuario-' + id + ' .btn-fix-user')
-                    .removeClass('btn-success')
-                    .addClass('btn-info')
-                    .attr('title', 'Fixar usuário');
-                
-                atualizarBotaoAdicionar();
-                
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso',
-                    text: 'Usuário desfixado com sucesso!'
-                });
-            }
+        // Função para remover usuário
+        window.removerUsuario = function(id) {
+            // Primeiro verifica se o usuário está fixado
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/os/getUsuariosFixados',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result) {
+                        const usuarioFixado = response.usuarios.some(u => u.usuario_id == id);
+                        
+                        if (usuarioFixado) {
+                            // Se estiver fixado, primeiro desfixa
+                            $.ajax({
+                                url: '<?php echo base_url(); ?>index.php/os/desfixarUsuario',
+                                type: 'POST',
+                                data: { usuario_id: id },
+                                dataType: 'json',
+                                success: function(desfixarResponse) {
+                                    if (desfixarResponse.result) {
+                                        // Remove o usuário da tabela
+                                        $("#usuario-" + id).remove();
+                                        // Remove o campo hidden
+                                        $("#usuarios_adicionais_container input[value='" + id + "']").remove();
+                                        // Atualiza o botão de adicionar
+                                        atualizarBotaoAdicionar();
+                                    }
+                                }
+                            });
+                        } else {
+                            // Se não estiver fixado, remove diretamente
+                            $("#usuario-" + id).remove();
+                            $("#usuarios_adicionais_container input[value='" + id + "']").remove();
+                            // Atualiza o botão de adicionar
+                            atualizarBotaoAdicionar();
+                        }
+                    }
+                }
+            });
         }
 
-        // Atualiza a função fixarUsuario para alternar entre fixar/desfixar
+        // Atualiza a função fixarUsuario para usar o banco
         window.fixarUsuario = function(id, nome) {
-            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
-            const jaFixado = usuariosFixados.some(u => u.id === id);
-            
-            if (jaFixado) {
-                desfixarUsuario(id);
-            } else {
-                usuariosFixados.push({ id, nome });
-                localStorage.setItem('usuariosFixadosOS', JSON.stringify(usuariosFixados));
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/os/fixarUsuario',
+                type: 'POST',
+                data: { usuario_id: id },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result) {
+                        $('#usuario-' + id + ' .btn-fix-user')
+                            .removeClass('btn-info')
+                            .addClass('btn-success')
+                            .attr('title', 'Usuário fixado');
 
-                $('#usuario-' + id + ' .btn-fix-user')
-                    .removeClass('btn-info')
-                    .addClass('btn-success')
-                    .attr('title', 'Usuário fixado');
+                        atualizarBotaoAdicionar();
 
-                atualizarBotaoAdicionar();
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso',
-                    text: 'Usuário fixado com sucesso!'
-                });
-            }
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sucesso',
+                            text: 'Usuário fixado com sucesso!'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro',
+                            text: 'Erro ao fixar usuário!'
+                        });
+                    }
+                }
+            });
         }
 
         // Adiciona log antes do envio do formulário
@@ -566,37 +563,50 @@
                 adicionarUsuario(usuarioPrincipalId, usuarioPrincipalNome);
             }
             
-            // Depois adiciona os usuários fixados
-            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
-            usuariosFixados.forEach(usuario => {
-                if (usuario.id != usuarioPrincipalId) { // Não adiciona o usuário principal novamente
-                    adicionarUsuario(usuario.id, usuario.nome);
+            // Depois carrega os usuários fixados do banco
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/os/getUsuariosFixados',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.result) {
+                        response.usuarios.forEach(usuario => {
+                            if (usuario.usuario_id != usuarioPrincipalId) { // Não adiciona o usuário principal novamente
+                                adicionarUsuario(usuario.usuario_id, usuario.nome_usuario);
+                            }
+                        });
+                    }
+                },
+                complete: function() {
+                    window.carregandoUsuariosFixados = false;
+                    atualizarBotaoAdicionar();
                 }
             });
-            
-            window.carregandoUsuariosFixados = false;
-            
-            // Atualiza o ícone do botão de adicionar se houver usuários fixados
-            atualizarBotaoAdicionar();
         }
 
         // Função para atualizar o botão de adicionar
         function atualizarBotaoAdicionar() {
-            const usuariosFixados = JSON.parse(localStorage.getItem('usuariosFixadosOS') || '[]');
-            const btnAdicionar = $('[data-target="#modalUsuarios"]');
-            
-            if (usuariosFixados.length > 0) {
-                btnAdicionar.addClass('btn-info').attr('title', 'Há usuários fixados');
-                // Adiciona um badge com o número de usuários fixados
-                if (!btnAdicionar.find('.badge').length) {
-                    btnAdicionar.append('<span class="badge">' + usuariosFixados.length + '</span>');
-                } else {
-                    btnAdicionar.find('.badge').text(usuariosFixados.length);
+            $.ajax({
+                url: '<?php echo base_url(); ?>index.php/os/getUsuariosFixados',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    const btnAdicionar = $('[data-target="#modalUsuarios"]');
+                    
+                    if (response.result && response.usuarios.length > 0) {
+                        btnAdicionar.addClass('btn-info').attr('title', 'Há usuários fixados');
+                        // Adiciona um badge com o número de usuários fixados
+                        if (!btnAdicionar.find('.badge').length) {
+                            btnAdicionar.append('<span class="badge">' + response.usuarios.length + '</span>');
+                        } else {
+                            btnAdicionar.find('.badge').text(response.usuarios.length);
+                        }
+                    } else {
+                        btnAdicionar.removeClass('btn-info').attr('title', 'Adicionar técnicos');
+                        btnAdicionar.find('.badge').remove();
+                    }
                 }
-            } else {
-                btnAdicionar.removeClass('btn-info').attr('title', 'Adicionar técnicos');
-                btnAdicionar.find('.badge').remove();
-            }
+            });
         }
 
         // Carrega os usuários fixados ao iniciar
