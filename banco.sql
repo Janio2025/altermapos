@@ -194,6 +194,29 @@ CREATE TABLE IF NOT EXISTS `transacoes_usuario` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
+-- -----------------------------------------------------
+-- Table `usuarios_fixados`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `usuarios_fixados` (
+    `idUsuarioFixado` int NOT NULL AUTO_INCREMENT,
+    `usuario_id` int NOT NULL,
+    `usuario_fixador_id` int NOT NULL,
+    `data_fixacao` datetime NOT NULL,
+    `status` tinyint(1) DEFAULT '1',
+    PRIMARY KEY (`idUsuarioFixado`),
+    KEY `fk_usuarios_fixados_usuario_idx` (`usuario_id`),
+    KEY `fk_usuarios_fixados_usuario_fixador_idx` (`usuario_fixador_id`),
+    CONSTRAINT `fk_usuarios_fixados_usuario`
+        FOREIGN KEY (`usuario_id`)
+        REFERENCES `usuarios` (`idUsuarios`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_usuarios_fixados_usuario_fixador`
+        FOREIGN KEY (`usuario_fixador_id`)
+        REFERENCES `usuarios` (`idUsuarios`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
 -- Table `clientes`
