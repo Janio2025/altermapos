@@ -755,13 +755,13 @@
                     <label for="valor">Valor*</label>
                     <input type="hidden" id="tipo" name="tipo" value="receita" />
                     <input class="span12 money" id="valor" type="text" data-affixes-stay="true" data-thousands=""
-                        data-decimal="." name="valor" readonly
-                        value="<?php echo number_format($totals + $total, 2, '.', ''); ?>" />
+                        data-decimal="." name="valor" readonly style="background-color: #f5f5f5; cursor: not-allowed;"
+                        value="<?php echo number_format($totals + $total, 2, '.', ''); ?>" onkeydown="return false" onmousedown="return false" />
                 </div>
                 <div class="span6" style="margin-left: 2;">
                     <label for="valor">Valor Com Desconto*</label>
-                    <input class="span12 money" id="faturar-desconto" type="text" name="faturar-desconto" readonly
-                        value="<?php echo number_format($result->valor_desconto, 2, '.', ''); ?> " />
+                    <input class="span12 money" id="faturar-desconto" type="text" name="faturar-desconto" readonly style="background-color: #f5f5f5; cursor: not-allowed;"
+                        value="<?php echo number_format($result->valor_desconto, 2, '.', ''); ?> " onkeydown="return false" onmousedown="return false" />
                     <strong><span style="color: red" id="resultado"></span></strong>
                 </div>
             </div>
@@ -1827,6 +1827,24 @@
         // Chama carregarUsuariosFixados quando o documento estiver pronto
         $(document).ready(function() {
             carregarUsuariosFixados();
+        });
+
+        // Previne edição dos campos de valor
+        $('#valor, #faturar-desconto').on('keydown keypress keyup paste', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Previne seleção do texto
+        $('#valor, #faturar-desconto').on('selectstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Previne o menu de contexto (botão direito)
+        $('#valor, #faturar-desconto').on('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
         });
     });
 </script>
