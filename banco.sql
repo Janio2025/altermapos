@@ -439,6 +439,64 @@ CREATE TABLE IF NOT EXISTS `os` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
+-- Table `aver_os`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aver_os` (
+    `idAver` int NOT NULL AUTO_INCREMENT,
+    `os_id` int NOT NULL,
+    `valor` decimal(10,2) NOT NULL,
+    `data_pagamento` datetime NOT NULL,
+    `status` enum('pago','pendente') NOT NULL DEFAULT 'pago',
+    `usuarios_id` int DEFAULT NULL,
+    `data_criacao` datetime NOT NULL,
+    PRIMARY KEY (`idAver`),
+    KEY `fk_aver_os_os1` (`os_id`),
+    KEY `fk_aver_os_usuarios1` (`usuarios_id`),
+    CONSTRAINT `fk_aver_os_os1`
+        FOREIGN KEY (`os_id`)
+        REFERENCES `os` (`idOs`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_aver_os_usuarios1`
+        FOREIGN KEY (`usuarios_id`)
+        REFERENCES `usuarios` (`idUsuarios`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
+-- Table `aver_comissoes`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `aver_comissoes` (
+    `idAverComissao` int NOT NULL AUTO_INCREMENT,
+    `aver_id` int NOT NULL,
+    `usuario_id` int NOT NULL,
+    `valor_comissao` decimal(10,2) NOT NULL,
+    `data_pagamento` datetime NOT NULL,
+    `status` enum('pago','pendente') NOT NULL DEFAULT 'pago',
+    `carteira_usuario_id` int NOT NULL,
+    PRIMARY KEY (`idAverComissao`),
+    KEY `fk_aver_comissoes_aver_os1` (`aver_id`),
+    KEY `fk_aver_comissoes_usuarios1` (`usuario_id`),
+    KEY `fk_aver_comissoes_carteira_usuario1` (`carteira_usuario_id`),
+    CONSTRAINT `fk_aver_comissoes_aver_os1`
+        FOREIGN KEY (`aver_id`)
+        REFERENCES `aver_os` (`idAver`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_aver_comissoes_usuarios1`
+        FOREIGN KEY (`usuario_id`)
+        REFERENCES `usuarios` (`idUsuarios`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION,
+    CONSTRAINT `fk_aver_comissoes_carteira_usuario1`
+        FOREIGN KEY (`carteira_usuario_id`)
+        REFERENCES `carteira_usuario` (`idCarteiraUsuario`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
 -- Table `os_usuarios`
 -- -----------------------------------------------------    
 CREATE TABLE IF NOT EXISTS `os_usuarios` (
