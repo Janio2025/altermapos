@@ -417,12 +417,8 @@ class Carteira_model extends CI_Model
 
     public function calcularValorBase($usuario_id, $tipo)
     {
-        if (!$usuario_id || !$tipo) {
-            return 0;
-        }
-
         $valor = 0;
-
+        
         // Subquery para pegar todas as OS do usuário (principal ou adicional)
         $this->db->select('os_id');
         $this->db->from('os_usuarios');
@@ -430,10 +426,22 @@ class Carteira_model extends CI_Model
         $subquery = $this->db->get_compiled_select();
 
         if ($tipo == 'servicos') {
-            // Soma apenas os serviços das OS do usuário
             $this->db->select_sum('servicos_os.subTotal');
             $this->db->from('servicos_os');
             $this->db->join('os', 'os.idOs = servicos_os.os_id');
+            $this->db->where('MONTH(os.dataFinal)', date('m'));
+            $this->db->where('YEAR(os.dataFinal)', date('Y'));
+            $this->db->where('os.status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
+            $query = $this->db->get();
+            $result = $query->row();
+            $valor = $result->subTotal ?: 0;
+        } else if ($tipo == 'produtos') {
+            $this->db->select_sum('produtos_os.subTotal');
+            $this->db->from('produtos_os');
+            $this->db->join('os', 'os.idOs = produtos_os.os_id');
+            $this->db->where('MONTH(os.dataFinal)', date('m'));
+            $this->db->where('YEAR(os.dataFinal)', date('Y'));
             $this->db->where('os.status', 'Faturado');
             $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
             $query = $this->db->get();
@@ -441,7 +449,7 @@ class Carteira_model extends CI_Model
             $valor = $result->subTotal ?: 0;
         } else if ($tipo == 'total') {
             // Primeiro, pega todas as OS do usuário
-            $this->db->select('os.idOs, os.valorTotal');
+            $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
             $this->db->from('os');
             $this->db->where('status', 'Faturado');
             $this->db->where("idOs IN ($subquery)"); // Usa a subquery
@@ -449,8 +457,9 @@ class Carteira_model extends CI_Model
             $ordens = $query->result();
 
             foreach ($ordens as $ordem) {
-                // Soma o valor total da OS
-                $valor += $ordem->valorTotal;
+                // Se houver desconto, usa o valor com desconto, senão usa o valor total
+                $valor_os = $ordem->valor_desconto > 0 ? $ordem->valor_desconto : $ordem->valorTotal;
+                $valor += $valor_os;
                 
                 // Busca e subtrai o precoCompra dos produtos desta OS
                 $this->db->select('produtos_os.quantidade, produtos.precoCompra');
@@ -554,7 +563,7 @@ class Carteira_model extends CI_Model
             $valor = $result->subTotal ?: 0;
         } else if ($tipo == 'total') {
             // Primeiro, pega todas as OS do usuário
-            $this->db->select('os.idOs, os.valorTotal');
+            $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
             $this->db->from('os');
             $this->db->where('status', 'Faturado');
             $this->db->where("idOs IN ($subquery)"); // Usa a subquery
@@ -562,8 +571,9 @@ class Carteira_model extends CI_Model
             $ordens = $query->result();
 
             foreach ($ordens as $ordem) {
-                // Soma o valor total da OS
-                $valor += $ordem->valorTotal;
+                // Se houver desconto, usa o valor com desconto, senão usa o valor total
+                $valor_os = $ordem->valor_desconto > 0 ? $ordem->valor_desconto : $ordem->valorTotal;
+                $valor += $valor_os;
                 
                 // Busca e subtrai o precoCompra dos produtos desta OS
                 $this->db->select('produtos_os.quantidade, produtos.precoCompra');

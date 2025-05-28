@@ -489,7 +489,7 @@ class Admincarteira extends MY_Controller {
             }
 
             // Busca todas as OS em que o usuário está envolvido (como principal ou adicional)
-            $this->db->select('os.idOs, os.valorTotal');
+            $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
             $this->db->from('os_usuarios');
             $this->db->join('os', 'os.idOs = os_usuarios.os_id');
             $this->db->where('os_usuarios.usuario_id', $carteira->usuarios_id);
@@ -509,20 +509,23 @@ class Admincarteira extends MY_Controller {
                     $valor_base += $result->subTotal ?: 0;
                 } else {
                     // Para tipo 'total', considera o valor total menos o custo dos produtos
-                    $valor_os = $ordem->valorTotal;
+                    // Verifica se existe desconto e usa o valor apropriado
+                    $valor_os = ($ordem->valor_desconto > 0) ? $ordem->valor_desconto : $ordem->valorTotal;
                     
                     // Subtrai o custo dos produtos
-                    $this->db->select_sum('produtos.precoCompra');
+                    $this->db->select('produtos_os.quantidade, produtos.precoCompra');
                     $this->db->from('produtos_os');
                     $this->db->join('produtos', 'produtos.idProdutos = produtos_os.produtos_id');
                     $this->db->where('produtos_os.os_id', $ordem->idOs);
                     $query_produtos = $this->db->get();
-                    $result_produtos = $query_produtos->row();
+                    $produtos = $query_produtos->result();
                     
-                    if ($result_produtos && $result_produtos->precoCompra) {
-                        $valor_os -= $result_produtos->precoCompra;
+                    $custo_total = 0;
+                    foreach ($produtos as $produto) {
+                        $custo_total += ($produto->precoCompra * $produto->quantidade);
                     }
                     
+                    $valor_os -= $custo_total;
                     $valor_base += $valor_os;
                 }
 
@@ -920,7 +923,7 @@ class Admincarteira extends MY_Controller {
                 }
 
                 // Busca todas as OS em que o usuário está envolvido (como principal ou adicional)
-                $this->db->select('os.idOs, os.valorTotal');
+                $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
                 $this->db->from('os_usuarios');
                 $this->db->join('os', 'os.idOs = os_usuarios.os_id');
                 $this->db->where('os_usuarios.usuario_id', $carteira->usuarios_id);
@@ -940,7 +943,8 @@ class Admincarteira extends MY_Controller {
                         $valor_base += $result->subTotal ?: 0;
                     } else {
                         // Para tipo 'total', considera o valor total menos o custo dos produtos
-                        $valor_os = $ordem->valorTotal;
+                        // Verifica se existe desconto e usa o valor apropriado
+                        $valor_os = ($ordem->valor_desconto > 0) ? $ordem->valor_desconto : $ordem->valorTotal;
                         
                         // Subtrai o custo dos produtos
                         $this->db->select('produtos_os.quantidade, produtos.precoCompra');

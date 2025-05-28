@@ -1053,7 +1053,7 @@ private function formatarChave($chave)
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_status_header(400)
-                    ->set_output(json_encode(['result' => false, 'messages', 'Desconto não pode ser adiciona. Os não ja Faturada/Cancelada']));
+                    ->set_output(json_encode(['result' => false, 'messages' => 'Desconto não pode ser adicionado. OS já Faturada/Cancelada']));
             }
             if ($this->os_model->edit('os', $data, 'idOs', $idOs) == true) {
                 log_info('Adicionou um desconto na OS. ID: ' . $idOs);
@@ -1062,17 +1062,13 @@ private function formatarChave($chave)
                     ->set_status_header(201)
                     ->set_output(json_encode(['result' => true, 'messages' => 'Desconto adicionado com sucesso!']));
             } else {
-                log_info('Ocorreu um erro ao tentar adiciona desconto a OS: ' . $idOs);
+                log_info('Ocorreu um erro ao tentar adicionar desconto a OS: ' . $idOs);
                 return $this->output
                     ->set_content_type('application/json')
                     ->set_status_header(400)
-                    ->set_output(json_encode(['result' => false, 'messages', 'Ocorreu um erro ao tentar adiciona desconto a OS.']));
+                    ->set_output(json_encode(['result' => false, 'messages' => 'Ocorreu um erro ao tentar adicionar desconto a OS.']));
             }
         }
-        return $this->output
-            ->set_content_type('application/json')
-            ->set_status_header(400)
-            ->set_output(json_encode(['result' => false, 'messages', 'Ocorreu um erro ao tentar adiciona desconto a OS.']));
     }
 
     public function faturar()
