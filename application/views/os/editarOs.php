@@ -105,7 +105,15 @@
                         <li id="tabServicos"><a href="#tab4" data-toggle="tab">Serviços</a></li>
                         <li id="tabAnexos"><a href="#tab5" data-toggle="tab">Anexos</a></li>
                         <li id="tabAnotacoes"><a href="#tab6" data-toggle="tab">Anotações</a></li>
-                        <li id="tabAvers"><a href="#tab7" data-toggle="tab">Avers</a></li>
+                        <li id="tabAvers"><a href="#tab7" data-toggle="tab">Total de Avers:<strong style="color: #2196F3;"> R$ <?php 
+                    $totalAvers = 0;
+                    if (!empty($avers)) {
+                        foreach ($avers as $a) {
+                            $totalAvers += $a->valor;
+                        }
+                    }
+                    echo number_format($totalAvers, 2, ',', '.');
+                ?></strong></a></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab1">
