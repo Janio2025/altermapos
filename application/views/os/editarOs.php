@@ -105,7 +105,7 @@
                         <li id="tabServicos"><a href="#tab4" data-toggle="tab">Serviços</a></li>
                         <li id="tabAnexos"><a href="#tab5" data-toggle="tab">Anexos</a></li>
                         <li id="tabAnotacoes"><a href="#tab6" data-toggle="tab">Anotações</a></li>
-                        <li id="tabAvers"><a href="#tab7" data-toggle="tab">Total de Avers:<strong style="color: #2196F3;"> R$ <?php 
+                        <li id="tabAvers"><a href="#tab7" data-toggle="tab">Total de Avers:<strong> R$ <?php 
                     $totalAvers = 0;
                     if (!empty($avers)) {
                         foreach ($avers as $a) {
