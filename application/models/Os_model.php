@@ -426,4 +426,43 @@ public function autoCompleteProdutoSaida($q)
         $this->db->where('usuario_id', $usuario_id);
         return $this->db->get('os_usuarios')->num_rows() > 0;
     }
+
+    public function getAvers($os_id)
+    {
+        try {
+            $this->db->select('aver_os.*, usuarios.nome as nome_usuario');
+            $this->db->from('aver_os');
+            $this->db->join('usuarios', 'usuarios.idUsuarios = aver_os.usuarios_id', 'left');
+            $this->db->where('aver_os.os_id', $os_id);
+            $this->db->order_by('aver_os.data_criacao', 'DESC');
+            
+            $query = $this->db->get();
+            
+            // Log da query para debug
+            log_message('debug', 'Query SQL: ' . $this->db->last_query());
+            
+            if ($query) {
+                $result = $query->result();
+                log_message('debug', 'Avers encontrados: ' . count($result));
+                return $result;
+            }
+            
+            log_message('error', 'Erro na query para OS: ' . $os_id);
+            return [];
+        } catch (Exception $e) {
+            log_message('error', 'Erro ao buscar avers: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    public function excluirAver($idAver)
+    {
+        try {
+            $this->db->where('idAver', $idAver);
+            return $this->db->delete('aver_os');
+        } catch (Exception $e) {
+            log_message('error', 'Erro ao excluir aver: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

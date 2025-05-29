@@ -391,6 +391,9 @@ class Os extends MY_Controller
         $this->load->model('mapos_model');
         $this->data['emitente'] = $this->mapos_model->getEmitente();
 
+        // Carrega os avers da OS
+        $this->data['avers'] = $this->os_model->getAvers($this->uri->segment(3));
+
         $this->data['view'] = 'os/editarOs';
         return $this->layout();
     }
@@ -442,89 +445,89 @@ class Os extends MY_Controller
     }
 
     public function imprimir()
-{
-    if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
-        $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
-        redirect('mapos');
+    {
+        if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
+            $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
+            redirect('mapos');
+        }
+
+        if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
+            redirect(base_url());
+        }
+
+        $this->data['custom_error'] = '';
+        $this->load->model('mapos_model');
+        $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
+
+        $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
+        $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
+        $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
+        $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
+        $this->data['emitente'] = $this->mapos_model->getEmitente();
+
+        if (!empty($this->data['configuration']['pix_key'])) {
+            $this->data['qrCode'] = $this->os_model->getQrCode(
+                $this->uri->segment(3),
+                $this->data['configuration']['pix_key'],
+                $this->data['emitente']
+            );
+            
+            // Chamando o método formatarChave corretamente
+            $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
+        }
+
+        $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
+
+        $this->load->view('os/imprimirOs', $this->data);
     }
 
-    if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
-        $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
-        redirect(base_url());
+    public function imprimirLaudo()
+    {
+        if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
+            $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
+            redirect('mapos');
+        }
+
+        if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
+            redirect(base_url());
+        }
+
+        $this->data['custom_error'] = '';
+        $this->load->model('mapos_model');
+        $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
+
+        $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
+        $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
+        $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
+        $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
+        $this->data['emitente'] = $this->mapos_model->getEmitente();
+
+        if (!empty($this->data['configuration']['pix_key'])) {
+            $this->data['qrCode'] = $this->os_model->getQrCode(
+                $this->uri->segment(3),
+                $this->data['configuration']['pix_key'],
+                $this->data['emitente']
+            );
+            
+            // Chamando o método formatarChave corretamente
+            $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
+        }
+
+        $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
+
+        $this->load->view('os/imprimirLaudo', $this->data);
     }
 
-    $this->data['custom_error'] = '';
-    $this->load->model('mapos_model');
-    $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
-
-    $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
-    $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
-    $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
-    $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
-    $this->data['emitente'] = $this->mapos_model->getEmitente();
-
-    if (!empty($this->data['configuration']['pix_key'])) {
-        $this->data['qrCode'] = $this->os_model->getQrCode(
-            $this->uri->segment(3),
-            $this->data['configuration']['pix_key'],
-            $this->data['emitente']
-        );
-        
-        // Chamando o método formatarChave corretamente
-        $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
+    /**
+     * Método para formatar a chave PIX
+     */
+    private function formatarChave($chave)
+    {
+        // Exemplo: removendo espaços e caracteres especiais
+        return preg_replace('/[^a-zA-Z0-9]/', '', $chave);
     }
-
-    $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
-
-    $this->load->view('os/imprimirOs', $this->data);
-}
-
-public function imprimirLaudo()
-{
-    if (! $this->uri->segment(3) || ! is_numeric($this->uri->segment(3))) {
-        $this->session->set_flashdata('error', 'Item não pode ser encontrado, parâmetro não foi passado corretamente.');
-        redirect('mapos');
-    }
-
-    if (! $this->permission->checkPermission($this->session->userdata('permissao'), 'vOs')) {
-        $this->session->set_flashdata('error', 'Você não tem permissão para visualizar O.S.');
-        redirect(base_url());
-    }
-
-    $this->data['custom_error'] = '';
-    $this->load->model('mapos_model');
-    $this->load->model('os_model'); // Certifique-se de carregar o modelo correto
-
-    $this->data['result'] = $this->os_model->getById($this->uri->segment(3));
-    $this->data['produtos'] = $this->os_model->getProdutos($this->uri->segment(3));
-    $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
-    $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
-    $this->data['emitente'] = $this->mapos_model->getEmitente();
-
-    if (!empty($this->data['configuration']['pix_key'])) {
-        $this->data['qrCode'] = $this->os_model->getQrCode(
-            $this->uri->segment(3),
-            $this->data['configuration']['pix_key'],
-            $this->data['emitente']
-        );
-        
-        // Chamando o método formatarChave corretamente
-        $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
-    }
-
-    $this->data['imprimirAnexo'] = isset($_ENV['IMPRIMIR_ANEXOS']) ? filter_var($_ENV['IMPRIMIR_ANEXOS'], FILTER_VALIDATE_BOOLEAN) : false;
-
-    $this->load->view('os/imprimirLaudo', $this->data);
-}
-
-/**
- * Método para formatar a chave PIX
- */
-private function formatarChave($chave)
-{
-    // Exemplo: removendo espaços e caracteres especiais
-    return preg_replace('/[^a-zA-Z0-9]/', '', $chave);
-}
 
     public function imprimirTermica()
     {
@@ -1304,5 +1307,71 @@ private function formatarChave($chave)
         $usuarios_fixados = $this->usuarios_fixados_model->getByUsuarioId($usuario_fixador_id);
         
         echo json_encode(['result' => true, 'usuarios' => $usuarios_fixados]);
+    }
+
+    public function adicionarAver()
+    {
+        $this->load->library('form_validation');
+        $this->data['custom_error'] = '';
+
+        if ($this->form_validation->run('aver') == false) {
+            $this->data['custom_error'] = (validation_errors() ? '<div class="alert alert-danger">' . validation_errors() . '</div>' : false);
+        } else {
+            $data = array(
+                'os_id' => $this->input->post('os_id'),
+                'valor' => $this->input->post('valor'),
+                'data_pagamento' => date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $this->input->post('data_pagamento')))),
+                'status' => $this->input->post('status'),
+                'usuarios_id' => $this->session->userdata('id'),
+                'data_criacao' => date('Y-m-d H:i:s')
+            );
+
+            $this->load->model('Os_model');
+            if ($this->Os_model->add('aver_os', $data) == true) {
+                $this->session->set_flashdata('success', 'Aver adicionado com sucesso!');
+                $json = array('result' => true);
+                echo json_encode($json);
+                return;
+            } else {
+                $json = array('result' => false, 'mensagem' => 'Erro ao adicionar aver.');
+                echo json_encode($json);
+                return;
+            }
+        }
+
+        $json = array('result' => false, 'mensagem' => $this->data['custom_error']);
+        echo json_encode($json);
+    }
+
+    public function getAvers($os_id)
+    {
+        try {
+            $this->load->model('os_model');
+            $data['avers'] = $this->os_model->getAvers($os_id);
+            
+            // Log para debug
+            log_message('debug', 'Controller getAvers - OS ID: ' . $os_id);
+            log_message('debug', 'Controller getAvers - Dados: ' . print_r($data['avers'], true));
+            
+            $this->load->view('os/tabela_avers', $data);
+        } catch (Exception $e) {
+            log_message('error', 'Erro no controller getAvers: ' . $e->getMessage());
+            echo '<div class="alert alert-danger">Erro ao carregar avers. Por favor, tente novamente.</div>';
+        }
+    }
+
+    public function excluirAver()
+    {
+        $this->load->model('os_model');
+        $idAver = $this->input->post('idAver');
+        $os_id = $this->input->post('os_id');
+
+        if ($this->os_model->excluirAver($idAver)) {
+            $response = array('result' => true, 'message' => 'Aver excluído com sucesso!');
+        } else {
+            $response = array('result' => false, 'message' => 'Erro ao excluir aver.');
+        }
+
+        echo json_encode($response);
     }
 }

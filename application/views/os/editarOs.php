@@ -79,6 +79,12 @@
                         }
                     } ?>
 
+                    <?php if (strtolower($result->status) != "cancelado") { ?>
+                        <a title="Registrar Aver" class="button btn btn-mini btn-info" href="#modal-aver" role="button" data-toggle="modal">
+                            <span class="button__icon"><i class="bx bx-money-withdraw"></i></span> <span class="button__text">Registrar Aver</span>
+                        </a>
+                    <?php } ?>
+
                     <a title="Enviar por E-mail" class="button btn btn-mini btn-warning"
                         href="<?php echo site_url() ?>/os/enviar_email/<?php echo $result->idOs; ?>">
                         <span class="button__icon"><i class="bx bx-envelope"></i></span> <span class="button__text">Via
@@ -99,6 +105,7 @@
                         <li id="tabServicos"><a href="#tab4" data-toggle="tab">Serviços</a></li>
                         <li id="tabAnexos"><a href="#tab5" data-toggle="tab">Anexos</a></li>
                         <li id="tabAnotacoes"><a href="#tab6" data-toggle="tab">Anotações</a></li>
+                        <li id="tabAvers"><a href="#tab7" data-toggle="tab">Avers</a></li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="tab1">
@@ -669,6 +676,20 @@
                             </div>
                         </div>
                         <!-- Fim tab anotações -->
+
+                        <!-- Avers -->
+                        <div class="tab-pane" id="tab7">
+                            <div class="span12" style="padding: 1%; margin-left: 0">
+                                <div class="span12" id="divAvers" style="margin-left: 0">
+                                    <?php 
+                                    $this->load->model('os_model');
+                                    $data['avers'] = $this->os_model->getAvers($result->idOs);
+                                    $this->load->view('os/tabela_avers', $data);
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fim tab avers -->
                     </div>
                 </div>
                 &nbsp
@@ -1474,6 +1495,103 @@
             }
         });
 
+        // Validação e submissão do formulário de Aver
+        $("#formAver").validate({
+            rules: {
+                valor: {
+                    required: true,
+                    number: true,
+                    min: 0.01
+                },
+                data_pagamento: {
+                    required: true
+                },
+                status: {
+                    required: true
+                }
+            },
+            messages: {
+                valor: {
+                    required: 'Campo obrigatório',
+                    number: 'Digite um valor válido',
+                    min: 'O valor deve ser maior que zero'
+                },
+                data_pagamento: {
+                    required: 'Campo obrigatório'
+                },
+                status: {
+                    required: 'Campo obrigatório'
+                }
+            },
+            submitHandler: function(form) {
+                var dados = $(form).serialize();
+                var valorAver = parseFloat($("#valor_aver").val().replace(/\./g, '').replace(',', '.'));
+                var valorTotal = parseFloat($("#valorTotal").val().replace(/\./g, '').replace(',', '.'));
+
+                if (valorAver > valorTotal) {
+                    Swal.fire({
+                        type: "error",
+                        title: "Atenção",
+                        text: "O valor do aver não pode ser maior que o valor total da OS."
+                    });
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo base_url(); ?>index.php/os/adicionarAver",
+                    data: dados,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        Swal.fire({
+                            title: 'Processando',
+                            text: 'Registrando aver...',
+                            icon: 'info',
+                            showCloseButton: false,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        });
+                    },
+                    success: function(data) {
+                        if (data.result == true) {
+                            $('#modal-aver').modal('hide');
+                            $("#formAver")[0].reset();
+                            
+                            // Atualiza a tabela de avers via AJAX
+                            $.ajax({
+                                url: "<?php echo base_url(); ?>index.php/os/getAvers/<?php echo $result->idOs; ?>",
+                                type: "GET",
+                                dataType: "html",
+                                success: function(response) {
+                                    $("#divAvers").html(response);
+                                    Swal.fire({
+                                        type: "success",
+                                        title: "Sucesso",
+                                        text: "Aver registrado com sucesso!"
+                                    });
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                type: "error",
+                                title: "Atenção",
+                                text: data.mensagem || "Ocorreu um erro ao tentar registrar o aver."
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            type: "error",
+                            title: "Atenção",
+                            text: "Ocorreu um erro ao tentar registrar o aver."
+                        });
+                    }
+                });
+                return false;
+            }
+        });
+
         $(document).on('click', 'a', function (event) {
             var idProduto = $(this).attr('idAcao');
             var quantidade = $(this).attr('quantAcao');
@@ -1848,3 +1966,47 @@
         });
     });
 </script>
+
+<!-- Modal Aver -->
+<div id="modal-aver" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalAverLabel" aria-hidden="true">
+    <form id="formAver" action="<?php echo base_url(); ?>index.php/os/adicionarAver" method="post">
+        <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="modalAverLabel">Registrar Aver</h3>
+        </div>
+        <div class="modal-body">
+            <div class="span12" style="margin-left: 0">
+                <div class="span12" style="margin-left: 0">
+                    <label for="valor_aver">Valor do Aver*</label>
+                    <input type="hidden" name="os_id" value="<?php echo $result->idOs; ?>">
+                    <input type="text" class="span12 money" id="valor_aver" name="valor" required 
+                           data-affixes-stay="true" data-thousands="" data-decimal="." 
+                           max="<?php echo number_format($totals + $total, 2, '.', ''); ?>"/>
+                </div>
+                <div class="span12" style="margin-left: 0">
+                    <label for="data_pagamento">Data do Pagamento*</label>
+                    <input type="text" class="span12 datepicker" id="data_pagamento" name="data_pagamento" 
+                           value="<?php echo date('d/m/Y'); ?>" required/>
+                </div>
+                <div class="span12" style="margin-left: 0">
+                    <label for="status_aver">Status*</label>
+                    <select class="span12" name="status" id="status_aver" required>
+                        <option value="pago">Pago</option>
+                        <option value="pendente">Pendente</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content: center">
+            <button class="button btn btn-warning" data-dismiss="modal" aria-hidden="true">
+                <span class="button__icon"><i class="bx bx-x"></i></span>
+                <span class="button__text2">Cancelar</span>
+            </button>
+            <button class="button btn btn-success">
+                <span class="button__icon"><i class="bx bx-save"></i></span>
+                <span class="button__text2">Salvar</span>
+            </button>
+        </div>
+    </form>
+</div>

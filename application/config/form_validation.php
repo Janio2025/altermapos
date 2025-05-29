@@ -488,4 +488,21 @@ $config = [
             'rules' => 'required'
         ]
     ],
+    'aver' => [
+        [
+            'field' => 'valor',
+            'label' => 'Valor',
+            'rules' => 'required|trim|numeric'
+        ],
+        [
+            'field' => 'data_pagamento',
+            'label' => 'Data do Pagamento',
+            'rules' => 'required|trim'
+        ],
+        [
+            'field' => 'status',
+            'label' => 'Status',
+            'rules' => 'required|trim'
+        ]
+    ],
 ];
