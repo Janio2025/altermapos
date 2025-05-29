@@ -1509,7 +1509,13 @@
                 valor: {
                     required: true,
                     number: true,
-                    min: 0.01
+                    min: function() {
+                        return 0; // Allow zero values
+                    },
+                    max: function() {
+                        var valorTotal = parseFloat($("#valorTotal").val().replace(/\./g, '').replace(',', '.'));
+                        return valorTotal; // Max value is the OS total
+                    }
                 },
                 data_pagamento: {
                     required: true
@@ -1522,7 +1528,8 @@
                 valor: {
                     required: 'Campo obrigatório',
                     number: 'Digite um valor válido',
-                    min: 'O valor deve ser maior que zero'
+                    min: 'O valor deve ser maior ou igual a zero',
+                    max: 'O valor não pode ser maior que o valor total da OS'
                 },
                 data_pagamento: {
                     required: 'Campo obrigatório'
