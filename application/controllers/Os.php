@@ -1309,31 +1309,87 @@ class Os extends MY_Controller
         echo json_encode(['result' => true, 'usuarios' => $usuarios_fixados]);
     }
 
+    private function normalizar_valor($valor) {
+        // Se o valor já contém vírgula, assume formato brasileiro (1.234,56)
+        if (strpos($valor, ',') !== false) {
+            return str_replace(',', '.', str_replace('.', '', $valor));
+        }
+        // Se não contém vírgula, assume formato americano (1234.56)
+        return $valor;
+    }
+
     public function adicionarAver()
     {
         $this->load->library('form_validation');
         $this->data['custom_error'] = '';
 
+        // Log para debug
+        log_message('debug', 'Iniciando adicionarAver');
+        log_message('debug', 'POST data: ' . print_r($_POST, true));
+
         if ($this->form_validation->run('aver') == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="alert alert-danger">' . validation_errors() . '</div>' : false);
+            log_message('debug', 'Validação falhou: ' . validation_errors());
         } else {
             $data = array(
                 'os_id' => $this->input->post('os_id'),
-                'valor' => $this->input->post('valor'),
+                'valor' => $this->normalizar_valor($this->input->post('valor')),
                 'data_pagamento' => date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $this->input->post('data_pagamento')))),
                 'status' => $this->input->post('status'),
                 'usuarios_id' => $this->session->userdata('id_admin'),
                 'data_criacao' => date('Y-m-d H:i:s')
             );
 
-            $this->load->model('Os_model');
-            if ($this->Os_model->add('aver_os', $data) == true) {
-                $this->session->set_flashdata('success', 'Aver adicionado com sucesso!');
+            log_message('debug', 'Dados preparados para inserção: ' . print_r($data, true));
+
+            if ($this->os_model->add('aver_os', $data) == true) {
+                log_message('debug', 'Aver adicionado com sucesso');
                 $json = array('result' => true);
                 echo json_encode($json);
                 return;
             } else {
+                log_message('error', 'Erro ao adicionar aver');
                 $json = array('result' => false, 'mensagem' => 'Erro ao adicionar aver.');
+                echo json_encode($json);
+                return;
+            }
+        }
+
+        $json = array('result' => false, 'mensagem' => $this->data['custom_error']);
+        echo json_encode($json);
+    }
+
+    public function editarAver()
+    {
+        $this->load->library('form_validation');
+        $this->data['custom_error'] = '';
+
+        // Log para debug
+        log_message('debug', 'Iniciando editarAver');
+        log_message('debug', 'POST data: ' . print_r($_POST, true));
+
+        if ($this->form_validation->run('aver') == false) {
+            $this->data['custom_error'] = (validation_errors() ? '<div class="alert alert-danger">' . validation_errors() . '</div>' : false);
+            log_message('debug', 'Validação falhou: ' . validation_errors());
+        } else {
+            $data = array(
+                'valor' => $this->normalizar_valor($this->input->post('valor')),
+                'data_pagamento' => date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $this->input->post('data_pagamento')))),
+                'status' => $this->input->post('status'),
+                'usuarios_id' => $this->session->userdata('id_admin')
+            );
+
+            log_message('debug', 'Dados preparados para atualização: ' . print_r($data, true));
+            log_message('debug', 'ID do aver a ser editado: ' . $this->input->post('id_aver'));
+
+            if ($this->os_model->edit('aver_os', $data, 'idAver', $this->input->post('id_aver')) == true) {
+                log_message('debug', 'Aver editado com sucesso');
+                $json = array('result' => true);
+                echo json_encode($json);
+                return;
+            } else {
+                log_message('error', 'Erro ao editar aver');
+                $json = array('result' => false, 'mensagem' => 'Erro ao editar aver.');
                 echo json_encode($json);
                 return;
             }

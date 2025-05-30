@@ -1510,11 +1510,11 @@
                     required: true,
                     number: true,
                     min: function() {
-                        return 0; // Allow zero values
+                        return 0;
                     },
                     max: function() {
                         var valorTotal = parseFloat($("#valorTotal").val().replace(/\./g, '').replace(',', '.'));
-                        return valorTotal; // Max value is the OS total
+                        return valorTotal;
                     }
                 },
                 data_pagamento: {
@@ -1595,11 +1595,11 @@
                             });
                         }
                     },
-                    error: function() {
+                    error: function(xhr, status, error) {
                         Swal.fire({
                             type: "error",
                             title: "Atenção",
-                            text: "Ocorreu um erro ao tentar registrar o aver."
+                            text: "Ocorreu um erro ao tentar registrar o aver. Erro: " + error
                         });
                     }
                 });
@@ -1979,6 +1979,126 @@
             e.preventDefault();
             return false;
         });
+
+        // Manipulação do botão de editar aver
+        $(document).on('click', '.btn-editar-aver', function() {
+            var id = $(this).data('id');
+            var valor = $(this).data('valor');
+            var data = $(this).data('data');
+            var status = $(this).data('status');
+
+            $('#id_aver_edit').val(id);
+            $('#valor_aver_edit').val(valor);
+            $('#data_pagamento_edit').val(data);
+            $('#status_aver_edit').val(status);
+            
+            // Abre o modal
+            $('#modal-editar-aver').modal('show');
+        });
+
+        // Validação e submissão do formulário de edição de Aver
+        $("#formEditarAver").validate({
+            rules: {
+                valor: {
+                    required: true,
+                    number: true,
+                    min: function() {
+                        return 0;
+                    },
+                    max: function() {
+                        var valorTotal = parseFloat($("#valorTotal").val().replace(/\./g, '').replace(',', '.'));
+                        return valorTotal;
+                    }
+                },
+                data_pagamento: {
+                    required: true
+                },
+                status: {
+                    required: true
+                }
+            },
+            messages: {
+                valor: {
+                    required: 'Campo obrigatório',
+                    number: 'Digite um valor válido',
+                    min: 'O valor deve ser maior ou igual a zero',
+                    max: 'O valor não pode ser maior que o valor total da OS'
+                },
+                data_pagamento: {
+                    required: 'Campo obrigatório'
+                },
+                status: {
+                    required: 'Campo obrigatório'
+                }
+            },
+            submitHandler: function(form) {
+                var dados = $(form).serialize();
+                var valorAver = parseFloat($("#valor_aver_edit").val().replace(/\./g, '').replace(',', '.'));
+                var valorTotal = parseFloat($("#valorTotal").val().replace(/\./g, '').replace(',', '.'));
+
+                if (valorAver > valorTotal) {
+                    Swal.fire({
+                        type: "error",
+                        title: "Atenção",
+                        text: "O valor do aver não pode ser maior que o valor total da OS."
+                    });
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo base_url(); ?>index.php/os/editarAver",
+                    data: dados,
+                    dataType: 'json',
+                    beforeSend: function() {
+                        Swal.fire({
+                            title: 'Processando',
+                            text: 'Atualizando aver...',
+                            icon: 'info',
+                            showCloseButton: false,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        });
+                    },
+                    success: function(data) {
+                        if (data.result == true) {
+                            $('#modal-editar-aver').modal('hide');
+                            $("#formEditarAver")[0].reset();
+                            
+                            // Atualiza a tabela de avers via AJAX
+                            $.ajax({
+                                url: "<?php echo base_url(); ?>index.php/os/getAvers/<?php echo $result->idOs; ?>",
+                                type: "GET",
+                                dataType: "html",
+                                success: function(response) {
+                                    $("#divAvers").html(response);
+                                    Swal.fire({
+                                        type: "success",
+                                        title: "Sucesso",
+                                        text: "Aver atualizado com sucesso!"
+                                    });
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                type: "error",
+                                title: "Atenção",
+                                text: data.mensagem || "Ocorreu um erro ao tentar atualizar o aver."
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            type: "error",
+                            title: "Atenção",
+                            text: "Ocorreu um erro ao tentar atualizar o aver."
+                        });
+                    }
+                });
+                return false;
+            }
+        });
     });
 </script>
 
@@ -2008,6 +2128,50 @@
                 <div class="span12" style="margin-left: 0">
                     <label for="status_aver">Status*</label>
                     <select class="span12" name="status" id="status_aver" required>
+                        <option value="pago">Pago</option>
+                        <option value="pendente">Pendente</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="display:flex;justify-content: center">
+            <button class="button btn btn-warning" data-dismiss="modal" aria-hidden="true">
+                <span class="button__icon"><i class="bx bx-x"></i></span>
+                <span class="button__text2">Cancelar</span>
+            </button>
+            <button class="button btn btn-success">
+                <span class="button__icon"><i class="bx bx-save"></i></span>
+                <span class="button__text2">Salvar</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal Editar Aver -->
+<div id="modal-editar-aver" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalEditarAverLabel" aria-hidden="true">
+    <form id="formEditarAver" action="<?php echo base_url(); ?>index.php/os/editarAver" method="post">
+        <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="modalEditarAverLabel">Editar Aver</h3>
+        </div>
+        <div class="modal-body">
+            <div class="span12" style="margin-left: 0">
+                <div class="span12" style="margin-left: 0">
+                    <label for="valor_aver_edit">Valor do Aver*</label>
+                    <input type="hidden" name="id_aver" id="id_aver_edit">
+                    <input type="hidden" name="os_id" value="<?php echo $result->idOs; ?>">
+                    <input type="text" class="span12 money" id="valor_aver_edit" name="valor" required 
+                           data-affixes-stay="true" data-thousands="" data-decimal="." 
+                           max="<?php echo number_format($totals + $total, 2, '.', ''); ?>"/>
+                </div>
+                <div class="span12" style="margin-left: 0">
+                    <label for="data_pagamento_edit">Data do Pagamento*</label>
+                    <input type="text" class="span12 datepicker" id="data_pagamento_edit" name="data_pagamento" required/>
+                </div>
+                <div class="span12" style="margin-left: 0">
+                    <label for="status_aver_edit">Status*</label>
+                    <select class="span12" name="status" id="status_aver_edit" required>
                         <option value="pago">Pago</option>
                         <option value="pendente">Pendente</option>
                     </select>

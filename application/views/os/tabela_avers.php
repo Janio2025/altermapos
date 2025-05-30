@@ -25,7 +25,22 @@ log_message('debug', 'Dados recebidos na view tabela_avers: ' . print_r($avers, 
                 echo '<td>' . ucfirst($a->status) . '</td>';
                 echo '<td>' . date('d/m/Y H:i:s', strtotime($a->data_criacao)) . '</td>';
                 echo '<td>' . ($a->nome_usuario ?? 'N/A') . '</td>';
-                echo '<td><div align="center"><a href="#" class="btn-nwe4 excluir-aver" idAver="' . $a->idAver . '" os_id="' . $a->os_id . '" title="Excluir Aver"><i class="bx bx-trash-alt"></i></a></div></td>';
+                echo '<td>
+                    <div align="center">
+                        <a href="#modal-editar-aver" class="btn btn-info btn-editar-aver" 
+                           data-id="' . $a->idAver . '"
+                           data-valor="' . number_format($a->valor, 2, ',', '.') . '"
+                           data-data="' . date('d/m/Y', strtotime($a->data_pagamento)) . '"
+                           data-status="' . $a->status . '">
+                            <i class="bx bx-edit"></i>
+                        </a>
+                        <a href="#modal-excluir-aver" class="btn btn-danger btn-excluir-aver" 
+                           data-id="' . $a->idAver . '"
+                           data-os="' . $a->os_id . '">
+                            <i class="bx bx-trash"></i>
+                        </a>
+                    </div>
+                </td>';
                 echo '</tr>';
             }
         } else {
@@ -52,10 +67,25 @@ log_message('debug', 'Dados recebidos na view tabela_avers: ' . print_r($avers, 
 
 <script type="text/javascript">
 $(document).ready(function() {
-    $('.excluir-aver').click(function(e) {
-        e.preventDefault();
-        var idAver = $(this).attr('idAver');
-        var os_id = $(this).attr('os_id');
+    // Handler para o botão de editar
+    $(document).on('click', '.btn-editar-aver', function() {
+        var id = $(this).data('id');
+        var valor = $(this).data('valor');
+        var data = $(this).data('data');
+        var status = $(this).data('status');
+
+        $('#id_aver_edit').val(id);
+        $('#valor_aver_edit').val(valor);
+        $('#data_pagamento_edit').val(data);
+        $('#status_aver_edit').val(status);
+        
+        $('#modal-editar-aver').modal('show');
+    });
+
+    // Handler para o botão de excluir
+    $(document).on('click', '.btn-excluir-aver', function() {
+        var idAver = $(this).data('id');
+        var os_id = $(this).data('os');
         
         Swal.fire({
             title: 'Tem certeza?',

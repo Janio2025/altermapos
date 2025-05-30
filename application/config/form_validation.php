@@ -492,17 +492,17 @@ $config = [
         [
             'field' => 'valor',
             'label' => 'Valor',
-            'rules' => 'required|trim|numeric'
+            'rules' => 'required|numeric'
         ],
         [
             'field' => 'data_pagamento',
             'label' => 'Data do Pagamento',
-            'rules' => 'required|trim'
+            'rules' => 'required'
         ],
         [
             'field' => 'status',
             'label' => 'Status',
-            'rules' => 'required|trim'
+            'rules' => 'required'
         ]
     ],
 ];
