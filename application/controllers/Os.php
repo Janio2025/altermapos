@@ -1322,7 +1322,7 @@ class Os extends MY_Controller
                 'valor' => $this->input->post('valor'),
                 'data_pagamento' => date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $this->input->post('data_pagamento')))),
                 'status' => $this->input->post('status'),
-                'usuarios_id' => $this->session->userdata('id'),
+                'usuarios_id' => $this->session->userdata('id_admin'),
                 'data_criacao' => date('Y-m-d H:i:s')
             );
 

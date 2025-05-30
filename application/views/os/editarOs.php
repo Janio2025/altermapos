@@ -1995,6 +1995,7 @@
                 <div class="span12" style="margin-left: 0">
                     <label for="valor_aver">Valor do Aver*</label>
                     <input type="hidden" name="os_id" value="<?php echo $result->idOs; ?>">
+                    <input type="hidden" name="usuarios_id" value="<?php echo $this->session->userdata('id_admin'); ?>">
                     <input type="text" class="span12 money" id="valor_aver" name="valor" required 
                            data-affixes-stay="true" data-thousands="" data-decimal="." 
                            max="<?php echo number_format($totals + $total, 2, '.', ''); ?>"/>
