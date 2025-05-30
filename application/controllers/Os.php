@@ -421,11 +421,24 @@ class Os extends MY_Controller
         $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
         $this->data['anotacoes'] = $this->os_model->getAnotacoes($this->uri->segment(3));
         $this->data['editavel'] = $this->os_model->isEditable($this->uri->segment(3));
-        $this->data['qrCode'] = $this->os_model->getQrCode(
-            $this->uri->segment(3),
-            $this->data['configuration']['pix_key'],
-            $this->data['emitente']
-        );
+
+        if ($return = $this->os_model->valorTotalOS($this->uri->segment(3))) {
+            $this->data['totalServico'] = $return['totalServico'];
+            $this->data['totalProdutos'] = $return['totalProdutos'];
+            $this->data['result']->total_aver = $return['total_aver'];
+        }
+
+        if (!empty($this->data['configuration']['pix_key'])) {
+            $this->data['qrCode'] = $this->os_model->getQrCode(
+                $this->uri->segment(3),
+                $this->data['configuration']['pix_key'],
+                $this->data['emitente']
+            );
+            
+            // Formata a chave PIX
+            $this->data['chaveFormatada'] = $this->formatarChave($this->data['configuration']['pix_key']);
+        }
+
         $this->data['modalGerarPagamento'] = $this->load->view(
             'cobrancas/modalGerarPagamento',
             [
@@ -435,11 +448,6 @@ class Os extends MY_Controller
             true
         );
         $this->data['view'] = 'os/visualizarOs';
-
-        if ($return = $this->os_model->valorTotalOS($this->uri->segment(3))) {
-            $this->data['totalServico'] = $return['totalServico'];
-            $this->data['totalProdutos'] = $return['totalProdutos'];
-        }
 
         return $this->layout();
     }
@@ -465,6 +473,12 @@ class Os extends MY_Controller
         $this->data['servicos'] = $this->os_model->getServicos($this->uri->segment(3));
         $this->data['anexos'] = $this->os_model->getAnexos($this->uri->segment(3));
         $this->data['emitente'] = $this->mapos_model->getEmitente();
+
+        if ($return = $this->os_model->valorTotalOS($this->uri->segment(3))) {
+            $this->data['totalServico'] = $return['totalServico'];
+            $this->data['totalProdutos'] = $return['totalProdutos'];
+            $this->data['result']->total_aver = $return['total_aver'];
+        }
 
         if (!empty($this->data['configuration']['pix_key'])) {
             $this->data['qrCode'] = $this->os_model->getQrCode(
@@ -525,8 +539,14 @@ class Os extends MY_Controller
      */
     private function formatarChave($chave)
     {
-        // Exemplo: removendo espaços e caracteres especiais
-        return preg_replace('/[^a-zA-Z0-9]/', '', $chave);
+        // Remove espaços e caracteres especiais
+        $chave = preg_replace('/[^a-zA-Z0-9]/', '', $chave);
+        
+        // Formata a chave em grupos de 4 caracteres
+        $chave = str_split($chave, 4);
+        $chave = implode(' ', $chave);
+        
+        return $chave;
     }
 
     public function imprimirTermica()

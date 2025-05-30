@@ -348,13 +348,28 @@
                         </table>
                         <?php } ?>
 
-                        <?php
-                        if ($totalProdutos != 0 || $totalServico != 0) {
-                            echo "<h4 style='text-align: right'>Valor Total: R$ " . number_format($totalProdutos + $totalServico, 2, ',', '.') . "</h4>";
-                            echo $result->valor_desconto != 0 ? "<h4 style='text-align: right'> Desconto: R$ " . number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') . "</h4>" : "";
-                            echo $result->valor_desconto != 0 ? "<h4 style='text-align: right'> Total com Desconto: R$ " . number_format($result->valor_desconto, 2, ',', '.') . "</h4>" : "";
-                        }
-?>
+                        <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
+                            <div class="span12" style="margin-left: 0">
+                                <div class="span12" style="margin-left: 0">
+                                    <h4 style="text-align: right; font-weight: normal">
+                                        <span>Valor Total: R$ <?php echo number_format($totalProdutos + $totalServico, 2, ',', '.'); ?></span>
+                                        <?php if ($result->valor_desconto != 0) : ?>
+                                            <span style="margin: 0 15px">|</span>
+                                            <span>Desconto: R$ <?php echo number_format($result->valor_desconto, 2, ',', '.'); ?></span>
+                                        <?php endif; ?>
+                                        <?php if ($result->total_aver > 0) : ?>
+                                            <span style="margin: 0 15px">|</span>
+                                            <span>AVER: R$ <?php echo number_format($result->total_aver, 2, ',', '.'); ?></span>
+                                        <?php endif; ?>
+                                        <span style="margin: 0 15px">|</span>
+                                        <span style="font-weight: bold">Valor a Pagar: R$ <?php 
+                                            $total = $result->valor_desconto != 0 ? $result->valor_desconto : ($totalProdutos + $totalServico);
+                                            echo number_format($total - $result->total_aver, 2, ',', '.');
+                                        ?></span>
+                                    </h4>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>

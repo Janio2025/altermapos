@@ -336,6 +336,8 @@ public function autoCompleteProdutoSaida($q)
         $totalServico = 0;
         $totalProdutos = 0;
         $valorDesconto = 0;
+        $totalAver = 0;
+
         if ($servicos = $this->getServicos($id)) {
             foreach ($servicos as $s) {
                 $preco = $s->preco ?: $s->precoVenda;
@@ -351,7 +353,19 @@ public function autoCompleteProdutoSaida($q)
             $valorDesconto = $valorDescontoBD->valor_desconto;
         }
 
-        return ['totalServico' => $totalServico, 'totalProdutos' => $totalProdutos, 'valor_desconto' => $valorDesconto];
+        // Calcula o total de AVER
+        if ($avers = $this->getAvers($id)) {
+            foreach ($avers as $a) {
+                $totalAver += $a->valor;
+            }
+        }
+
+        return [
+            'totalServico' => $totalServico, 
+            'totalProdutos' => $totalProdutos, 
+            'valor_desconto' => $valorDesconto,
+            'total_aver' => $totalAver
+        ];
     }
 
     public function isEditable($id = null)
@@ -376,7 +390,8 @@ public function autoCompleteProdutoSaida($q)
         }
 
         $result = $this->valorTotalOS($id);
-        $amount = $result['valor_desconto'] != 0 ? round(floatval($result['valor_desconto']), 2) : round(floatval($result['totalServico'] + $result['totalProdutos']), 2);
+        $total = $result['valor_desconto'] != 0 ? $result['valor_desconto'] : ($result['totalServico'] + $result['totalProdutos']);
+        $amount = round(floatval($total - $result['total_aver']), 2);
 
         if ($amount <= 0) {
             return;

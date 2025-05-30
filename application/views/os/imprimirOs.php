@@ -229,58 +229,65 @@
                     </div>
                 <?php endif; ?>
 
-                <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
-                    <div class="pagamento">
-                        <div class="qrcode">
-                            <?php if ($this->data['configuration']['pix_key']) : ?>
-                                <div><img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></div>
-                                <div style="display: flex; flex-wrap: wrap; align-content: center;">
-                                    <div style="width: 100%; text-align:center;"><i class="fas fa-camera"></i><br />Escaneie o QRCode ao lado para pagar por Pix</div>
-                                    <div class="chavePix"> Pix: <b><?= $chaveFormatada ?></b></div>
-                                </div>
-                            <?php else: ?>
-                                <div></div>
-                                <div></div>
-                            <?php endif; ?>
+                <?php if ($totalProdutos != 0 || $totalServico != 0) { ?>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <!-- Coluna 1: QR Code -->
+                        <div style="width: 30%; text-align: center;">
+                            <?php if (!empty($qrCode)) { ?>
+                                <img src="<?php echo $qrCode; ?>" alt="QR Code Pix" style="max-width: 150px;">
+                            <?php } ?>
                         </div>
-                        <div>
-                            <div class="tabela">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr class="table-secondary">
-                                            <th colspan="2">RESUMO DOS VALORES</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php if ($result->valor_desconto != 0) : ?>
-                                            <tr>
-                                                <td width="65%">SUBTOTAL</td>
-                                                <td>R$ <b><?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></b></td>
-                                            </tr>
-                                            <tr>
-                                                <td>DESCONTO</td>
-                                                <td>R$ <b><?= number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') ?></b></td>
-                                            </tr>
-                                            <tr>
-                                                <td>TOTAL</td>
-                                                <td>R$ <?= number_format($result->valor_desconto, 2, ',', '.') ?></td>
-                                            </tr>
-                                        <?php else : ?>
-                                            <tr>
-                                                <td style="width:290px">TOTAL</td>
-                                                <td>R$ <?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
+
+                        <!-- Coluna 2: Informações do Pix -->
+                        <div style="width: 30%; text-align: center; margin-top: 15px;">
+                            <h5 style="text-align: center; margin-bottom: 5px;">Pagamento via Pix</h5>
+                            <?php if (!empty($chaveFormatada)) { ?>
+                                <p style="font-size: 13px; margin: 0;">Chave Pix: <?php echo $chaveFormatada; ?></p>
+                            <?php } ?>
+                        </div>
+
+                        <!-- Coluna 3: Valores -->
+                        <div style="width: 30%; margin-top: 15px;">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <p style="text-align: right; margin: 3px 0; font-size: 12px;">Total: R$ <?php echo number_format($totalProdutos + $totalServico, 2, ',', '.'); ?></p>
+                                </div>
+                            </div>
+
+                            <?php if ($result->valor_desconto != 0) { ?>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <p style="text-align: right; margin: 3px 0; font-size: 12px;">Com Desconto: R$ <?php echo number_format($result->valor_desconto, 2, ',', '.'); ?></p>
+                                    </div>
+                                </div>
+                            <?php } ?>
+
+                            <?php if ($result->total_aver > 0) { ?>
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        <p style="text-align: right; margin: 3px 0; font-size: 12px;">AVER: R$ <?php echo number_format($result->total_aver, 2, ',', '.'); ?></p>
+                                    </div>
+                                </div>
+                            <?php } ?>
+
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <p style="text-align: right; margin: 3px 0; font-size: 14px; font-weight: bold;">Valor Final: R$ <?php 
+                                        $total = $totalProdutos + $totalServico;
+                                        $valorFinal = $total;
+                                        if ($result->valor_desconto != 0) {
+                                            $valorFinal = $result->valor_desconto;
+                                        }
+                                        if ($result->total_aver > 0) {
+                                            $valorFinal -= $result->total_aver;
+                                        }
+                                        echo number_format($valorFinal, 2, ',', '.');
+                                    ?></p>
+                                </div>
                             </div>
                         </div>
-                        
                     </div>
-
-                    
-                <?php endif; ?>
-
+                <?php } ?>
 
             </section>
             <footer>
@@ -482,20 +489,24 @@
                     <?php endif; ?>
 
                     <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
-                        <div class="pagamento">
-                            <div class="qrcode">
+                        <div class="pagamento" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div class="span4" style="width: 30%;">
                                 <?php if ($this->data['configuration']['pix_key']) : ?>
-                                    <div><img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" /></div>
-                                    <div style="display: flex; flex-wrap: wrap; align-content: center;">
-                                        <div style="width: 100%; text-align:center;"><i class="fas fa-camera"></i><br />Escaneie o QRCode ao lado para pagar por Pix</div>
-                                        <div class="chavePix"> Pix: <b><?= $chaveFormatada ?></b></div>
+                                    <div style="text-align: center;">
+                                        <img width="130px" src="<?= $qrCode ?>" alt="QR Code de Pagamento" />
+                                        <div style="margin-top: 10px;">
+                                            <div style="text-align: center;">
+                                                <i class="fas fa-camera"></i><br />
+                                                Escaneie o QRCode para pagar por Pix
+                                            </div>
+                                            <div class="chavePix" style="text-align: center; margin-top: 5px;">
+                                                Pix: <b><?= $chaveFormatada ?></b>
+                                            </div>
+                                        </div>
                                     </div>
-                                <?php else: ?>
-                                    <div></div>
-                                    <div></div>
                                 <?php endif; ?>
                             </div>
-                            <div>
+                            <div class="span8" style="width: 65%;">
                                 <div class="tabela">
                                     <table class="table table-bordered">
                                         <thead>
@@ -504,25 +515,26 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <tr>
+                                                <td width="65%">Valor Total</td>
+                                                <td>R$ <?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></td>
+                                            </tr>
                                             <?php if ($result->valor_desconto != 0) : ?>
                                                 <tr>
-                                                    <td width="65%">SUBTOTAL</td>
-                                                    <td>R$ <b><?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></b></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>DESCONTO</td>
-                                                    <td>R$ <b><?= number_format($result->valor_desconto != 0 ? $result->valor_desconto - ($totalProdutos + $totalServico) : 0.00, 2, ',', '.') ?></b></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>TOTAL</td>
+                                                    <td>Desconto</td>
                                                     <td>R$ <?= number_format($result->valor_desconto, 2, ',', '.') ?></td>
                                                 </tr>
-                                            <?php else : ?>
-                                                <tr>
-                                                    <td style="width:290px">TOTAL</td>
-                                                    <td>R$ <?= number_format($totalProdutos + $totalServico, 2, ',', '.') ?></td>
-                                                </tr> 
                                             <?php endif; ?>
+                                            <?php if ($result->total_aver > 0) : ?>
+                                                <tr>
+                                                    <td>AVER</td>
+                                                    <td>R$ <?= number_format($result->total_aver, 2, ',', '.') ?></td>
+                                                </tr>
+                                            <?php endif; ?>
+                                            <tr>
+                                                <td><b>Valor a Pagar</b></td>
+                                                <td><b>R$ <?= number_format(($totalProdutos + $totalServico) - $result->valor_desconto - $result->total_aver, 2, ',', '.') ?></b></td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
