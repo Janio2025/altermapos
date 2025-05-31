@@ -355,7 +355,7 @@
                                         <span>Valor Total: R$ <?php echo number_format($totalProdutos + $totalServico, 2, ',', '.'); ?></span>
                                         <?php if ($result->valor_desconto != 0) : ?>
                                             <span style="margin: 0 15px">|</span>
-                                            <span>Desconto: R$ <?php echo number_format($result->valor_desconto, 2, ',', '.'); ?></span>
+                                            <span>Com Desconto: R$ <?php echo number_format($result->valor_desconto, 2, ',', '.'); ?></span>
                                         <?php endif; ?>
                                         <?php if ($result->total_aver > 0) : ?>
                                             <span style="margin: 0 15px">|</span>
