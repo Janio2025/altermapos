@@ -146,6 +146,7 @@
                                         <option value="">Selecione o tipo de valor base</option>
                                         <option value="servicos" <?php echo (isset($config) && $config->tipo_valor_base == 'servicos') ? 'selected' : ''; ?>>Serviços</option>
                                         <option value="total" <?php echo (isset($config) && $config->tipo_valor_base == 'total') ? 'selected' : ''; ?>>Produtos e Serviços</option>
+                                        <option value="total_os" <?php echo (isset($config) && $config->tipo_valor_base == 'total_os') ? 'selected' : ''; ?>>Total da OS</option>
                                     </select>
                                 </div>
 

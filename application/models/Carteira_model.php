@@ -476,6 +476,20 @@ class Carteira_model extends CI_Model
                 }
                 $valor -= $custo_total;
             }
+        } else if ($tipo == 'total_os') {
+            // Pega todas as OS do usuário
+            $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
+            $this->db->from('os');
+            $this->db->where('status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
+            $query = $this->db->get();
+            $ordens = $query->result();
+
+            foreach ($ordens as $ordem) {
+                // Se houver desconto, usa o valor com desconto, senão usa o valor total
+                $valor_os = $ordem->valor_desconto > 0 ? $ordem->valor_desconto : $ordem->valorTotal;
+                $valor += $valor_os;
+            }
         }
 
         return $valor;
@@ -566,7 +580,7 @@ class Carteira_model extends CI_Model
             $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
             $this->db->from('os');
             $this->db->where('status', 'Faturado');
-            $this->db->where("idOs IN ($subquery)"); // Usa a subquery
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
             $query = $this->db->get();
             $ordens = $query->result();
 
@@ -589,6 +603,20 @@ class Carteira_model extends CI_Model
                     $custo_total += ($produto->precoCompra * $produto->quantidade);
                 }
                 $valor -= $custo_total;
+            }
+        } else if ($tipo == 'total_os') {
+            // Pega todas as OS do usuário
+            $this->db->select('os.idOs, os.valorTotal, os.valor_desconto');
+            $this->db->from('os');
+            $this->db->where('status', 'Faturado');
+            $this->db->where("os.idOs IN ($subquery)"); // Usa a subquery
+            $query = $this->db->get();
+            $ordens = $query->result();
+
+            foreach ($ordens as $ordem) {
+                // Se houver desconto, usa o valor com desconto, senão usa o valor total
+                $valor_os = $ordem->valor_desconto > 0 ? $ordem->valor_desconto : $ordem->valorTotal;
+                $valor += $valor_os;
             }
         }
 
