@@ -241,8 +241,8 @@
                         <!-- Coluna 2: Informações do Pix -->
                         <div style="width: 30%; text-align: center; margin-top: 15px;">
                             <h5 style="text-align: center; margin-bottom: 5px;">Pagamento via Pix</h5>
-                            <?php if (!empty($chaveFormatada)) { ?>
-                                <p style="font-size: 13px; margin: 0;">Chave Pix: <?php echo $chaveFormatada; ?></p>
+                            <?php if (!empty($this->data['configuration']['pix_key'])) { ?>
+                                <p style="font-size: 13px; margin: 0;">Chave Pix: <?php echo $this->data['configuration']['pix_key']; ?></p>
                             <?php } ?>
                         </div>
 
@@ -500,7 +500,7 @@
                                                 Escaneie o QRCode para pagar por Pix
                                             </div>
                                             <div class="chavePix" style="text-align: center; margin-top: 5px;">
-                                                Pix: <b><?= $chaveFormatada ?></b>
+                                                Pix: <b><?= $this->data['configuration']['pix_key'] ?></b>
                                             </div>
                                         </div>
                                     </div>
