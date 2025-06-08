@@ -439,6 +439,20 @@ CREATE TABLE IF NOT EXISTS `os` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
+-- Table `compartimento_equipamentos`
+-- -----------------------------------------------------
+CREATE TABLE compartimento_equipamentos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    compartimento_id INT,
+    os_id INT,
+    produtos_id INT,
+    data_entrada DATETIME,
+    FOREIGN KEY (compartimento_id) REFERENCES compartimentos(id),
+    FOREIGN KEY (os_id) REFERENCES os(id),
+    FOREIGN KEY (produtos_id) REFERENCES produtos(id)
+);
+
+-- -----------------------------------------------------
 -- Table `aver_os`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `aver_os` (
