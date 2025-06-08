@@ -38,9 +38,10 @@ class Compartimentos_model extends CI_Model
 
     public function getCompartimentosComOcupacao($organizador_id)
     {
-        $this->db->select('c.*, COUNT(ce.id) as quantidade');
+        $this->db->select('c.*, COUNT(CASE WHEN ce.os_id IS NOT NULL AND o.faturado = 0 THEN 1 END) as quantidade');
         $this->db->from('compartimentos c');
         $this->db->join('compartimento_equipamentos ce', 'c.id = ce.compartimento_id', 'left');
+        $this->db->join('os o', 'ce.os_id = o.idOs', 'left');
         $this->db->where('c.organizador_id', $organizador_id);
         $this->db->group_by('c.id');
         $query = $this->db->get();

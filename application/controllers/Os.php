@@ -1123,7 +1123,11 @@ class Os extends MY_Controller
             } catch (Exception $e) {
                 $vencimento = date('Y/m/d');
             }
-            $os = $this->os_model->getById($this->input->post('os_id'));
+
+            // Buscar os dados da OS antes de qualquer alteração
+            $os_id = $this->input->post('os_id');
+            $os = $this->os_model->getById($os_id);
+            
             $data = [
                 'descricao' => set_value('descricao'),
                 'valor' => getAmount($this->input->post('valor')),
@@ -1139,7 +1143,7 @@ class Os extends MY_Controller
                 'tipo' => $this->input->post('tipo'),
                 'observacoes' => set_value('observacoes'),
                 'usuarios_id' => $os->usuarios_id,
-                'os_id' => $this->input->post('os_id')
+                'os_id' => $os_id
             ];
 
             $editavel = $this->os_model->isEditable($this->input->post('idOs'));
@@ -1151,15 +1155,24 @@ class Os extends MY_Controller
             }
 
             if ($this->os_model->add('lancamentos', $data) == true) {
-                $os = $this->input->post('os_id');
-
                 $this->db->set('faturado', 1);
                 $this->db->set('valorTotal', $this->input->post('valor'));
                 $this->db->set('status', 'Faturado');
-                $this->db->where('idOs', $os);
+                $this->db->where('idOs', $os_id);
                 $this->db->update('os');
 
-                log_info('Faturou uma OS. ID: ' . $os);
+                // Remover a OS do compartimento
+                if ($os->compartimento_id) {
+                    $this->load->model('compartimentos_model');
+                    $this->compartimentos_model->atualizarOcupacao($os->compartimento_id, 'os', $os_id, 'remover');
+                    
+                    // Limpar o compartimento_id na tabela os
+                    $this->db->set('compartimento_id', null);
+                    $this->db->where('idOs', $os_id);
+                    $this->db->update('os');
+                }
+
+                log_info('Faturou uma OS. ID: ' . $os_id);
 
                 $this->session->set_flashdata('success', 'OS faturada com sucesso!');
                 $json = ['result' => true];
