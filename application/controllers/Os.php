@@ -1272,7 +1272,7 @@ class Os extends MY_Controller
         $organizador_id = $this->input->post('organizador_id') ?: $this->input->get('organizador_id');
         
         if ($organizador_id) {
-            $compartimentos = $this->compartimentos_model->getCompartimentosByOrganizador($organizador_id);
+            $compartimentos = $this->compartimentos_model->getCompartimentosComOcupacao($organizador_id);
             return $this->output
                 ->set_content_type('application/json')
                 ->set_output(json_encode($compartimentos));

@@ -13,6 +13,8 @@
         // Dynamic compartimentos loading
         $('#organizador_id').change(function() {
             var organizadorId = $(this).val();
+            var compartimentoAtual = '<?php echo $result->compartimento_id; ?>'; // Pega o ID do compartimento atual
+            
             if (organizadorId) {
                 $.ajax({
                     url: '<?php echo base_url(); ?>index.php/os/buscarCompartimentos',
@@ -23,7 +25,22 @@
                         $('#compartimento_id').empty();
                         $('#compartimento_id').append('<option value="">Selecione um compartimento</option>');
                         $.each(data, function(key, value) {
-                            $('#compartimento_id').append('<option value="' + value.id + '">' + value.nome_compartimento + '</option>');
+                            var option = $('<option></option>')
+                                .val(value.id)
+                                .text(value.nome_compartimento);
+                            
+                            // Se o compartimento estiver ocupado, adiciona a quantidade
+                            if (value.quantidade > 0) {
+                                option.text(value.nome_compartimento + ' (' + value.quantidade + ' OS)');
+                                option.addClass('compartimento-ocupado');
+                            }
+                            
+                            // Se for o compartimento atual, marca como selecionado
+                            if (value.id == compartimentoAtual) {
+                                option.prop('selected', true);
+                            }
+                            
+                            $('#compartimento_id').append(option);
                         });
                     },
                     error: function(xhr, status, error) {
@@ -37,8 +54,28 @@
                 $('#compartimento_id').append('<option value="">Selecione primeiro um organizador</option>');
             }
         });
+
+        // Carregar compartimentos ocupados ao iniciar a página
+        var organizadorId = $('#organizador_id').val();
+        if (organizadorId) {
+            $('#organizador_id').trigger('change');
+        }
     });
 </script>
+
+<style>
+    /* Estilos para compartimentos ocupados */
+    .compartimento-ocupado {
+        color: #ff0000;
+        font-weight: bold;
+    }
+    
+    /* Estilo para o select2 quando o compartimento está ocupado */
+    .select2-results__option.compartimento-ocupado {
+        color: #ff0000;
+        font-weight: bold;
+    }
+</style>
 
 <div class="row-fluid" style="margin-top:0">
     <div class="span12">
