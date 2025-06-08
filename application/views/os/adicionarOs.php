@@ -313,6 +313,18 @@
     [data-target="#modalUsuarios"].btn-info {
         background-color: #17a2b8;
     }
+
+    /* Estilos para compartimentos ocupados */
+    .ocupado {
+        color: red;
+        font-weight: bold;
+    }
+
+    /* Estilo para o select2 com itens ocupados */
+    .select2-results__option.ocupado {
+        color: red;
+        font-weight: bold;
+    }
 </style>
 
 <script type="text/javascript">
@@ -629,7 +641,7 @@
             if (organizador_id) {
                 // Carregar compartimentos via AJAX
                 $.ajax({
-                    url: '<?php echo site_url('os/buscarCompartimentos'); ?>',
+                    url: '<?php echo site_url('compartimentos/buscarCompartimentos'); ?>',
                     type: 'GET',
                     data: { organizador_id: organizador_id },
                     dataType: 'json',
@@ -639,12 +651,19 @@
                             compartimento_select.append('<option value="">Selecione um compartimento</option>');
                             // Adicionar os compartimentos ao select
                             $.each(data, function(index, item) {
+                                let optionClass = item.quantidade > 0 ? 'ocupado' : '';
+                                let optionText = item.quantidade > 0 ? 
+                                    `${item.nome_compartimento} (${item.quantidade})` : 
+                                    item.nome_compartimento;
+                                
                                 compartimento_select.append(
-                                    $('<option></option>').val(item.id).text(item.nome_compartimento)
+                                    $('<option></option>')
+                                        .val(item.id)
+                                        .text(optionText)
+                                        .addClass(optionClass)
                                 );
                             });
                         } else {
-                            // Se não houver compartimentos, mostra mensagem apropriada
                             compartimento_select.append('<option value="">Organizador sem compartimentos</option>');
                         }
                     },
@@ -654,6 +673,56 @@
                 });
             } else {
                 compartimento_select.append('<option value="">Selecione primeiro um organizador</option>');
+            }
+        });
+
+        // Inicializar o Select2 com template personalizado
+        $('#compartimento_id').select2({
+            templateResult: formatCompartimento,
+            templateSelection: formatCompartimento
+        });
+
+        // Função para formatar a exibição do compartimento no Select2
+        function formatCompartimento(compartimento) {
+            if (!compartimento.id) return compartimento.text;
+            
+            let $compartimento = $(
+                '<span class="' + $(compartimento.element).attr('class') + '">' + 
+                compartimento.text + 
+                '</span>'
+            );
+            
+            return $compartimento;
+        }
+
+        // Quando um compartimento é selecionado, validar capacidade
+        $('#compartimento_id').change(function() {
+            var compartimento_id = $(this).val();
+            if (compartimento_id) {
+                $.ajax({
+                    url: '<?php echo site_url('compartimentos/validarCapacidadeCompartimento'); ?>',
+                    type: 'POST',
+                    data: { compartimento_id: compartimento_id },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (!response.valido) {
+                            Swal.fire({
+                                title: 'Atenção!',
+                                text: 'Este compartimento está com alta ocupação. Deseja continuar mesmo assim?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: 'Sim, continuar',
+                                cancelButtonText: 'Cancelar'
+                            }).then((result) => {
+                                if (!result.isConfirmed) {
+                                    $('#compartimento_id').val('').trigger('change');
+                                }
+                            });
+                        }
+                    }
+                });
             }
         });
     });

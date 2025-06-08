@@ -173,7 +173,14 @@ class Os extends MY_Controller
                 $idOs = $id;
                 $os = $this->os_model->getById($idOs);
                 $emitente = $this->mapos_model->getEmitente();
-              
+
+                // Atualiza ocupação do compartimento
+                $compartimento_id = $this->input->post('compartimento_id');
+                if (!empty($compartimento_id)) {
+                    $this->load->model('compartimentos_model');
+                    $this->compartimentos_model->atualizarOcupacao($compartimento_id, 'os', $idOs, 'adicionar');
+                }
+
                 $tecnico = $this->usuarios_model->getById($os->usuarios_id);
 
                 // Verificar configuração de notificação
