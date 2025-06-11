@@ -267,7 +267,7 @@ if ($localizacaoProduto !== 'N/A') {
     <div class="modal-footer">
         <button class="btn" data-dismiss="modal" aria-hidden="true">Fechar</button>
         <a href="" id="download" class="btn btn-inverse">Download</a>
-        <a href="" link="" class="btn btn-danger" id="excluir-produto">Excluir Produto</a>
+        
     </div>
 </div>
 
