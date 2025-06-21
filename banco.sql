@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS `mercadopago_transactions` (
     `payment_method` VARCHAR(50) NOT NULL,
     `pix_key` VARCHAR(255),
     `description` TEXT,
-    `response_data` JSON,
+    `response_data` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `mercadopago_transactions` (
     INDEX `idx_user_id` (`user_id`),
     INDEX `idx_wallet_id` (`wallet_id`),
     INDEX `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Tabela para logs do Mercado Pago
 CREATE TABLE IF NOT EXISTS `mercadopago_logs` (
@@ -141,12 +141,12 @@ CREATE TABLE IF NOT EXISTS `mercadopago_logs` (
     `transaction_id` INT,
     `type` VARCHAR(50) NOT NULL,
     `message` TEXT NOT NULL,
-    `data` JSON,
+    `data` TEXT,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     INDEX `idx_transaction_id` (`transaction_id`),
     INDEX `idx_type` (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 
 -- -----------------------------------------------------
@@ -441,32 +441,33 @@ CREATE TABLE IF NOT EXISTS `os` (
 -- -----------------------------------------------------
 -- Table `compartimento_equipamentos`
 -- -----------------------------------------------------
-CREATE TABLE compartimento_equipamentos (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    compartimento_id INT,
-    os_id INT,
-    produtos_id INT,
-    data_entrada DATETIME,
-    FOREIGN KEY (compartimento_id) REFERENCES compartimentos(id),
-    FOREIGN KEY (os_id) REFERENCES os(id),
-    FOREIGN KEY (produtos_id) REFERENCES produtos(id)
-);
+CREATE TABLE IF NOT EXISTS `compartimento_equipamentos` (
+    `id` INT PRIMARY KEY AUTO_INCREMENT,
+    `compartimento_id` INT,
+    `os_id` INT,
+    `produtos_id` INT,
+    `data_entrada` DATETIME,
+    FOREIGN KEY (`compartimento_id`) REFERENCES `compartimentos`(`id`),
+    FOREIGN KEY (`os_id`) REFERENCES `os`(`idOs`),
+    FOREIGN KEY (`produtos_id`) REFERENCES `produtos`(`idProdutos`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
 -- Table `log_compartimentos`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `log_compartimentos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `compartimento_id` int(11) NOT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `compartimento_id` int NOT NULL,
   `acao` varchar(20) NOT NULL,
-  `item_id` int(11) NOT NULL,
+  `item_id` int NOT NULL,
   `tipo_item` varchar(20) NOT NULL,
   `data_alteracao` datetime NOT NULL,
-  `usuario_id` int(11) NOT NULL,
+  `usuario_id` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `compartimento_id` (`compartimento_id`),
   KEY `usuario_id` (`usuario_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- -----------------------------------------------------
 -- Table `aver_os`
 -- -----------------------------------------------------
