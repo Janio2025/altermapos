@@ -1102,6 +1102,7 @@ CREATE TABLE IF NOT EXISTS `configuracoes` (
     `config` varchar(20) NOT NULL,
     `valor` text,
     `media_server_url` VARCHAR(255) DEFAULT NULL,
+    `media_server_path` VARCHAR(255) DEFAULT NULL,
     PRIMARY KEY (`idConfig`),
     UNIQUE KEY `config` (`config`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -1116,22 +1117,23 @@ CREATE TABLE IF NOT EXISTS `migrations` (
 -- -----------------------------------------------------
 -- Inserções iniciais
 -- -----------------------------------------------------
-INSERT IGNORE INTO `configuracoes` (`idConfig`, `config`, `valor`, `media_server_url`) VALUES
-(2, 'app_name', 'Map-OS', NULL),
-(3, 'app_theme', 'white', NULL),
-(4, 'per_page', '10', NULL),
-(5, 'os_notification', 'cliente', NULL),
-(6, 'control_estoque', '1', NULL),
-(7, 'notifica_whats', 'Prezado(a), {CLIENTE_NOME} a OS de nº {NUMERO_OS} - {DESCRI_PRODUTOS} - {MARCA_OS_PRODUTOS} - Teve seu status alterado para: {STATUS_OS},  Valor: {VALOR_OS}, Atenciosamente: {TELEFONE_EMITENTE}.', NULL),
-(8, 'control_baixa', '0', NULL),
-(9, 'control_editos', '1', NULL),
-(10, 'control_datatable', '1', NULL),
-(11, 'pix_key', '', NULL),
-(12, 'os_status_list', '[\"Aberto\",\"Faturado\",\"Negocia\\u00e7\\u00e3o\",\"Em Andamento\",\"Or\\u00e7amento\",\"Finalizado\",\"Cancelado\",\"Aguardando Pe\\u00e7as\",\"Aprovado\"]', NULL),
-(13, 'control_edit_vendas', '1', NULL),
-(14, 'email_automatico', '1', NULL),
-(15, 'control_2vias', '0', NULL),
-(16, 'media_server_url', '', NULL);
+INSERT IGNORE INTO `configuracoes` (`idConfig`, `config`, `valor`, `media_server_url`, `media_server_path`) VALUES
+(2, 'app_name', 'Map-OS', NULL, NULL),
+(3, 'app_theme', 'white', NULL, NULL),
+(4, 'per_page', '10', NULL, NULL),
+(5, 'os_notification', 'cliente', NULL, NULL),
+(6, 'control_estoque', '1', NULL, NULL),
+(7, 'notifica_whats', 'Prezado(a), {CLIENTE_NOME} a OS de nº {NUMERO_OS} - {DESCRI_PRODUTOS} - {MARCA_OS_PRODUTOS} - Teve seu status alterado para: {STATUS_OS},  Valor: {VALOR_OS}, Atenciosamente: {TELEFONE_EMITENTE}.', NULL, NULL),
+(8, 'control_baixa', '0', NULL, NULL),
+(9, 'control_editos', '1', NULL, NULL),
+(10, 'control_datatable', '1', NULL, NULL),
+(11, 'pix_key', '', NULL, NULL),
+(12, 'os_status_list', '[\"Aberto\",\"Faturado\",\"Negocia\\u00e7\\u00e3o\",\"Em Andamento\",\"Or\\u00e7amento\",\"Finalizado\",\"Cancelado\",\"Aguardando Pe\\u00e7as\",\"Aprovado\"]', NULL, NULL),
+(13, 'control_edit_vendas', '1', NULL, NULL),
+(14, 'email_automatico', '1', NULL, NULL),
+(15, 'control_2vias', '0', NULL, NULL),
+(16, 'media_server_url', '', NULL, NULL),
+(17, 'media_server_path', '', NULL, NULL);
 
 INSERT IGNORE INTO `permissoes` (`idPermissao`, `nome`, `permissoes`, `situacao`, `data`) VALUES
 (1, 'Administrador', 'a:66:{s:12:"vOrganizador";s:1:"1";s:12:"aOrganizador";s:1:"1";s:12:"eOrganizador";s:1:"1";s:12:"dOrganizador";s:1:"1";s:9:"vCarteira";s:1:"1";s:9:"aCarteira";s:1:"1";s:9:"eCarteira";s:1:"1";s:9:"dCarteira";s:1:"1";s:14:"vCarteiraAdmin";s:1:"1";s:14:"aCarteiraAdmin";s:1:"1";s:14:"eCarteiraAdmin";s:1:"1";s:14:"dCarteiraAdmin";s:1:"1";s:14:"pCarteiraAdmin";s:1:"1";s:8:"aCliente";s:1:"1";s:8:"eCliente";s:1:"1";s:8:"dCliente";s:1:"1";s:8:"vCliente";s:1:"1";s:8:"aProduto";s:1:"1";s:8:"eProduto";s:1:"1";s:8:"dProduto";s:1:"1";s:8:"vProduto";s:1:"1";s:8:"aServico";s:1:"1";s:8:"eServico";s:1:"1";s:8:"dServico";s:1:"1";s:8:"vServico";s:1:"1";s:3:"aOs";s:1:"1";s:3:"eOs";s:1:"1";s:3:"dOs";s:1:"1";s:3:"vOs";s:1:"1";s:6:"aVenda";s:1:"1";s:6:"eVenda";s:1:"1";s:6:"dVenda";s:1:"1";s:6:"vVenda";s:1:"1";s:9:"aGarantia";s:1:"1";s:9:"eGarantia";s:1:"1";s:9:"dGarantia";s:1:"1";s:9:"vGarantia";s:1:"1";s:8:"aArquivo";s:1:"1";s:8:"eArquivo";s:1:"1";s:8:"dArquivo";s:1:"1";s:8:"vArquivo";s:1:"1";s:10:"aPagamento";N;s:10:"ePagamento";N;s:10:"dPagamento";N;s:10:"vPagamento";N;s:11:"aLancamento";s:1:"1";s:11:"eLancamento";s:1:"1";s:11:"dLancamento";s:1:"1";s:11:"vLancamento";s:1:"1";s:8:"cUsuario";s:1:"1";s:9:"cEmitente";s:1:"1";s:10:"cPermissao";s:1:"1";s:7:"cBackup";s:1:"1";s:10:"cAuditoria";s:1:"1";s:6:"cEmail";s:1:"1";s:8:"cSistema";s:1:"1";s:8:"rCliente";s:1:"1";s:8:"rProduto";s:1:"1";s:8:"rServico";s:1:"1";s:3:"rOs";s:1:"1";s:6:"rVenda";s:1:"1";s:11:"rFinanceiro";s:1:"1";s:9:"aCobranca";s:1:"1";s:9:"eCobranca";s:1:"1";s:9:"dCobranca";s:1:"1";s:9:"vCobranca";s:1:"1";}', 1, '2025-03-10');

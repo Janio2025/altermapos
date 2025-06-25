@@ -940,7 +940,20 @@ class Os extends MY_Controller
         $this->load->library('upload');
         $this->load->library('image_lib');
 
-        $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'os' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $this->input->post('idOsServico');
+        $this->load->model('mapos_model');
+        $media_server_url = $this->mapos_model->getConfiguracaoByKey('media_server_url');
+        $media_server_path = $this->mapos_model->getConfiguracaoByKey('media_server_path');
+        $media_server_path = rtrim($media_server_path, '/\\');
+
+        // Caminho físico para salvar o arquivo
+        $directory = $media_server_path . '/anexos/os/' . date('m-Y') . '/OS-' . $this->input->post('idOsServico');
+        $url_base = $media_server_url . '/anexos/os/' . date('m-Y') . '/OS-' . $this->input->post('idOsServico');
+
+        if (empty($media_server_url) || empty($media_server_path)) {
+            // Se não configurado, usa o caminho padrão local
+            $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'os' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $this->input->post('idOsServico');
+            $url_base = base_url('assets/anexos/os/' . date('m-Y') . '/OS-' . $this->input->post('idOsServico'));
+        }
 
         // If it exist, check if it's a directory
         if (!is_dir($directory . DIRECTORY_SEPARATOR . 'thumbs')) {
@@ -985,7 +998,10 @@ class Os extends MY_Controller
                 $new_file_path = $upload_data['file_path'] . $new_file_name;
         
                 rename($upload_data['full_path'], $new_file_path);
-        
+
+                // O campo url deve ser apenas a URL da pasta, e anexo apenas o nome do arquivo
+                $thumb_name = $upload_data['is_image'] == 1 ? 'thumb_' . $new_file_name : '';
+
                 if ($upload_data['is_image'] == 1) {
                     $resize_conf = [
                         'source_image' => $new_file_path,
@@ -1001,7 +1017,7 @@ class Os extends MY_Controller
                     } else {
                         $success[] = $upload_data;
                         $this->load->model('Os_model');
-                        $result = $this->Os_model->anexar($this->input->post('idOsServico'), $new_file_name, base_url('assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'os' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $this->input->post('idOsServico')), 'thumb_' . $new_file_name, $directory);
+                        $result = $this->Os_model->anexar($this->input->post('idOsServico'), $new_file_name, $url_base, $thumb_name, $directory);
                         if (!$result) {
                             $error['db'][] = 'Erro ao inserir no banco de dados.';
                         }
@@ -1011,7 +1027,7 @@ class Os extends MY_Controller
         
                     $this->load->model('Os_model');
         
-                    $result = $this->Os_model->anexar($this->input->post('idOsServico'), $new_file_name, base_url('assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'os' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $this->input->post('idOsServico')), '', $directory);
+                    $result = $this->Os_model->anexar($this->input->post('idOsServico'), $new_file_name, $url_base, '', $directory);
                     if (!$result) {
                         $error['db'][] = 'Erro ao inserir no banco de dados.';
                     }

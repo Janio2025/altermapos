@@ -552,4 +552,17 @@ class Mapos_model extends CI_Model
 
         return true;
     }
+
+    /**
+     * Retorna o valor de uma configuração pelo nome da chave
+     */
+    public function getConfiguracaoByKey($key)
+    {
+        $this->db->where('config', $key);
+        $query = $this->db->get('configuracoes');
+        if ($query->num_rows() > 0) {
+            return $query->row()->valor;
+        }
+        return null;
+    }
 }

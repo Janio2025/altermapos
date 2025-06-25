@@ -478,6 +478,7 @@ class Mapos extends MY_Controller {
                 'os_status_list' => json_encode($this->input->post('os_status_list')),
                 'control_2vias' => $this->input->post('control_2vias'),
                 'media_server_url' => $this->input->post('media_server_url'),
+                'media_server_path' => $this->input->post('media_server_path'),
             ];
             if ($this->mapos_model->saveConfiguracao($data) == true) {
                 $this->session->set_flashdata('success', 'Configurações do sistema atualizadas com sucesso!');

@@ -38,6 +38,13 @@
                             </div>
                         </div>
                         <div class="control-group">
+                            <label for="media_server_path" class="control-label">Caminho Físico do Servidor de Mídia</label>
+                            <div class="controls">
+                                <input type="text" name="media_server_path" id="media_server_path" value="<?= isset($configuration['media_server_path']) ? $configuration['media_server_path'] : '' ?>" placeholder="C:/wamp64/www/midia" class="form-control">
+                                <span class="help-inline">Caminho físico no disco do servidor de mídia. Exemplo: C:/wamp64/www/midia</span>
+                            </div>
+                        </div>
+                        <div class="control-group">
                             <label for="app_theme" class="control-label">Tema do Sistema</label>
                             <div class="controls">
                                 <select name="app_theme" id="app_theme">
