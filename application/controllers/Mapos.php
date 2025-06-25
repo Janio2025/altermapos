@@ -425,6 +425,7 @@ class Mapos extends MY_Controller {
         $this->form_validation->set_rules('pix_key', 'Chave Pix', 'trim|valid_pix_key', [
             'valid_pix_key' => 'Chave Pix inválida!',
         ]);
+        $this->form_validation->set_rules('media_server_url', 'URL do Servidor de Mídia', 'trim|valid_url');
 
         if ($this->form_validation->run() == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="alert">' . validation_errors() . '</div>' : false);
@@ -476,6 +477,7 @@ class Mapos extends MY_Controller {
                 'pix_key' => $this->input->post('pix_key'),
                 'os_status_list' => json_encode($this->input->post('os_status_list')),
                 'control_2vias' => $this->input->post('control_2vias'),
+                'media_server_url' => $this->input->post('media_server_url'),
             ];
             if ($this->mapos_model->saveConfiguracao($data) == true) {
                 $this->session->set_flashdata('success', 'Configurações do sistema atualizadas com sucesso!');

@@ -30,6 +30,14 @@
                             </div>
                         </div>
                         <div class="control-group">
+                            <label for="media_server_url" class="control-label">URL do Servidor de Mídia</label>
+                            <div class="controls">
+                                <input type="text" name="media_server_url" id="media_server_url" value="<?= isset(
+                                    $configuration['media_server_url']) ? $configuration['media_server_url'] : '' ?>" placeholder="http://192.168.0.10/midia" class="form-control">
+                                <span class="help-inline">Endereço do servidor de mídia local/remoto para salvar fotos e anexos. Exemplo: http://192.168.0.10/midia</span>
+                            </div>
+                        </div>
+                        <div class="control-group">
                             <label for="app_theme" class="control-label">Tema do Sistema</label>
                             <div class="controls">
                                 <select name="app_theme" id="app_theme">
