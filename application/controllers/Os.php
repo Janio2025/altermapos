@@ -995,10 +995,18 @@ class Os extends MY_Controller
             } else {
                 $upload_data = $this->upload->data();
         
-                // Gera um nome de arquivo aleatório mantendo a extensão original
-                $new_file_name = uniqid() . '.' . pathinfo($upload_data['file_name'], PATHINFO_EXTENSION);
+                // Gera um nome de arquivo baseado na data e hora
+                $ext = pathinfo($upload_data['file_name'], PATHINFO_EXTENSION);
+                $base_name = date('d-m-Y_H-i-s');
+                $new_file_name = $base_name . '.' . $ext;
                 $new_file_path = $upload_data['file_path'] . $new_file_name;
-        
+
+                // Se já existir um arquivo com o mesmo nome, adiciona um sufixo aleatório
+                if (file_exists($new_file_path)) {
+                    $new_file_name = $base_name . '_' . uniqid() . '.' . $ext;
+                    $new_file_path = $upload_data['file_path'] . $new_file_name;
+                }
+
                 rename($upload_data['full_path'], $new_file_path);
 
                 // O campo url deve ser apenas a URL da pasta, e anexo apenas o nome do arquivo

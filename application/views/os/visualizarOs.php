@@ -324,28 +324,32 @@
                         <?php } ?>
 
                         <?php if ($anexos != null) { ?>
-                        <table class="table table-bordered table-condensed">
-                            <thead>
-                                <tr>
-                                    <th>Anexo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div class="span12" style="padding: 1%; margin-left: 0">
+                            <div class="row-fluid">
                                 <?php
-                            foreach ($anexos as $a) {
-                                if ($a->thumb == null) {
-                                    $thumb = base_url() . 'assets/img/icon-file.png';
-                                    $link = base_url() . 'assets/img/icon-file.png';
-                                } else {
-                                    $thumb = $a->url . '/thumbs/' . $a->thumb;
-                                    $link = $a->url . '/' . $a->anexo;
+                                $count = 0;
+                                foreach ($anexos as $a) {
+                                    if ($a->thumb == null) {
+                                        $thumb = base_url() . 'assets/img/icon-file.png';
+                                        $link = base_url() . 'assets/img/icon-file.png';
+                                    } else {
+                                        $thumb = $a->url . '/thumbs/' . $a->thumb;
+                                        $link = $a->url . '/' . $a->anexo;
+                                    }
+                                    if ($count % 3 == 0 && $count > 0) {
+                                        echo '</div><div class="row-fluid">';
+                                    }
+                                    echo '<div class="span4" style="min-height: 180px; text-align: center; margin-bottom: 20px;">
+                                            <a style="min-height: 150px; display: block;" href="#modal-anexo" imagem="' . $a->idAnexos . '" link="' . $link . '" role="button" class="btn anexo span12" data-toggle="modal">
+                                                <img src="' . $thumb . '" alt="" style="max-width: 100%; max-height: 120px; margin-bottom: 8px;">
+                                            </a>
+                                            <div style="word-break: break-all; font-size: 13px; color: #333; margin-top: 5px;">' . $a->anexo . '</div>
+                                        </div>';
+                                    $count++;
                                 }
-                                echo '<tr>';
-                                echo '<td><a style="min-height: 150px;" href="#modal-anexo" imagem="' . $a->idAnexos . '" link="' . $link . '" role="button" class="btn anexo span12" data-toggle="modal"><img src="' . $thumb . '" alt=""></a></td>';
-                                echo '</tr>';
-                            } ?>
-                            </tbody>
-                        </table>
+                                ?>
+                            </div>
+                        </div>
                         <?php } ?>
 
                         <?php if ($totalProdutos != 0 || $totalServico != 0) : ?>
