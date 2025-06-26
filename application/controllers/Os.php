@@ -1001,10 +1001,13 @@ class Os extends MY_Controller
                 $new_file_name = $base_name . '.' . $ext;
                 $new_file_path = $upload_data['file_path'] . $new_file_name;
 
-                // Se já existir um arquivo com o mesmo nome, adiciona um sufixo aleatório
-                if (file_exists($new_file_path)) {
-                    $new_file_name = $base_name . '_' . uniqid() . '.' . $ext;
+                // Se já existir um arquivo com o mesmo nome, adiciona um sufixo incremental
+                $contador = 1;
+                while (file_exists($new_file_path)) {
+                    $sufixo = sprintf('-%02d', $contador);
+                    $new_file_name = $base_name . $sufixo . '.' . $ext;
                     $new_file_path = $upload_data['file_path'] . $new_file_name;
+                    $contador++;
                 }
 
                 rename($upload_data['full_path'], $new_file_path);
