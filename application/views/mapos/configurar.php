@@ -70,9 +70,9 @@
                                                         <input type="text" name="servidores_midia[<?= $index ?>][caminho_fisico]" value="<?= $servidor['caminho_fisico'] ?>" placeholder="C:/wamp64/www/midia" class="span12">
                                                     </div>
                                                     <div class="span2">
-                                                        <label>Espaço em Disco</label>
+                                                        <label class="label-espaco-disco">Espaço em Disco</label>
                                                         <div class="progress barra-disco" style="margin-bottom:0; height:22px;">
-                                                            <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #e53935;">
+                                                            <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #2196f3;">
                                                                 40% usado
                                                             </div>
                                                         </div>
@@ -683,7 +683,7 @@
                                     <input type="text" name="servidores_midia[${servidorIndex}][caminho_fisico]" placeholder="C:/wamp64/www/midia" class="span12">
                                 </div>
                                 <div class="span2">
-                                    <label>Espaço em Disco</label>
+                                    <label class="label-espaco-disco">Espaço em Disco</label>
                                     <div class="progress barra-disco" style="margin-bottom:0; height:22px;">
                                         <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #2196f3;">
                                             ...
@@ -768,8 +768,10 @@
         function atualizarBarraEspaco(servidorItem) {
             var caminho = servidorItem.find('input[name*="[caminho_fisico]"]').val();
             var barra = servidorItem.find('.barra-espaco');
+            var label = servidorItem.find('.label-espaco-disco');
             if (!caminho) {
                 barra.css('width', '0%').text('');
+                label.text('Espaço em Disco');
                 return;
             }
             $.ajax({
@@ -780,6 +782,7 @@
                 success: function(resp) {
                     if (resp.success) {
                         var perc = resp.percentual_usado;
+                        var tamanho_gb = resp.tamanho_total_gb;
                         barra.css('width', perc + '%');
                         if (perc >= 90) {
                             barra.css('background', '#e53935');
@@ -787,12 +790,15 @@
                             barra.css('background', '#2196f3');
                         }
                         barra.text(perc + '% usado');
+                        label.text('Espaço em Disco ' + tamanho_gb + ' GB');
                     } else {
                         barra.css('width', '0%').text('N/A').css('background', '#2196f3');
+                        label.text('Espaço em Disco');
                     }
                 },
                 error: function() {
                     barra.css('width', '0%').text('Erro').css('background', '#2196f3');
+                    label.text('Espaço em Disco');
                 }
             });
         }

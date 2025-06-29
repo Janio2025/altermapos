@@ -746,12 +746,17 @@ class Mapos extends MY_Controller {
         }
         $espaco_usado = $espaco_total - $espaco_livre;
         $percentual_usado = $espaco_total > 0 ? round(($espaco_usado / $espaco_total) * 100, 2) : 0;
+        
+        // Calcular tamanho total em GB
+        $tamanho_total_gb = round($espaco_total / (1024 * 1024 * 1024), 1);
+        
         echo json_encode([
             'success' => true,
             'espaco_total' => $espaco_total,
             'espaco_livre' => $espaco_livre,
             'espaco_usado' => $espaco_usado,
-            'percentual_usado' => $percentual_usado
+            'percentual_usado' => $percentual_usado,
+            'tamanho_total_gb' => $tamanho_total_gb
         ]);
     }
 }
