@@ -18,7 +18,7 @@
                     <div class="control-group">
                         <label for="preco" class="control-label"><span class="required">Arquivo*</span></label>
                         <div class="controls">
-                            <input id="arquivo" type="file" name="userfile" /> (Arquivos suportados .txt .pdf .gif .png .jpg .jpeg)
+                            <input id="arquivo" type="file" name="userfile" /> (Arquivos suportados .txt .pdf .gif .png .jpg .jpeg .zip)
                         </div>
                     </div>
 

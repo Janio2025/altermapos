@@ -181,10 +181,49 @@ class Arquivos extends MY_Controller
         }
 
         $file = $this->arquivos_model->getById($id);
-        $this->load->library('zip');
+        
+        if (!$file) {
+            $this->session->set_flashdata('error', 'Arquivo não encontrado.');
+            redirect(base_url() . 'index.php/arquivos/');
+        }
+
         $path = $file->path;
-        $this->zip->read_file($path);
-        $this->zip->download('file' . date('d-m-Y-H.i.s') . '.zip');
+        
+        // Verificar se o arquivo existe
+        if (!file_exists($path)) {
+            $this->session->set_flashdata('error', 'Arquivo não encontrado no servidor.');
+            redirect(base_url() . 'index.php/arquivos/');
+        }
+
+        // Obter informações do arquivo
+        $file_size = filesize($path);
+        $file_name = $file->file;
+        
+        // Configurar headers para download
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $file_name . '"');
+        header('Content-Length: ' . $file_size);
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Expires: 0');
+
+        // Para arquivos grandes, usar streaming
+        if ($file_size > 10485760) { // 10MB
+            // Usar streaming para arquivos grandes
+            $handle = fopen($path, 'rb');
+            if ($handle) {
+                while (!feof($handle)) {
+                    echo fread($handle, 8192); // 8KB chunks
+                    flush();
+                }
+                fclose($handle);
+            }
+        } else {
+            // Para arquivos menores, usar readfile
+            readfile($path);
+        }
+        
+        exit;
     }
 
     public function excluir()
@@ -228,7 +267,7 @@ class Arquivos extends MY_Controller
         $url_base = $config['url_base'];
 
         $config['upload_path'] = $directory;
-        $config['allowed_types'] = 'txt|jpg|jpeg|gif|png|pdf|PDF|JPG|JPEG|GIF|PNG';
+        $config['allowed_types'] = 'txt|jpg|jpeg|gif|png|pdf|PDF|JPG|JPEG|GIF|PNG|zip|ZIP';
         $config['max_size'] = 0;
         $config['max_width'] = '3000';
         $config['max_height'] = '2000';
