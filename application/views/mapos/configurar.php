@@ -105,19 +105,6 @@
                             </div>
                         </div>
 
-                        <!-- Informações de Espaço dos Servidores -->
-                        <div class="control-group">
-                            <label class="control-label">Informações de Espaço</label>
-                            <div class="controls">
-                                <div id="info-espaco-servidores">
-                                    <button type="button" class="btn btn-info" id="atualizar-espaco">
-                                        <i class="fas fa-sync"></i> Atualizar Informações de Espaço
-                                    </button>
-                                    <div id="tabela-espaco" style="margin-top: 10px;"></div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="control-group">
                             <label for="app_theme" class="control-label">Tema do Sistema</label>
                             <div class="controls">
@@ -750,63 +737,5 @@
                 $('.remover-servidor').hide();
             }
         });
-
-        // Atualizar informações de espaço dos servidores
-        $('#atualizar-espaco').click(function() {
-            $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Atualizando...');
-            
-            $.ajax({
-                url: '<?= site_url("mapos/atualizarEspacoServidores") ?>',
-                type: 'POST',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.success) {
-                        let html = '<table class="table table-bordered table-striped">';
-                        html += '<thead><tr><th>Servidor</th><th>Espaço Total</th><th>Espaço Livre</th><th>Espaço Usado</th><th>% Usado</th><th>Status</th></tr></thead>';
-                        html += '<tbody>';
-                        
-                        response.data.forEach(function(servidor) {
-                            const percentual = servidor.percentual_usado;
-                            let statusClass = 'success';
-                            if (percentual > 80) statusClass = 'danger';
-                            else if (percentual > 60) statusClass = 'warning';
-                            
-                            html += '<tr>';
-                            html += '<td>' + servidor.nome + '</td>';
-                            html += '<td>' + formatBytes(servidor.espaco_total) + '</td>';
-                            html += '<td>' + formatBytes(servidor.espaco_livre) + '</td>';
-                            html += '<td>' + formatBytes(servidor.espaco_usado) + '</td>';
-                            html += '<td><span class="label label-' + statusClass + '">' + percentual + '%</span></td>';
-                            html += '<td>' + (servidor.ativo ? '<span class="label label-success">Ativo</span>' : '<span class="label label-danger">Inativo</span>') + '</td>';
-                            html += '</tr>';
-                        });
-                        
-                        html += '</tbody></table>';
-                        $('#tabela-espaco').html(html);
-                    } else {
-                        $('#tabela-espaco').html('<div class="alert alert-error">Erro ao atualizar informações de espaço.</div>');
-                    }
-                },
-                error: function() {
-                    $('#tabela-espaco').html('<div class="alert alert-error">Erro ao conectar com o servidor.</div>');
-                },
-                complete: function() {
-                    $('#atualizar-espaco').prop('disabled', false).html('<i class="fas fa-sync"></i> Atualizar Informações de Espaço');
-                }
-            });
-        });
-
-        // Função para formatar bytes
-        function formatBytes(bytes, decimals = 2) {
-            if (bytes === 0) return '0 Bytes';
-            
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-            
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-        }
     });
 </script>
