@@ -65,11 +65,19 @@
                                                         <label>URL do Servidor</label>
                                                         <input type="text" name="servidores_midia[<?= $index ?>][url]" value="<?= $servidor['url'] ?>" placeholder="http://192.168.0.10/midia" class="span12">
                                                     </div>
-                                                    <div class="span3">
+                                                    <div class="span2">
                                                         <label>Caminho Físico</label>
                                                         <input type="text" name="servidores_midia[<?= $index ?>][caminho_fisico]" value="<?= $servidor['caminho_fisico'] ?>" placeholder="C:/wamp64/www/midia" class="span12">
                                                     </div>
                                                     <div class="span2">
+                                                        <label>Espaço em Disco</label>
+                                                        <div class="progress barra-disco" style="margin-bottom:0; height:22px;">
+                                                            <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #e53935;">
+                                                                40% usado
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="span1">
                                                         <label>Prioridade</label>
                                                         <input type="number" name="servidores_midia[<?= $index ?>][prioridade]" value="<?= $servidor['prioridade'] ?>" min="0" class="span12">
                                                     </div>
@@ -659,11 +667,19 @@
                                     <label>URL do Servidor</label>
                                     <input type="text" name="servidores_midia[${servidorIndex}][url]" placeholder="http://192.168.0.10/midia" class="span12">
                                 </div>
-                                <div class="span3">
+                                <div class="span2">
                                     <label>Caminho Físico</label>
                                     <input type="text" name="servidores_midia[${servidorIndex}][caminho_fisico]" placeholder="C:/wamp64/www/midia" class="span12">
                                 </div>
                                 <div class="span2">
+                                    <label>Espaço em Disco</label>
+                                    <div class="progress barra-disco" style="margin-bottom:0; height:22px;">
+                                        <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #e53935;">
+                                            40% usado
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span1">
                                     <label>Prioridade</label>
                                     <input type="number" name="servidores_midia[${servidorIndex}][prioridade]" value="0" min="0" class="span12">
                                 </div>
@@ -737,5 +753,70 @@
                 $('.remover-servidor').hide();
             }
         });
+
+        function atualizarBarraEspaco(servidorItem) {
+            var caminho = servidorItem.find('input[name*="[caminho_fisico]"]').val();
+            var barra = servidorItem.find('.barra-espaco');
+            if (!caminho) {
+                barra.css('width', '0%').text('');
+                return;
+            }
+            $.ajax({
+                url: '<?= site_url('mapos/espacoServidorMidia') ?>',
+                type: 'POST',
+                data: { caminho_fisico: caminho },
+                dataType: 'json',
+                success: function(resp) {
+                    if (resp.success) {
+                        var perc = resp.percentual_usado;
+                        barra.css('width', perc + '%');
+                        // Sempre vermelho destacado
+                        barra.css('background', '#e53935');
+                        barra.text(perc + '% usado');
+                    } else {
+                        barra.css('width', '0%').text('N/A').css('background', '#e53935');
+                    }
+                },
+                error: function() {
+                    barra.css('width', '0%').text('Erro').css('background', '#e53935');
+                }
+            });
+        }
+        // Atualizar ao carregar a tela
+        $('.servidor-midia-item').each(function() {
+            atualizarBarraEspaco($(this));
+        });
+        // Atualizar ao alterar o campo Caminho Físico
+        $(document).on('change', 'input[name*="[caminho_fisico]"]', function() {
+            var servidorItem = $(this).closest('.servidor-midia-item');
+            atualizarBarraEspaco(servidorItem);
+        });
     });
 </script>
+<style>
+    /* ... estilos existentes ... */
+    #home.tab-pane {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+    .progress.barra-disco {
+        background: #4caf50 !important; /* verde para espaço livre */
+        position: relative;
+        overflow: hidden;
+        height: 22px;
+        border-radius: 4px;
+    }
+    .barra-espaco {
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        height: 100%;
+        color: #fff;
+        text-align: center;
+        line-height: 22px;
+        font-weight: bold;
+        border-radius: 4px;
+        transition: width 0.5s;
+        z-index: 2;
+        background: #e53935;
+    }
+</style>

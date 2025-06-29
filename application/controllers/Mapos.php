@@ -727,4 +727,31 @@ class Mapos extends MY_Controller {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }
+
+    public function espacoServidorMidia()
+    {
+        if (!$this->input->is_ajax_request()) {
+            show_error('Acesso não permitido', 403);
+        }
+        $caminho = $this->input->post('caminho_fisico');
+        if (!$caminho || !is_dir($caminho)) {
+            echo json_encode(['success' => false, 'mensagem' => 'Caminho inválido ou inexistente.']);
+            return;
+        }
+        $espaco_total = @disk_total_space($caminho);
+        $espaco_livre = @disk_free_space($caminho);
+        if ($espaco_total === false || $espaco_livre === false) {
+            echo json_encode(['success' => false, 'mensagem' => 'Não foi possível obter informações do disco.']);
+            return;
+        }
+        $espaco_usado = $espaco_total - $espaco_livre;
+        $percentual_usado = $espaco_total > 0 ? round(($espaco_usado / $espaco_total) * 100, 2) : 0;
+        echo json_encode([
+            'success' => true,
+            'espaco_total' => $espaco_total,
+            'espaco_livre' => $espaco_livre,
+            'espaco_usado' => $espaco_usado,
+            'percentual_usado' => $percentual_usado
+        ]);
+    }
 }
