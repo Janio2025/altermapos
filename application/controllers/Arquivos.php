@@ -68,6 +68,7 @@ class Arquivos extends MY_Controller
         }
 
         $this->load->library('form_validation');
+        $this->load->helper('media_server_helper');
         $this->data['custom_error'] = '';
 
         $this->form_validation->set_rules('nome', '', 'trim|required');
@@ -79,7 +80,7 @@ class Arquivos extends MY_Controller
 
             $file = $arquivo['file_name'];
             $path = $arquivo['full_path'];
-            $url = base_url() . 'assets/arquivos/' . date('d-m-Y') . '/' . $file;
+            $url = $arquivo['url'];
             $tamanho = $arquivo['file_size'];
             $tipo = $arquivo['file_ext'];
 
@@ -219,17 +220,22 @@ class Arquivos extends MY_Controller
             redirect(base_url());
         }
 
-        $date = date('d-m-Y');
+        $this->load->helper('media_server_helper');
+        
+        // Usar o helper para determinar o diretório e URL
+        $config = Media_server_helper::getDiretorioUpload('arquivos', date('Y-m-d'));
+        $directory = $config['directory'];
+        $url_base = $config['url_base'];
 
-        $config['upload_path'] = './assets/arquivos/' . $date;
+        $config['upload_path'] = $directory;
         $config['allowed_types'] = 'txt|jpg|jpeg|gif|png|pdf|PDF|JPG|JPEG|GIF|PNG';
         $config['max_size'] = 0;
         $config['max_width'] = '3000';
         $config['max_height'] = '2000';
         $config['encrypt_name'] = true;
 
-        if (! is_dir('./assets/arquivos/' . $date)) {
-            mkdir('./assets/arquivos/' . $date, 0777, true);
+        if (! is_dir($directory)) {
+            mkdir($directory, 0777, true);
         }
 
         $this->load->library('upload', $config);
@@ -240,8 +246,10 @@ class Arquivos extends MY_Controller
             $this->session->set_flashdata('error', 'Erro ao fazer upload do arquivo, verifique se a extensão do arquivo é permitida.');
             redirect(site_url('arquivos/adicionar'));
         } else {
-            //$data = array('upload_data' => $this->upload->data());
-            return $this->upload->data();
+            $upload_data = $this->upload->data();
+            // Adicionar a URL base aos dados de upload
+            $upload_data['url'] = $url_base . '/' . $upload_data['file_name'];
+            return $upload_data;
         }
     }
 }

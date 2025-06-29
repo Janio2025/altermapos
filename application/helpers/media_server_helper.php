@@ -233,12 +233,26 @@ class Media_server_helper
         
         if ($servidor && !empty($servidor->url) && !empty($servidor->caminho_fisico)) {
             // Usar servidor de mídia configurado
-            $directory = rtrim($servidor->caminho_fisico, '/\\') . '/anexos/' . $tipo . '/' . date('m-Y') . '/' . strtoupper($tipo) . '-' . $id;
-            $url_base = rtrim($servidor->url, '/') . '/anexos/' . $tipo . '/' . date('m-Y') . '/' . strtoupper($tipo) . '-' . $id;
+            if ($tipo === 'arquivos') {
+                // Para arquivos, usar estrutura mais simples
+                $directory = rtrim($servidor->caminho_fisico, '/\\') . '/arquivos/' . date('Y-m-d');
+                $url_base = rtrim($servidor->url, '/') . '/arquivos/' . date('Y-m-d');
+            } else {
+                // Para outros tipos (os, produtos), usar estrutura padrão
+                $directory = rtrim($servidor->caminho_fisico, '/\\') . '/anexos/' . $tipo . '/' . date('m-Y') . '/' . strtoupper($tipo) . '-' . $id;
+                $url_base = rtrim($servidor->url, '/') . '/anexos/' . $tipo . '/' . date('m-Y') . '/' . strtoupper($tipo) . '-' . $id;
+            }
         } else {
             // Usar caminho padrão local
-            $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . $tipo . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . strtoupper($tipo) . '-' . $id;
-            $url_base = base_url('assets/anexos/' . $tipo . '/' . date('m-Y') . '/' . strtoupper($tipo) . '-' . $id);
+            if ($tipo === 'arquivos') {
+                // Para arquivos, usar estrutura mais simples
+                $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'arquivos' . DIRECTORY_SEPARATOR . date('Y-m-d');
+                $url_base = base_url('assets/arquivos/' . date('Y-m-d'));
+            } else {
+                // Para outros tipos, usar estrutura padrão
+                $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . $tipo . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . strtoupper($tipo) . '-' . $id;
+                $url_base = base_url('assets/anexos/' . $tipo . '/' . date('m-Y') . '/' . strtoupper($tipo) . '-' . $id);
+            }
         }
         
         return [
