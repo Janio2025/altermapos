@@ -548,7 +548,12 @@ public function downloadProduto($id = null)
 {
     $this->load->library('upload');
     $this->load->library('image_lib');
-    $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'produtos' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'Produto-' . $idProduto;
+    $this->load->helper('media_server_helper');
+
+    // Usar o helper para determinar o diretório e URL
+    $config = Media_server_helper::getDiretorioUpload('produtos', $idProduto);
+    $directory = $config['directory'];
+    $url_base = $config['url_base'];
     
     if (!is_dir($directory . DIRECTORY_SEPARATOR . 'thumbs')) {
         // Criar diretório para imagens e thumbs
@@ -609,7 +614,7 @@ public function downloadProduto($id = null)
                 } else {
                     $success[] = $upload_data;
                     $this->load->model('produtos_model');
-                    $result = $this->produtos_model->imgAnexar($idProduto, $new_file_name, base_url('assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'produtos' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'Produto-' . $idProduto), 'thumb_' . $new_file_name, $directory);
+                    $result = $this->produtos_model->imgAnexar($idProduto, $new_file_name, $url_base, 'thumb_' . $new_file_name, $directory);
                     if (!$result) {
                         $error['db'][] = 'Erro ao inserir no banco de dados.';
                     }
@@ -617,7 +622,7 @@ public function downloadProduto($id = null)
             } else {
                 $success[] = $upload_data;
                 $this->load->model('produtos_model');
-                $result = $this->produtos_model->imgAnexar($this->input->post('idProdutoImg'), $new_file_name, base_url('assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'produtos' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'Produto-' . $this->input->post('idProdutoImg')), '', $directory);
+                $result = $this->produtos_model->imgAnexar($this->input->post('idProdutoImg'), $new_file_name, $url_base, '', $directory);
                 if (!$result) {
                     $error['db'][] = 'Erro ao inserir no banco de dados.';
                 }

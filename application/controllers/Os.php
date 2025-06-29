@@ -941,21 +941,12 @@ class Os extends MY_Controller
     {
         $this->load->library('upload');
         $this->load->library('image_lib');
+        $this->load->helper('media_server_helper');
 
-        $this->load->model('mapos_model');
-        $media_server_url = $this->mapos_model->getConfiguracaoByKey('media_server_url');
-        $media_server_path = $this->mapos_model->getConfiguracaoByKey('media_server_path');
-        $media_server_path = rtrim($media_server_path, '/\\');
-
-        // Caminho físico para salvar o arquivo
-        $directory = $media_server_path . '/anexos/os/' . date('m-Y') . '/OS-' . $this->input->post('idOsServico');
-        $url_base = $media_server_url . '/anexos/os/' . date('m-Y') . '/OS-' . $this->input->post('idOsServico');
-
-        if (empty($media_server_url) || empty($media_server_path)) {
-            // Se não configurado, usa o caminho padrão local
-            $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . 'os' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $this->input->post('idOsServico');
-            $url_base = base_url('assets/anexos/os/' . date('m-Y') . '/OS-' . $this->input->post('idOsServico'));
-        }
+        // Usar o helper para determinar o diretório e URL
+        $config = Media_server_helper::getDiretorioUpload('os', $this->input->post('idOsServico'));
+        $directory = $config['directory'];
+        $url_base = $config['url_base'];
 
         // If it exist, check if it's a directory
         if (!is_dir($directory . DIRECTORY_SEPARATOR . 'thumbs')) {

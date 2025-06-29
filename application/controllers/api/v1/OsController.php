@@ -769,8 +769,12 @@ class OsController extends REST_Controller
     {
         $this->load->library('upload');
         $this->load->library('image_lib');
+        $this->load->helper('media_server_helper');
 
-        $directory = FCPATH . 'assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $id;
+        // Usar o helper para determinar o diretório e URL
+        $config = Media_server_helper::getDiretorioUpload('os', $id);
+        $directory = $config['directory'];
+        $url_base = $config['url_base'];
 
         // If it exist, check if it's a directory
         if (! is_dir($directory . DIRECTORY_SEPARATOR . 'thumbs')) {
@@ -805,7 +809,7 @@ class OsController extends REST_Controller
                 // Gera um nome de arquivo aleatório mantendo a extensão original
                 $new_file_name = uniqid() . '.' . pathinfo($upload_data['file_name'], PATHINFO_EXTENSION);
                 $new_file_path = $upload_data['file_path'] . $new_file_name;
-                $url = base_url('assets' . DIRECTORY_SEPARATOR . 'anexos' . DIRECTORY_SEPARATOR . date('m-Y') . DIRECTORY_SEPARATOR . 'OS-' . $id);
+                $url = $url_base . $new_file_name;
 
                 rename($upload_data['full_path'], $new_file_path);
 
@@ -851,7 +855,7 @@ class OsController extends REST_Controller
 
         $retorno = [
             'idAnexos' => $anexo->idAnexos,
-            'url' => $url,
+            'url' => $url_base,
             'anexo' => $new_file_name,
             'thumb' => 'thumb_' . $new_file_name,
         ];

@@ -1108,6 +1108,24 @@ CREATE TABLE IF NOT EXISTS `configuracoes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
+-- Table `servidores_midia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `servidores_midia` (
+    `idServidorMidia` int NOT NULL AUTO_INCREMENT,
+    `nome` varchar(100) NOT NULL,
+    `url` varchar(255) NOT NULL,
+    `caminho_fisico` varchar(255) NOT NULL,
+    `ativo` tinyint(1) DEFAULT 1,
+    `prioridade` int DEFAULT 0,
+    `espaco_disponivel` bigint DEFAULT NULL,
+    `data_criacao` timestamp DEFAULT CURRENT_TIMESTAMP,
+    `data_modificacao` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`idServidorMidia`),
+    KEY `idx_ativo` (`ativo`),
+    KEY `idx_prioridade` (`prioridade`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
 -- Table `migrations`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `migrations` (

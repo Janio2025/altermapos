@@ -29,21 +29,95 @@
                                 <span class="help-inline">Nome do sistema</span>
                             </div>
                         </div>
+                        
+                        <!-- Seção de Servidores de Mídia -->
                         <div class="control-group">
-                            <label for="media_server_url" class="control-label">URL do Servidor de Mídia</label>
+                            <label class="control-label">Servidores de Mídia</label>
                             <div class="controls">
-                                <input type="text" name="media_server_url" id="media_server_url" value="<?= isset(
-                                    $configuration['media_server_url']) ? $configuration['media_server_url'] : '' ?>" placeholder="http://192.168.0.10/midia" class="form-control">
-                                <span class="help-inline">Endereço do servidor de mídia local/remoto para salvar fotos e anexos. Exemplo: http://192.168.0.10/midia</span>
+                                <div id="servidores-midia-container">
+                                    <?php 
+                                    $servidores = isset($servidores_midia) ? $servidores_midia : [];
+                                    if (empty($servidores)) {
+                                        // Se não há servidores configurados, mostrar pelo menos um campo
+                                        $servidores = [['idServidorMidia' => '', 'nome' => '', 'url' => '', 'caminho_fisico' => '', 'ativo' => 1, 'prioridade' => 0]];
+                                    }
+                                    foreach ($servidores as $index => $servidor): 
+                                        // Converter objeto para array se necessário
+                                        if (is_object($servidor)) {
+                                            $servidor = (array) $servidor;
+                                        }
+                                        // Garantir que todos os campos existam
+                                        $servidor['nome'] = isset($servidor['nome']) ? $servidor['nome'] : '';
+                                        $servidor['url'] = isset($servidor['url']) ? $servidor['url'] : '';
+                                        $servidor['caminho_fisico'] = isset($servidor['caminho_fisico']) ? $servidor['caminho_fisico'] : '';
+                                        $servidor['ativo'] = isset($servidor['ativo']) ? $servidor['ativo'] : 1;
+                                        $servidor['prioridade'] = isset($servidor['prioridade']) ? $servidor['prioridade'] : 0;
+                                    ?>
+                                    <div class="servidor-midia-item" data-index="<?= $index ?>">
+                                        <div class="row-fluid" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                                            <div class="span12">
+                                                <div class="row-fluid">
+                                                    <div class="span3">
+                                                        <label>Nome do Servidor</label>
+                                                        <input type="text" name="servidores_midia[<?= $index ?>][nome]" value="<?= $servidor['nome'] ?>" placeholder="Ex: HD Principal" class="span12">
+                                                    </div>
+                                                    <div class="span3">
+                                                        <label>URL do Servidor</label>
+                                                        <input type="text" name="servidores_midia[<?= $index ?>][url]" value="<?= $servidor['url'] ?>" placeholder="http://192.168.0.10/midia" class="span12">
+                                                    </div>
+                                                    <div class="span3">
+                                                        <label>Caminho Físico</label>
+                                                        <input type="text" name="servidores_midia[<?= $index ?>][caminho_fisico]" value="<?= $servidor['caminho_fisico'] ?>" placeholder="C:/wamp64/www/midia" class="span12">
+                                                    </div>
+                                                    <div class="span2">
+                                                        <label>Prioridade</label>
+                                                        <input type="number" name="servidores_midia[<?= $index ?>][prioridade]" value="<?= $servidor['prioridade'] ?>" min="0" class="span12">
+                                                    </div>
+                                                    <div class="span1">
+                                                        <label>&nbsp;</label>
+                                                        <div style="margin-top: 5px;">
+                                                            <label>
+                                                                <input type="checkbox" name="servidores_midia[<?= $index ?>][ativo]" value="1" <?= $servidor['ativo'] ? 'checked' : '' ?>>
+                                                                <span class="lbl">Ativo</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row-fluid" style="margin-top: 5px;">
+                                                    <div class="span12">
+                                                        <button type="button" class="btn btn-danger btn-mini remover-servidor" <?= count($servidores) == 1 ? 'style="display:none;"' : '' ?>>
+                                                            <i class="fas fa-trash"></i> Remover
+                                                        </button>
+                                                        <?php if (isset($servidor['idServidorMidia']) && $servidor['idServidorMidia']): ?>
+                                                        <input type="hidden" name="servidores_midia[<?= $index ?>][idServidorMidia]" value="<?= $servidor['idServidorMidia'] ?>">
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <button type="button" class="btn btn-success" id="adicionar-servidor">
+                                    <i class="fas fa-plus"></i> Adicionar Servidor
+                                </button>
+                                <span class="help-inline">Configure múltiplos servidores de mídia para distribuir o armazenamento. A prioridade determina qual servidor será usado primeiro.</span>
                             </div>
                         </div>
+
+                        <!-- Informações de Espaço dos Servidores -->
                         <div class="control-group">
-                            <label for="media_server_path" class="control-label">Caminho Físico do Servidor de Mídia</label>
+                            <label class="control-label">Informações de Espaço</label>
                             <div class="controls">
-                                <input type="text" name="media_server_path" id="media_server_path" value="<?= isset($configuration['media_server_path']) ? $configuration['media_server_path'] : '' ?>" placeholder="C:/wamp64/www/midia" class="form-control">
-                                <span class="help-inline">Caminho físico no disco do servidor de mídia. Exemplo: C:/wamp64/www/midia</span>
+                                <div id="info-espaco-servidores">
+                                    <button type="button" class="btn btn-info" id="atualizar-espaco">
+                                        <i class="fas fa-sync"></i> Atualizar Informações de Espaço
+                                    </button>
+                                    <div id="tabela-espaco" style="margin-top: 10px;"></div>
+                                </div>
                             </div>
                         </div>
+
                         <div class="control-group">
                             <label for="app_theme" class="control-label">Tema do Sistema</label>
                             <div class="controls">
@@ -580,5 +654,150 @@
                 document.getElementById("notifica_whats").value += $(this).val();
             $(this).prop('selectedIndex', 0);
         });
+
+        // Gerenciamento de servidores de mídia
+        let servidorIndex = <?= count($servidores) ?>;
+        
+        $('#adicionar-servidor').click(function() {
+            const template = `
+                <div class="servidor-midia-item" data-index="${servidorIndex}">
+                    <div class="row-fluid" style="margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <div class="span12">
+                            <div class="row-fluid">
+                                <div class="span3">
+                                    <label>Nome do Servidor</label>
+                                    <input type="text" name="servidores_midia[${servidorIndex}][nome]" placeholder="Ex: HD Principal" class="span12">
+                                </div>
+                                <div class="span3">
+                                    <label>URL do Servidor</label>
+                                    <input type="text" name="servidores_midia[${servidorIndex}][url]" placeholder="http://192.168.0.10/midia" class="span12">
+                                </div>
+                                <div class="span3">
+                                    <label>Caminho Físico</label>
+                                    <input type="text" name="servidores_midia[${servidorIndex}][caminho_fisico]" placeholder="C:/wamp64/www/midia" class="span12">
+                                </div>
+                                <div class="span2">
+                                    <label>Prioridade</label>
+                                    <input type="number" name="servidores_midia[${servidorIndex}][prioridade]" value="0" min="0" class="span12">
+                                </div>
+                                <div class="span1">
+                                    <label>&nbsp;</label>
+                                    <div style="margin-top: 5px;">
+                                        <label>
+                                            <input type="checkbox" name="servidores_midia[${servidorIndex}][ativo]" value="1" checked>
+                                            <span class="lbl">Ativo</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row-fluid" style="margin-top: 5px;">
+                                <div class="span12">
+                                    <button type="button" class="btn btn-danger btn-mini remover-servidor">
+                                        <i class="fas fa-trash"></i> Remover
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            $('#servidores-midia-container').append(template);
+            servidorIndex++;
+            
+            // Aplicar CSRF token aos novos campos
+            var csrfTokenName = $('meta[name="csrf-token-name"]').attr('content');
+            var csrfCookieName = $('meta[name="csrf-cookie-name"]').attr('content');
+            setCsrfTokenInAllForms(csrfTokenName, csrfCookieName);
+            
+            // Mostrar botões de remover se houver mais de um servidor
+            if ($('.servidor-midia-item').length > 1) {
+                $('.remover-servidor').show();
+            }
+        });
+        
+        $(document).on('click', '.remover-servidor', function() {
+            $(this).closest('.servidor-midia-item').remove();
+            
+            // Reindexar os campos
+            $('.servidor-midia-item').each(function(index) {
+                $(this).attr('data-index', index);
+                $(this).find('input, select').each(function() {
+                    const name = $(this).attr('name');
+                    if (name) {
+                        const newName = name.replace(/servidores_midia\[\d+\]/, `servidores_midia[${index}]`);
+                        $(this).attr('name', newName);
+                    }
+                });
+            });
+            
+            // Aplicar CSRF token após reindexação
+            var csrfTokenName = $('meta[name="csrf-token-name"]').attr('content');
+            var csrfCookieName = $('meta[name="csrf-cookie-name"]').attr('content');
+            setCsrfTokenInAllForms(csrfTokenName, csrfCookieName);
+            
+            // Esconder botões de remover se só houver um servidor
+            if ($('.servidor-midia-item').length <= 1) {
+                $('.remover-servidor').hide();
+            }
+        });
+
+        // Atualizar informações de espaço dos servidores
+        $('#atualizar-espaco').click(function() {
+            $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Atualizando...');
+            
+            $.ajax({
+                url: '<?= site_url("mapos/atualizarEspacoServidores") ?>',
+                type: 'POST',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        let html = '<table class="table table-bordered table-striped">';
+                        html += '<thead><tr><th>Servidor</th><th>Espaço Total</th><th>Espaço Livre</th><th>Espaço Usado</th><th>% Usado</th><th>Status</th></tr></thead>';
+                        html += '<tbody>';
+                        
+                        response.data.forEach(function(servidor) {
+                            const percentual = servidor.percentual_usado;
+                            let statusClass = 'success';
+                            if (percentual > 80) statusClass = 'danger';
+                            else if (percentual > 60) statusClass = 'warning';
+                            
+                            html += '<tr>';
+                            html += '<td>' + servidor.nome + '</td>';
+                            html += '<td>' + formatBytes(servidor.espaco_total) + '</td>';
+                            html += '<td>' + formatBytes(servidor.espaco_livre) + '</td>';
+                            html += '<td>' + formatBytes(servidor.espaco_usado) + '</td>';
+                            html += '<td><span class="label label-' + statusClass + '">' + percentual + '%</span></td>';
+                            html += '<td>' + (servidor.ativo ? '<span class="label label-success">Ativo</span>' : '<span class="label label-danger">Inativo</span>') + '</td>';
+                            html += '</tr>';
+                        });
+                        
+                        html += '</tbody></table>';
+                        $('#tabela-espaco').html(html);
+                    } else {
+                        $('#tabela-espaco').html('<div class="alert alert-error">Erro ao atualizar informações de espaço.</div>');
+                    }
+                },
+                error: function() {
+                    $('#tabela-espaco').html('<div class="alert alert-error">Erro ao conectar com o servidor.</div>');
+                },
+                complete: function() {
+                    $('#atualizar-espaco').prop('disabled', false).html('<i class="fas fa-sync"></i> Atualizar Informações de Espaço');
+                }
+            });
+        });
+
+        // Função para formatar bytes
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
     });
 </script>

@@ -406,6 +406,7 @@ class Mapos extends MY_Controller {
 
         $this->load->library('form_validation');
         $this->load->model('mapos_model');
+        $this->load->model('servidores_midia_model');
 
         $this->data['custom_error'] = '';
 
@@ -425,7 +426,6 @@ class Mapos extends MY_Controller {
         $this->form_validation->set_rules('pix_key', 'Chave Pix', 'trim|valid_pix_key', [
             'valid_pix_key' => 'Chave Pix inválida!',
         ]);
-        $this->form_validation->set_rules('media_server_url', 'URL do Servidor de Mídia', 'trim|valid_url');
 
         if ($this->form_validation->run() == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="alert">' . validation_errors() . '</div>' : false);
@@ -477,9 +477,32 @@ class Mapos extends MY_Controller {
                 'pix_key' => $this->input->post('pix_key'),
                 'os_status_list' => json_encode($this->input->post('os_status_list')),
                 'control_2vias' => $this->input->post('control_2vias'),
-                'media_server_url' => $this->input->post('media_server_url'),
-                'media_server_path' => $this->input->post('media_server_path'),
             ];
+
+            // Processar servidores de mídia
+            $servidores_midia = $this->input->post('servidores_midia');
+            if ($servidores_midia && is_array($servidores_midia)) {
+                foreach ($servidores_midia as $servidor) {
+                    if (!empty($servidor['nome']) && !empty($servidor['url']) && !empty($servidor['caminho_fisico'])) {
+                        $servidor_data = [
+                            'nome' => $servidor['nome'],
+                            'url' => $servidor['url'],
+                            'caminho_fisico' => $servidor['caminho_fisico'],
+                            'ativo' => isset($servidor['ativo']) ? 1 : 0,
+                            'prioridade' => isset($servidor['prioridade']) ? (int)$servidor['prioridade'] : 0,
+                        ];
+
+                        if (isset($servidor['idServidorMidia']) && !empty($servidor['idServidorMidia'])) {
+                            // Atualizar servidor existente
+                            $this->servidores_midia_model->edit($servidor_data, $servidor['idServidorMidia']);
+                        } else {
+                            // Adicionar novo servidor
+                            $this->servidores_midia_model->add($servidor_data);
+                        }
+                    }
+                }
+            }
+
             if ($this->mapos_model->saveConfiguracao($data) == true) {
                 $this->session->set_flashdata('success', 'Configurações do sistema atualizadas com sucesso!');
                 redirect(site_url('mapos/configurar'));
@@ -488,6 +511,14 @@ class Mapos extends MY_Controller {
             }
         }
 
+        // Carregar servidores de mídia para a view
+        $servidores_ativos = $this->servidores_midia_model->getAtivos();
+        if (empty($servidores_ativos)) {
+            $this->data['servidores_midia'] = $this->servidores_midia_model->getAll();
+        } else {
+            $this->data['servidores_midia'] = $servidores_ativos;
+        }
+        
         $this->data['view'] = 'mapos/configurar';
 
         return $this->layout();
@@ -661,5 +692,29 @@ class Mapos extends MY_Controller {
             }
         }
         return file_put_contents($env_file_path, $env_file) ? true : false;
+    }
+
+    public function atualizarEspacoServidores()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'cSistema')) {
+            $this->output->set_status_header(403);
+            echo json_encode(['success' => false, 'message' => 'Sem permissão']);
+            return;
+        }
+
+        $this->load->helper('media_server_helper');
+        
+        try {
+            $info_servidores = Media_server_helper::getInfoEspacoServidores();
+            
+            // Atualizar o espaço disponível no banco
+            foreach ($info_servidores as $servidor) {
+                Media_server_helper::atualizarEspacoDisponivel($servidor['id']);
+            }
+            
+            echo json_encode(['success' => true, 'data' => $info_servidores]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
     }
 }
