@@ -653,6 +653,17 @@
         // Gerenciamento de servidores de mídia
         let servidorIndex = <?= count($servidores) ?>;
         
+        // Função para atualizar limites de prioridade
+        function atualizarLimitesPrioridade() {
+            var totalServidores = $('.servidor-midia-item').length;
+            $('input[name*="[prioridade]"]').each(function() {
+                $(this).attr('max', totalServidores - 1);
+            });
+        }
+        
+        // Atualizar limites ao carregar a página
+        atualizarLimitesPrioridade();
+        
         $('#adicionar-servidor').click(function() {
             const template = `
                 <div class="servidor-midia-item" data-index="${servidorIndex}">
@@ -674,14 +685,14 @@
                                 <div class="span2">
                                     <label>Espaço em Disco</label>
                                     <div class="progress barra-disco" style="margin-bottom:0; height:22px;">
-                                        <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #e53935;">
-                                            40% usado
+                                        <div class="bar barra-espaco" style="width: 0%; min-width: 10%; color: #fff; text-align:center; line-height:22px; font-weight:bold; background: #2196f3;">
+                                            ...
                                         </div>
                                     </div>
                                 </div>
                                 <div class="span1">
                                     <label>Prioridade</label>
-                                    <input type="number" name="servidores_midia[${servidorIndex}][prioridade]" value="0" min="0" class="span12">
+                                    <input type="number" name="servidores_midia[${servidorIndex}][prioridade]" value="0" min="0" max="${$('.servidor-midia-item').length}" class="span12">
                                 </div>
                                 <div class="span1">
                                     <label>&nbsp;</label>
@@ -713,10 +724,8 @@
             var csrfCookieName = $('meta[name="csrf-cookie-name"]').attr('content');
             setCsrfTokenInAllForms(csrfTokenName, csrfCookieName);
             
-            // Mostrar botões de remover se houver mais de um servidor
-            if ($('.servidor-midia-item').length > 1) {
-                $('.remover-servidor').show();
-            }
+            // Atualizar limites de prioridade
+            atualizarLimitesPrioridade();
         });
         
         $(document).on('click', '.remover-servidor', function() {
@@ -752,6 +761,8 @@
             if ($('.servidor-midia-item').length === 0) {
                 $('#adicionar-servidor').click();
             }
+            // Atualizar limites de prioridade
+            atualizarLimitesPrioridade();
         });
 
         function atualizarBarraEspaco(servidorItem) {
