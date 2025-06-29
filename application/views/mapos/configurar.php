@@ -102,8 +102,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
+                            </div>
+                        </div>
                                     <?php endforeach; ?>
                                 </div>
                                 <button type="button" class="btn btn-success" id="adicionar-servidor">
@@ -770,15 +770,18 @@
                     if (resp.success) {
                         var perc = resp.percentual_usado;
                         barra.css('width', perc + '%');
-                        // Sempre vermelho destacado
-                        barra.css('background', '#e53935');
+                        if (perc >= 90) {
+                            barra.css('background', '#e53935');
+                        } else {
+                            barra.css('background', '#2196f3');
+                        }
                         barra.text(perc + '% usado');
                     } else {
-                        barra.css('width', '0%').text('N/A').css('background', '#e53935');
+                        barra.css('width', '0%').text('N/A').css('background', '#2196f3');
                     }
                 },
                 error: function() {
-                    barra.css('width', '0%').text('Erro').css('background', '#e53935');
+                    barra.css('width', '0%').text('Erro').css('background', '#2196f3');
                 }
             });
         }
@@ -794,13 +797,12 @@
     });
 </script>
 <style>
-    /* ... estilos existentes ... */
     #home.tab-pane {
         padding-left: 30px;
         padding-right: 30px;
     }
     .progress.barra-disco {
-        background: #4caf50 !important; /* verde para espaço livre */
+        background: #e0e0e0 !important; /* cinza claro para espaço livre */
         position: relative;
         overflow: hidden;
         height: 22px;
@@ -813,10 +815,11 @@
         color: #fff;
         text-align: center;
         line-height: 22px;
-        font-weight: bold;
+        font-weight: 400;
+        font-size: 15px;
         border-radius: 4px;
         transition: width 0.5s;
         z-index: 2;
-        background: #e53935;
+        background: #2196f3;
     }
 </style>
