@@ -479,6 +479,16 @@ class Mapos extends MY_Controller {
                 'control_2vias' => $this->input->post('control_2vias'),
             ];
 
+            // Processar remoção de servidores de mídia
+            $servidores_remover = $this->input->post('servidores_midia_remover');
+            if ($servidores_remover && is_array($servidores_remover)) {
+                foreach ($servidores_remover as $idRemover) {
+                    if (!empty($idRemover)) {
+                        $this->servidores_midia_model->delete($idRemover);
+                    }
+                }
+            }
+
             // Processar servidores de mídia
             $servidores_midia = $this->input->post('servidores_midia');
             if ($servidores_midia && is_array($servidores_midia)) {

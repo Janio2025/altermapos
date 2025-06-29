@@ -717,8 +717,19 @@
         });
         
         $(document).on('click', '.remover-servidor', function() {
-            $(this).closest('.servidor-midia-item').remove();
-            
+            var servidorItem = $(this).closest('.servidor-midia-item');
+            // Se o servidor já existe no banco, guardar o ID para remoção
+            var idServidor = servidorItem.find('input[name*="[idServidorMidia]"]').val();
+            if (idServidor) {
+                // Adiciona um campo hidden para remoção
+                var inputRemover = $('<input>').attr({
+                    type: 'hidden',
+                    name: 'servidores_midia_remover[]',
+                    value: idServidor
+                });
+                $('#formConfigurar').append(inputRemover);
+            }
+            servidorItem.remove();
             // Reindexar os campos
             $('.servidor-midia-item').each(function(index) {
                 $(this).attr('data-index', index);
@@ -730,12 +741,10 @@
                     }
                 });
             });
-            
             // Aplicar CSRF token após reindexação
             var csrfTokenName = $('meta[name="csrf-token-name"]').attr('content');
             var csrfCookieName = $('meta[name="csrf-cookie-name"]').attr('content');
             setCsrfTokenInAllForms(csrfTokenName, csrfCookieName);
-            
             // Esconder botões de remover se só houver um servidor
             if ($('.servidor-midia-item').length <= 1) {
                 $('.remover-servidor').hide();
