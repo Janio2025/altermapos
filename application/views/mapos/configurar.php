@@ -748,9 +748,9 @@
             var csrfTokenName = $('meta[name="csrf-token-name"]').attr('content');
             var csrfCookieName = $('meta[name="csrf-cookie-name"]').attr('content');
             setCsrfTokenInAllForms(csrfTokenName, csrfCookieName);
-            // Esconder botões de remover se só houver um servidor
-            if ($('.servidor-midia-item').length <= 1) {
-                $('.remover-servidor').hide();
+            // Se não houver nenhum servidor, adicionar um campo vazio
+            if ($('.servidor-midia-item').length === 0) {
+                $('#adicionar-servidor').click();
             }
         });
 
