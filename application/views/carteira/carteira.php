@@ -431,6 +431,63 @@
     .table-transactions .btn-nwe i {
         font-size: 16px;
     }
+    .card-destaque {
+        background: #fff;
+        color: #28a745;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(40,167,69,0.08);
+        padding: 22px 18px 18px 18px;
+        margin-bottom: 18px;
+        display: flex;
+        flex-direction: column;
+        min-height: 120px;
+        border: 1.5px solid #e9ecef;
+        justify-content: center;
+    }
+    .card-destaque.comissao {
+        color: #ff9800;
+        box-shadow: 0 2px 8px rgba(255,193,7,0.08);
+        border: 1.5px solid #ffe0a3;
+    }
+    .card-destaque .card-titulo {
+        font-size: 1.1em;
+        font-weight: 600;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+        text-shadow: none;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        color: inherit;
+    }
+    .card-destaque .card-titulo i {
+        font-size: 1.3em;
+        color: inherit;
+    }
+    .card-destaque .card-valor {
+        font-size: 2.2em;
+        font-weight: bold;
+        margin-bottom: 0;
+        text-shadow: none;
+        width: 100%;
+        color: inherit;
+        text-align: center;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    @media (max-width: 768px) {
+        .card-destaque {
+            padding: 14px 6px 12px 6px;
+            min-height: 80px;
+        }
+        .card-destaque .card-valor {
+            font-size: 1.3em;
+        }
+    }
 </style>
 
 <div class="new122">
@@ -445,61 +502,23 @@
     <div class="row-fluid">
         <!-- Saldo da Carteira -->
         <div class="span6">
-            <div class="widget-box">
-                <div class="widget-title">
-                    <span class="icon">
-                        <i class="bx bx-wallet"></i>
-                    </span>
-                    <h5>Saldo Disponível</h5>
+            <div class="card-destaque">
+                <div class="card-titulo">
+                    <i class="bx bx-wallet"></i> Saldo Disponível
                 </div>
-                <div class="widget-content">
-                    <div class="row-fluid" style="min-height: 100px; padding: 10px;">
-                        <div class="span12">
-                            <?php if(isset($carteira)): ?>
-                            <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
-                                R$ <?php echo number_format($carteira->saldo, 2, ',', '.'); ?>
-                            </div>
-                            <?php if($carteira->saldo > 0): ?>
-                            
-                            <?php endif; ?>
-                            <?php else: ?>
-                            <div class="saldo-value" style="font-size: 36px; text-align: center; color: #28a745;">
-                                R$ <?php echo number_format($saldo, 2, ',', '.'); ?>
-                            </div>
-                            <?php if($saldo > 0): ?>
-                            <div style="text-align: center; margin-top: 15px;">
-                                <button type="button" onclick="abrirModalSaque()" class="button btn btn-success">
-                                    <span class="button__icon"><i class='bx bx-money'></i></span>
-                                    <span class="button__text2">Realizar Saque via PIX</span>
-                                </button>
-                            </div>
-                            <?php endif; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                <div class="card-valor">
+                    R$ <?php echo isset($carteira) ? number_format($carteira->saldo, 2, ',', '.') : number_format($saldo, 2, ',', '.'); ?>
                 </div>
             </div>
         </div>
-
         <!-- Comissão Pendente -->
         <div class="span6">
-            <div class="widget-box">
-                <div class="widget-title">
-                    <span class="icon">
-                        <i class="bx bx-money"></i>
-                    </span>
-                    <h5>Comissão Pendente</h5>
+            <div class="card-destaque comissao">
+                <div class="card-titulo">
+                    <i class="bx bx-money"></i> Comissão Pendente
                 </div>
-                <div class="widget-content">
-                    <div class="row-fluid" style="min-height: 100px; padding: 10px;">
-                        <div class="span12">
-                            <div style="display: flex; flex-direction: column; align-items: center;">
-                                <div class="comissao-value" style="font-size: 28px; color: #ffc107; margin-top: 10px;">
-                                    R$ <span id="comissao-pendente">0,00</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="card-valor">
+                    R$ <span id="comissao-pendente">0,00</span>
                 </div>
             </div>
         </div>
