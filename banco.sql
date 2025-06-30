@@ -343,6 +343,45 @@ CREATE TABLE IF NOT EXISTS `lancamentos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
+-- Table `fechamentos_caixa`
+-- -----------------------------------------------------    
+CREATE TABLE IF NOT EXISTS `fechamentos_caixa` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `data_fechamento` DATETIME NOT NULL,
+    `usuario_id` INT NOT NULL,
+    `valor_fechado` DECIMAL(10,2) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `usuario_id` (`usuario_id`),
+    CONSTRAINT `fk_fechamentos_caixa_usuario`
+        FOREIGN KEY (`usuario_id`)
+        REFERENCES `usuarios` (`idUsuarios`)
+        ON DELETE NO ACTION
+        ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
+-- Table `fechamento_lancamentos`
+-- -----------------------------------------------------    
+CREATE TABLE IF NOT EXISTS `fechamento_lancamentos` (
+    `id` INT NOT NULL AUTO_INCREMENT,
+    `fechamento_id` INT NOT NULL,
+    `lancamento_id` INT NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `fechamento_id` (`fechamento_id`),
+    KEY `lancamento_id` (`lancamento_id`),
+    CONSTRAINT `fk_fechamento_lancamentos_fechamento`
+        FOREIGN KEY (`fechamento_id`)
+        REFERENCES `fechamentos_caixa` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT `fk_fechamento_lancamentos_lancamento`
+        FOREIGN KEY (`lancamento_id`)
+        REFERENCES `lancamentos` (`idLancamentos`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- -----------------------------------------------------
 -- Table `forma_pagamento`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `forma_pagamento` (
