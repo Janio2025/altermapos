@@ -3,10 +3,55 @@
     select {
         width: 70px;
     }
+    /* Configuração única para todos os botões da coluna Ações */
+    .btn-nwe, .btn-nwe2, .btn-nwe3, .btn-nwe4 {
+        padding: 4px 6px !important;
+        font-size: 0.85em !important;
+        margin: 0 2px !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease !important;
+        width: 30px !important;
+        height: 25px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background-color: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        color: #495057 !important;
+        text-decoration: none !important;
+        text-align: center !important;
+    }
+    
+    .btn-nwe:hover, .btn-nwe2:hover, .btn-nwe3:hover, .btn-nwe4:hover {
+        background-color: #e9ecef !important;
+        border-color: #adb5bd !important;
+        color: #212529 !important;
+    }
+    
+    /* Cores específicas para botões especiais */
     .btn-nwe2.btn-pagar {
-        padding: 7px 12px;
-        font-size: 1.1em;
-        margin: 0 5px;
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: white !important;
+    }
+    
+    .btn-nwe2.btn-pagar:hover {
+        background-color: #0056b3 !important;
+        border-color: #0056b3 !important;
+        color: white !important;
+    }
+    
+    .btn-nwe2.btn-adicionar-salario {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: white !important;
+    }
+    
+    .btn-nwe2.btn-adicionar-salario:hover {
+        background-color: #218838 !important;
+        border-color: #1e7e34 !important;
+        color: white !important;
     }
     @media (max-width: 768px) {
         table#tabela thead {
@@ -35,6 +80,61 @@
             justify-content: flex-start;
             gap: 5px;
         }
+    }
+    .swal2-actions {
+        gap: 1rem !important;
+    }
+    
+    /* Estilos para o modal do SweetAlert2 */
+    .swal2-popup-custom {
+        border-radius: 8px;
+        padding: 2rem;
+    }
+
+    .swal2-title-custom {
+        color: #2D335B;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .swal2-html-container-custom {
+        font-size: 1rem;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .swal2-html-container-custom ul {
+        margin: 1rem 0;
+    }
+
+    .swal2-html-container-custom li {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .swal2-html-container-custom i {
+        font-size: 1.2rem;
+    }
+
+    .swal2-confirm-button-custom {
+        padding: 0.5rem 1.5rem !important;
+        font-size: 1rem !important;
+        border-radius: 4px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+    }
+
+    .swal2-cancel-button-custom {
+        padding: 0.5rem 1.5rem !important;
+        font-size: 1rem !important;
+        border-radius: 4px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
     }
 </style>
 
@@ -101,6 +201,7 @@
                             }
                             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'pCarteiraAdmin')) {
                                 echo '<a href="' . base_url() . 'index.php/admincarteira/pagarusuario/' . $r->idCarteiraUsuario . '" class="btn-nwe2 btn-pagar" title="Pagar Usuário"><i class="bx bx-money bx-xs"></i></a>';
+                                echo '<a href="javascript:void(0)" onclick="verificarPagamentoAutomatico(' . $r->idCarteiraUsuario . ')" class="btn-nwe2 btn-adicionar-salario" title="Adicionar Salário"><i class="bx bx-plus-circle bx-xs"></i></a>';
                             }
                             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'dCarteiraAdmin')) {
                                 echo '<a href="#modal-excluir" role="button" data-toggle="modal" carteira="' . $r->idCarteiraUsuario . '" class="btn-nwe4" title="Excluir Carteira"><i class="bx bx-trash-alt bx-xs"></i></a>';
@@ -236,6 +337,80 @@
                             icon: 'error',
                             title: 'Erro',
                             text: 'Ocorreu um erro ao processar os pagamentos. Por favor, tente novamente.'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function verificarPagamentoAutomatico(carteiraId) {
+        Swal.fire({
+            title: 'Verificar Pagamentos Automáticos',
+            html: `
+                <div style="text-align: left;">
+                    <p><i class="bx bx-info-circle" style="color: #17a2b8;"></i> Esta ação irá:</p>
+                    <ul style="list-style: none; padding-left: 20px;">
+                        <li><i class="bx bx-check" style="color: #28a745;"></i> Verificar pagamentos pendentes</li>
+                        <li><i class="bx bx-check" style="color: #28a745;"></i> Processar pagamentos automáticos</li>
+                        <li><i class="bx bx-check" style="color: #28a745;"></i> Atualizar datas de próximos pagamentos</li>
+                    </ul>
+                    <p style="margin-top: 15px; color: #dc3545;"><i class="bx bx-error-circle"></i> Deseja continuar?</p>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: '<i class="bx bx-check"></i> Sim, verificar',
+            cancelButtonText: '<i class="bx bx-x"></i> Cancelar',
+            customClass: {
+                popup: 'swal2-popup-custom',
+                title: 'swal2-title-custom',
+                htmlContainer: 'swal2-html-container-custom',
+                confirmButton: 'swal2-confirm-button-custom',
+                cancelButton: 'swal2-cancel-button-custom'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '<?php echo base_url() ?>index.php/admincarteira/verificarPagamentosAutomaticos',
+                    type: 'POST',
+                    data: {
+                        carteira_id: carteiraId,
+                        <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>'
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Sucesso!',
+                                text: response.message,
+                                confirmButtonColor: '#28a745',
+                                confirmButtonText: '<i class="bx bx-check"></i> OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erro!',
+                                text: response.message,
+                                confirmButtonColor: '#dc3545',
+                                confirmButtonText: '<i class="bx bx-x"></i> OK'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erro!',
+                            text: 'Erro ao verificar pagamentos automáticos.',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: '<i class="bx bx-x"></i> OK'
                         });
                     }
                 });
