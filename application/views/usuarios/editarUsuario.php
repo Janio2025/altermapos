@@ -151,6 +151,17 @@
                         </div>
                     </div>
 
+                    <div class="control-group">
+                        <label class="control-label">Tipo de Usuário</label>
+                        <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" name="is_empresa" value="1" <?php echo (isset($result->is_empresa) && $result->is_empresa == 1) ? 'checked' : ''; ?> />
+                                Empresa
+                            </label>
+                            <span class="help-inline">Marque esta opção se o usuário representar a empresa. Funcionários não devem ter esta opção marcada.</span>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <div class="span12">
                             <div class="span6 offset3" style="display:flex">

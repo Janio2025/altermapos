@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
     `permissoes_id` int NOT NULL,
     `dataExpiracao` date DEFAULT NULL,
     `url_image_user` varchar(255) DEFAULT NULL,
+    `is_empresa` tinyint(1) DEFAULT 0,
     PRIMARY KEY (`idUsuarios`),
     KEY `fk_usuarios_permissoes1_idx` (`permissoes_id`),
     CONSTRAINT `fk_usuarios_permissoes1`

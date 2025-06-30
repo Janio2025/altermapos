@@ -11,6 +11,7 @@
  * @property Permission $permission
  * @property Carteira_model $carteira_model
  * @property Usuarios_model $usuarios_model
+ * @property Financeiro_model $financeiro_model
  */
 class Admincarteira extends MY_Controller {
     
@@ -23,6 +24,7 @@ class Admincarteira extends MY_Controller {
         
         $this->load->model('carteira_model');
         $this->load->model('usuarios_model');
+        $this->load->model('financeiro_model');
         $this->load->library('permission');
         $this->load->library('session');
         $this->load->library('form_validation');
@@ -807,6 +809,66 @@ class Admincarteira extends MY_Controller {
             // Atualiza o saldo da carteira
             $novo_saldo = $carteira->saldo - $valor;
             $this->carteira_model->edit('carteira_usuario', array('saldo' => $novo_saldo), 'idCarteiraUsuario', $id);
+
+            // Registra como despesa nos lançamentos financeiros
+            // Busca o nome do usuário da carteira
+            $this->db->select('usuarios.nome, usuarios.is_empresa');
+            $this->db->from('usuarios');
+            $this->db->join('carteira_usuario', 'carteira_usuario.usuarios_id = usuarios.idUsuarios');
+            $this->db->where('carteira_usuario.idCarteiraUsuario', $id);
+            $usuario = $this->db->get()->row();
+            
+            // Se a carteira é de uma empresa, apenas desconta da própria carteira
+            if ($usuario && isset($usuario->is_empresa) && $usuario->is_empresa == 1) {
+                // Empresa sacando próprio dinheiro - não registra como despesa
+                $this->db->trans_commit();
+                
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Retirada realizada com sucesso!',
+                    'valor' => number_format($valor, 2, '.', ''),
+                    'chave_pix' => $config->chave_pix,
+                    'nome' => $carteira->nome,
+                    'txid' => 'RET' . date('YmdHis') . rand(1000, 9999),
+                    'id_transacao' => $id_transacao
+                ]);
+                return;
+            }
+            
+            // Se é funcionário, desconta da carteira da empresa também
+            if ($usuario && (!isset($usuario->is_empresa) || $usuario->is_empresa == 0)) {
+                // Busca a carteira da empresa (usuário logado)
+                $this->db->select('carteira_usuario.idCarteiraUsuario, carteira_usuario.saldo');
+                $this->db->from('carteira_usuario');
+                $this->db->join('usuarios', 'usuarios.idUsuarios = carteira_usuario.usuarios_id');
+                $this->db->where('usuarios.idUsuarios', $this->session->userdata('id_admin'));
+                $this->db->where('usuarios.is_empresa', 1);
+                $carteira_empresa = $this->db->get()->row();
+                
+                if ($carteira_empresa) {
+                    // Desconta também da carteira da empresa
+                    $novo_saldo_empresa = $carteira_empresa->saldo - $valor;
+                    $this->carteira_model->edit('carteira_usuario', array('saldo' => $novo_saldo_empresa), 'idCarteiraUsuario', $carteira_empresa->idCarteiraUsuario);
+                }
+            }
+            
+            $data_lancamento = array(
+                'descricao' => 'Retirada de Carteira - ' . $descricao,
+                'valor' => $valor,
+                'data_vencimento' => date('Y-m-d'),
+                'data_pagamento' => date('Y-m-d'),
+                'baixado' => 1, // Já pago
+                'cliente_fornecedor' => $usuario ? $usuario->nome : 'Usuário da Carteira',
+                'forma_pgto' => 'PIX',
+                'tipo' => 'despesa',
+                'observacoes' => 'Retirada automática da carteira do usuário. ID da transação: ' . $id_transacao,
+                'usuarios_id' => $this->session->userdata('id_admin')
+            );
+            
+            // Adiciona o lançamento financeiro
+            if (!$this->financeiro_model->add('lancamentos', $data_lancamento)) {
+                throw new Exception('Erro ao registrar lançamento financeiro.');
+            }
 
             $this->db->trans_commit();
 

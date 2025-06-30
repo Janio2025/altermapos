@@ -67,6 +67,7 @@ class Usuarios extends MY_Controller
                 'dataExpiracao' => set_value('dataExpiracao'),
                 'situacao' => set_value('situacao'),
                 'permissoes_id' => $this->input->post('permissoes_id'),
+                'is_empresa' => $this->input->post('is_empresa') ? 1 : 0,
                 'dataCadastro' => date('Y-m-d'),
             ];
 
@@ -138,6 +139,7 @@ class Usuarios extends MY_Controller
                     'dataExpiracao' => set_value('dataExpiracao'),
                     'situacao' => $this->input->post('situacao'),
                     'permissoes_id' => $this->input->post('permissoes_id'),
+                    'is_empresa' => $this->input->post('is_empresa') ? 1 : 0,
                 ];
             } else {
                 $data = [
@@ -156,6 +158,7 @@ class Usuarios extends MY_Controller
                     'dataExpiracao' => set_value('dataExpiracao'),
                     'situacao' => $this->input->post('situacao'),
                     'permissoes_id' => $this->input->post('permissoes_id'),
+                    'is_empresa' => $this->input->post('is_empresa') ? 1 : 0,
                 ];
             }
 
