@@ -975,41 +975,54 @@
 
         // Função para abrir o modal de movimentações
         window.abrirModalMovimentacoes = function(tipo, titulo, cor, icone) {
-            const dataAtual = new Date();
-            let movimentacoes = [];
             let total = 0;
+            let movimentacoes = [];
 
-            // Coleta as movimentações do tipo especificado
+            const tipoFiltro = $('#tipo-filtro').val();
+            let dataInicio, dataFim;
+
+            if (tipoFiltro === 'mes') {
+                const dataAtual = new Date();
+                dataInicio = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
+                dataFim = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0);
+            } else if (tipoFiltro === 'ano') {
+                const dataAtual = new Date();
+                dataInicio = new Date(dataAtual.getFullYear(), 0, 1);
+                dataFim = new Date(dataAtual.getFullYear(), 11, 31);
+            } else {
+                dataInicio = new Date($('#data-inicio').val());
+                dataFim = new Date($('#data-fim').val());
+                dataFim.setDate(dataFim.getDate() + 1); // inclui o dia final
+            }
+
+            // Coleta as movimentações do tipo especificado e dentro do período filtrado
             $('.table-transactions tbody tr').each(function() {
-                const data = $(this).find('.col-data').text();
+                let data = $(this).find('.col-data').text();
                 if (!data) return;
 
-                const tipoTransacao = $(this).find('.col-tipo span').attr('data-tipo');
-                
-                // Para o card de ganhos, inclui tanto comissões quanto bônus
-                if (tipo === 'ganhos' && (tipoTransacao !== 'comissao' && tipoTransacao !== 'bonus')) {
-                    return;
-                } else if (tipo !== 'ganhos' && tipoTransacao !== tipo) {
+                let tipoTransacao = $(this).find('.col-tipo span').attr('data-tipo');
+                if (tipo === 'ganhos') {
+                    if (tipoTransacao !== 'comissao' && tipoTransacao !== 'bonus' && tipoTransacao !== 'salario') return;
+                } else if (tipoTransacao !== tipo) {
                     return;
                 }
 
-                const [dia, mes, ano] = data.split('/');
-                const dataTransacao = new Date(ano, mes - 1, dia);
-                
-                // Verifica se é do mês atual
-                if (dataTransacao.getMonth() === dataAtual.getMonth() && 
-                    dataTransacao.getFullYear() === dataAtual.getFullYear()) {
-                    
-                    const valorText = $(this).find('.col-valor').text().replace('R$ ', '');
-                    const valor = parseFloat(valorText.replace('.', '').replace(',', '.'));
-                    const descricao = $(this).find('.col-descricao').text();
+                // Extrai apenas a parte da data (antes do espaço)
+                let dataParte = data.split(' ')[0];
+                let [dia, mes, ano] = dataParte.split('/');
+                let dataTransacao = new Date(ano, mes - 1, dia);
+
+                // Verifica se a data está dentro do período selecionado
+                if (dataTransacao >= dataInicio && dataTransacao <= dataFim) {
+                    let valorText = $(this).find('.col-valor').text().replace('R$ ', '');
+                    let valor = parseFloat(valorText.replace('.', '').replace(',', '.'));
+                    let descricao = $(this).find('.col-descricao').text();
 
                     movimentacoes.push({
                         data: data,
                         valor: valor,
                         descricao: descricao
                     });
-
                     total += valor;
                 }
             });
@@ -1052,14 +1065,15 @@
                 html = `
                     <div class="empty-state">
                         <i class="bx bx-info-circle"></i>
-                        <p>Nenhuma movimentação encontrada para este mês.</p>
+                        <p>Nenhuma movimentação encontrada para este período.</p>
                     </div>
                 `;
             }
 
             // Atualiza e exibe o modal
             $('#modalMovimentacoesIcon').attr('class', `bx ${icone}`).css('color', cor);
-            $('#modalMovimentacoesTitulo').text(titulo + ' do Mês');
+            $('#modalMovimentacoesTitulo').text(titulo +
+                (tipoFiltro === 'mes' ? ' do Mês' : tipoFiltro === 'ano' ? ' do Ano' : ' do Período'));
             $('#modalMovimentacoesConteudo').html(html);
             $('#modalMovimentacoes').modal('show');
         }
