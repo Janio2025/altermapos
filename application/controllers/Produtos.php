@@ -544,6 +544,39 @@ public function downloadProduto($id = null)
 
     // modificações
 
+    /**
+     * Limpa o nome do produto removendo caracteres inválidos para nomes de arquivos
+     * @param string $nomeProduto
+     * @return string
+     */
+    private function limparNomeArquivo($nomeProduto) {
+        // Caracteres inválidos no Windows: < > : " | ? * \ /
+        // Também removemos outros caracteres problemáticos
+        $caracteresInvalidos = ['<', '>', ':', '"', '|', '?', '*', '\\', '/', 'º', '°', 'ª', '™', '®', '©'];
+        
+        // Remove caracteres inválidos
+        $nomeLimpo = str_replace($caracteresInvalidos, '', $nomeProduto);
+        
+        // Remove espaços extras e caracteres de controle
+        $nomeLimpo = trim($nomeLimpo);
+        $nomeLimpo = preg_replace('/\s+/', ' ', $nomeLimpo); // Múltiplos espaços viram um só
+        
+        // Remove caracteres de controle (ASCII 0-31)
+        $nomeLimpo = preg_replace('/[\x00-\x1F\x7F]/', '', $nomeLimpo);
+        
+        // Limita o tamanho do nome (máximo 50 caracteres para evitar problemas)
+        if (strlen($nomeLimpo) > 50) {
+            $nomeLimpo = substr($nomeLimpo, 0, 50);
+        }
+        
+        // Se ficou vazio, usa um nome padrão
+        if (empty($nomeLimpo)) {
+            $nomeLimpo = 'produto';
+        }
+        
+        return $nomeLimpo;
+    }
+
     public function imgAnexar($idProduto)
 {
     $this->load->library('upload');
@@ -597,7 +630,7 @@ public function downloadProduto($id = null)
             $error['upload'][] = $this->upload->display_errors();
         } else {
             $upload_data = $this->upload->data();
-            $new_file_name = $nomeProduto . '-' . uniqid() . '.' . pathinfo($upload_data['file_name'], PATHINFO_EXTENSION); // Renomeia o arquivo
+            $new_file_name = $this->limparNomeArquivo($nomeProduto) . '-' . uniqid() . '.' . pathinfo($upload_data['file_name'], PATHINFO_EXTENSION); // Renomeia o arquivo
             $new_file_path = $upload_data['file_path'] . $new_file_name;
             rename($upload_data['full_path'], $new_file_path); // Move e renomeia o arquivo
 

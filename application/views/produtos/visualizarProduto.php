@@ -109,6 +109,35 @@
             margin-bottom: 2%; /* Adiciona um espaço de 5% abaixo de cada div */
 }
 
+/* Estilos para o toggle do preço de compra */
+.preco-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.eye-icon {
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    transition: color 0.3s ease;
+    padding: 2px;
+    border-radius: 3px;
+}
+
+.eye-icon:hover {
+    color: #333;
+    background-color: #f0f0f0;
+}
+
+.preco-oculto {
+    color: #999;
+    letter-spacing: 2px;
+}
+
+.preco-visivel {
+    color: #333;
+}
 
 </style>
 <!-- #st -->
@@ -208,7 +237,13 @@ if ($localizacaoProduto !== 'N/A') {
                         </tr>
                         <tr>
                             <td><strong>Preço de Compra</strong></td>
-                            <td>R$ <?php echo isset($result->precoCompra) ? $result->precoCompra : '0,00'; ?></td>
+                            <td>
+                                <div class="preco-toggle">
+                                    <span id="preco-compra-valor" class="preco-oculto">R$ •••••</span>
+                                    <i class="fas fa-eye eye-icon" id="toggle-preco-compra" title="Mostrar/Ocultar preço"></i>
+                                </div>
+                                <span id="preco-compra-real" style="display: none;">R$ <?php echo isset($result->precoCompra) ? $result->precoCompra : '0,00'; ?></span>
+                            </td>
                         </tr>
                         <tr>
                             <td><strong>Preço de Venda</strong></td>
@@ -292,6 +327,27 @@ $(document).ready(function() {
         
         // Abre o modal
         $('#modal-produto').modal('show');
+    });
+
+    // Toggle para mostrar/ocultar preço de compra
+    $(document).on('click', '#toggle-preco-compra', function() {
+        var valorSpan = $('#preco-compra-valor');
+        var realSpan = $('#preco-compra-real');
+        var icon = $(this);
+        
+        if (valorSpan.hasClass('preco-oculto')) {
+            // Mostrar valor real
+            valorSpan.hide();
+            realSpan.show();
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            valorSpan.removeClass('preco-oculto').addClass('preco-visivel');
+        } else {
+            // Ocultar valor real
+            valorSpan.show();
+            realSpan.hide();
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            valorSpan.removeClass('preco-visivel').addClass('preco-oculto');
+        }
     });
 
     // Quando clicar para excluir o produto

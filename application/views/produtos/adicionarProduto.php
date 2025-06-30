@@ -229,6 +229,7 @@
                 <?php echo $custom_error; ?>
                 <form action="<?php echo current_url(); ?>" id="formProduto" enctype="multipart/form-data" method="post"
                     class="form-horizontal">
+                    <?php echo form_hidden($this->security->get_csrf_token_name(), $this->security->get_csrf_hash()); ?>
                     <div class="span12 div-teste">
                         <div>
                             <div class="span3 div-bord" style="padding: 1%; margin-left: 1">
