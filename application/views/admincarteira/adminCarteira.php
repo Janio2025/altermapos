@@ -173,8 +173,6 @@
                         <th>Usuário</th>
                         <th>Salário Base</th>
                         <th>Saldo</th>
-                        <th>Outros Valores</th>
-                        <th>Total Comissões</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -189,8 +187,6 @@
                             echo '<td data-label="Usuário">' . $r->nome_usuario . '</td>';
                             echo '<td data-label="Salário Base">R$ ' . number_format($r->salario_base, 2, ',', '.') . '</td>';
                             echo '<td data-label="Saldo">R$ ' . number_format($r->saldo, 2, ',', '.') . '</td>';
-                            echo '<td data-label="Outros Valores">R$ ' . number_format($r->total_bonus, 2, ',', '.') . '</td>';
-                            echo '<td data-label="Total Comissões">R$ ' . number_format($r->total_comissoes, 2, ',', '.') . '</td>';
                             
                             echo '<td data-label="Ações">';
                             if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCarteiraAdmin')) {
