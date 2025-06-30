@@ -292,4 +292,54 @@ class Financeiro_model extends CI_Model
             'gastos_colaboradores' => $gastos_colaboradores
         );
     }
+
+    /**
+     * Busca todos os lançamentos pagos (baixado = 1) que ainda não foram fechados em nenhum fechamento de caixa.
+     * @return array Lista de lançamentos pagos não fechados
+     */
+    public function getLancamentosPagosNaoFechados()
+    {
+        $sql = "SELECT l.* FROM lancamentos l
+                WHERE l.baixado = 1
+                AND l.idLancamentos NOT IN (
+                    SELECT lancamento_id FROM fechamento_lancamentos
+                )";
+        return $this->db->query($sql)->result();
+    }
+
+    /**
+     * Marca os lançamentos como fechados, vinculando-os a um fechamento de caixa.
+     * @param int $fechamento_id ID do fechamento de caixa
+     * @param array $lancamentos_ids IDs dos lançamentos a vincular
+     * @return void
+     */
+    public function marcarLancamentosComoFechados($fechamento_id, $lancamentos_ids)
+    {
+        if (empty($lancamentos_ids)) return;
+        $data = array();
+        foreach ($lancamentos_ids as $id) {
+            $data[] = array(
+                'fechamento_id' => $fechamento_id,
+                'lancamento_id' => $id
+            );
+        }
+        $this->db->insert_batch('fechamento_lancamentos', $data);
+    }
+
+    /**
+     * Cria um novo registro de fechamento de caixa.
+     * @param int $usuario_id ID do usuário que está fechando o caixa
+     * @param float $valor_fechado Valor total do fechamento
+     * @return int ID do fechamento criado
+     */
+    public function criarFechamentoCaixa($usuario_id, $valor_fechado)
+    {
+        $data = array(
+            'data_fechamento' => date('Y-m-d H:i:s'),
+            'usuario_id' => $usuario_id,
+            'valor_fechado' => $valor_fechado
+        );
+        $this->db->insert('fechamentos_caixa', $data);
+        return $this->db->insert_id();
+    }
 }

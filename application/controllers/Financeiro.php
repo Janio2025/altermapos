@@ -120,6 +120,10 @@ class Financeiro extends MY_Controller
         $this->data['gastos_colaboradores'] = $gastos_mensais['gastos_colaboradores'];
         $this->data['meses'] = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
+        // Verifica se deve mostrar o botão Fechar Caixa
+        $lancamentosNaoFechados = $this->financeiro_model->getLancamentosPagosNaoFechados();
+        $this->data['mostrarFecharCaixaFlag'] = !empty($lancamentosNaoFechados);
+
         $this->data['view'] = 'financeiro/lancamentos';
 
         return $this->layout();
@@ -666,5 +670,90 @@ class Financeiro extends MY_Controller
         $ate = $ano . '-' . $mes . '-' . $qtdDiasMes;
 
         return [$inicia, $ate];
+    }
+
+    /**
+     * Fecha o caixa: soma receitas e despesas de lançamentos pagos não fechados,
+     * atualiza a carteira da empresa e registra o fechamento.
+     */
+    public function fecharCaixa()
+    {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'aLancamento')) {
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+                'success' => false,
+                'message' => 'Você não tem permissão para fechar o caixa.'
+            ]));
+            return;
+        }
+
+        $this->load->model('carteira_model');
+        $this->load->model('usuarios_model');
+        $this->load->model('financeiro_model');
+        $this->db->trans_begin();
+        try {
+            // 1. Buscar lançamentos pagos não fechados
+            $lancamentos = $this->financeiro_model->getLancamentosPagosNaoFechados();
+            if (empty($lancamentos)) {
+                throw new Exception('Não há lançamentos pagos pendentes de fechamento.');
+            }
+
+            // 2. Calcular saldo (receitas - despesas)
+            $saldo = 0;
+            $ids = [];
+            foreach ($lancamentos as $l) {
+                $ids[] = $l->idLancamentos;
+                if ($l->tipo == 'receita') {
+                    $valor = ($l->valor_desconto && $l->valor_desconto > 0) ? $l->valor_desconto : $l->valor;
+                    $saldo += $valor;
+                } elseif ($l->tipo == 'despesa') {
+                    $valor = ($l->valor_desconto && $l->valor_desconto > 0) ? $l->valor_desconto : $l->valor;
+                    $saldo -= $valor;
+                }
+            }
+
+            // 3. Buscar carteira da empresa (usuário com is_empresa = 1)
+            $empresa = $this->db->where('is_empresa', 1)->get('usuarios')->row();
+            if (!$empresa) {
+                throw new Exception('Usuário empresa não encontrado.');
+            }
+            $carteira = $this->carteira_model->getByUsuarioId($empresa->idUsuarios);
+            if (!$carteira) {
+                throw new Exception('Carteira da empresa não encontrada.');
+            }
+
+            // 4. Atualizar saldo da carteira e registrar transação
+            $tipo_transacao = $saldo >= 0 ? 'Valores' : 'Retirada';
+            $valor_transacao = abs($saldo);
+            $descricao = $tipo_transacao == 'Valores' ? 'Fechamento de Caixa (Entrada)' : 'Fechamento de Caixa (Saída)';
+            $transacao_data = [
+                'tipo' => $tipo_transacao == 'Valores' ? 'bonus' : 'retirada',
+                'valor' => $valor_transacao,
+                'data_transacao' => date('Y-m-d H:i:s'),
+                'descricao' => $descricao,
+                'carteira_usuario_id' => $carteira->idCarteiraUsuario,
+                'considerado_saldo' => 1
+            ];
+            $this->carteira_model->registrarTransacao($transacao_data);
+
+            // 5. Criar registro em fechamentos_caixa
+            $usuario_id = $this->session->userdata('id_admin');
+            $fechamento_id = $this->financeiro_model->criarFechamentoCaixa($usuario_id, $saldo);
+
+            // 6. Vincular lançamentos ao fechamento
+            $this->financeiro_model->marcarLancamentosComoFechados($fechamento_id, $ids);
+
+            $this->db->trans_commit();
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+                'success' => true,
+                'message' => 'Caixa fechado com sucesso!',
+                'saldo' => $saldo
+            ]));
+        } catch (Exception $e) {
+            $this->db->trans_rollback();
+            $this->output->set_content_type('application/json')->set_output(json_encode([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]));
+        }
     }
 }

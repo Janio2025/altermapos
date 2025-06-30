@@ -6,6 +6,11 @@
 
 <?php $situacao = $this->input->get('situacao');
 $periodo = $this->input->get('periodo');
+// Adiciona verificação para exibir o botão Fechar Caixa
+$mostrarFecharCaixa = false;
+if (isset($mostrarFecharCaixaFlag)) {
+    $mostrarFecharCaixa = $mostrarFecharCaixaFlag;
+}
 ?>
 
 <style type="text/css">
@@ -407,6 +412,11 @@ $periodo = $this->input->get('periodo');
             <i class="fas fa-hand-holding-usd"></i>
         </span>
         <h5>Lançamentos Financeiros</h5>
+        <?php if ($mostrarFecharCaixa) { ?>
+            <button id="btnFecharCaixa" class="btn btn-primary" style="float:right; margin-top:-5px; margin-right:10px;">
+                <i class="bx bx-lock"></i> Fechar Caixa
+            </button>
+        <?php } ?>
     </div>
 
     <div class="top-actions">
@@ -1614,9 +1624,7 @@ echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
 			valorParcelas();
 		});
     });
-</script>
 
-<script>
     $(document).ready(function() {
         // Evento de clique nos botões
         $('[data-toggle="modal"]').click(function() {
@@ -1639,6 +1647,44 @@ echo number_format($sub_recpendente_despependente, 2, ',', '.'); ?></div>
                 $('#labelRecebido').text('Recebido?');
             }
         }
+    });
+
+    // Fechar Caixa
+    $('#btnFecharCaixa').on('click', function() {
+        Swal.fire({
+            title: 'Fechar Caixa?',
+            text: 'Tem certeza que deseja fechar o caixa? Esta ação é irreversível para os lançamentos já pagos.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, fechar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Pega o token CSRF do PHP
+                var csrfName = '<?php echo $this->security->get_csrf_token_name(); ?>';
+                var csrfHash = '<?php echo $this->security->get_csrf_hash(); ?>';
+                var postData = {};
+                postData[csrfName] = csrfHash;
+                $.ajax({
+                    url: '<?php echo base_url('index.php/financeiro/fecharCaixa'); ?>',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: postData,
+                    success: function(resp) {
+                        if (resp.success) {
+                            Swal.fire('Sucesso', resp.message, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Erro', resp.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Erro', 'Erro ao tentar fechar o caixa.', 'error');
+                    }
+                });
+            }
+        });
     });
 </script>
 
