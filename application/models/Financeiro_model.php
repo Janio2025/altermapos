@@ -303,7 +303,8 @@ class Financeiro_model extends CI_Model
                 WHERE l.baixado = 1
                 AND l.idLancamentos NOT IN (
                     SELECT lancamento_id FROM fechamento_lancamentos
-                )";
+                )
+                AND l.os_id IS NULL";
         return $this->db->query($sql)->result();
     }
 
