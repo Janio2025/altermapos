@@ -91,6 +91,20 @@ class MercadoLivre extends MY_Controller
         // Trocar código por token
         $token_data = $this->trocarCodigoPorToken($code);
         
+        $nickname = '';
+        if ($token_data && isset($token_data['user_id']) && isset($token_data['access_token'])) {
+            $user_id = $token_data['user_id'];
+            $access_token = $token_data['access_token'];
+            $user_url = "https://api.mercadolibre.com/users/{$user_id}?access_token={$access_token}";
+            $user_response = @file_get_contents($user_url);
+            if ($user_response !== false) {
+                $user_data = json_decode($user_response, true);
+                if (isset($user_data['nickname'])) {
+                    $nickname = $user_data['nickname'];
+                }
+            }
+        }
+        
         if ($token_data) {
             // Salvar no .env diretamente
             $env_file_path = dirname(__FILE__, 2) . DIRECTORY_SEPARATOR . '.env';
@@ -100,8 +114,8 @@ class MercadoLivre extends MY_Controller
                 'MERCADO_LIVRE_ACCESS_TOKEN' => $token_data['access_token'],
                 'MERCADO_LIVRE_REFRESH_TOKEN' => $token_data['refresh_token'],
                 'MERCADO_LIVRE_USER_ID' => $token_data['user_id'],
-                'MERCADO_LIVRE_NICKNAME' => $token_data['nickname'],
-                'MERCADO_LIVRE_TOKEN_EXPIRES_AT' => date('Y-m-d H:i:s', time() + $token_data['expires_in'])
+                'MERCADO_LIVRE_NICKNAME' => '"' . $nickname . '"',
+                'MERCADO_LIVRE_TOKEN_EXPIRES_AT' => '"' . date('Y-m-d H:i:s', time() + $token_data['expires_in']) . '"'
             ];
             
             foreach ($dataDotEnv as $constante => $valor) {
@@ -115,7 +129,7 @@ class MercadoLivre extends MY_Controller
             file_put_contents($env_file_path, $env_file);
             
             $this->session->set_flashdata('success', 'Autenticação com Mercado Livre realizada com sucesso!');
-            log_info('Autenticação ML realizada para usuário: ' . $token_data['nickname']);
+            log_info('Autenticação ML realizada para usuário: ' . $nickname);
         } else {
             $this->session->set_flashdata('error', 'Erro na autenticação com Mercado Livre.');
         }
@@ -128,9 +142,9 @@ class MercadoLivre extends MY_Controller
      */
     private function trocarCodigoPorToken($code)
     {
-        $client_id = 'SEU_CLIENT_ID'; // Configurar no .env
-        $client_secret = 'SEU_CLIENT_SECRET'; // Configurar no .env
-        $redirect_uri = site_url('mercadolivre/callback');
+        $client_id = $_ENV['MERCADO_LIVRE_CLIENT_ID'] ?? '';
+        $client_secret = $_ENV['MERCADO_LIVRE_CLIENT_SECRET'] ?? '';
+        $redirect_uri = $_ENV['MERCADO_LIVRE_REDIRECT_URI'] ?? site_url('mercadolivre/callback');
 
         $url = 'https://api.mercadolibre.com/oauth/token';
         $data = [
@@ -154,6 +168,9 @@ class MercadoLivre extends MY_Controller
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
+        // Log para depuração
+        file_put_contents('C:\\wamp64\\tmp\\ml_debug.txt', date('Y-m-d H:i:s') . "\n" . $response . "\n\n", FILE_APPEND);
+
         if ($http_code == 200) {
             return json_decode($response, true);
         }
@@ -172,8 +189,8 @@ class MercadoLivre extends MY_Controller
             return false;
         }
 
-        $client_id = 'SEU_CLIENT_ID';
-        $client_secret = 'SEU_CLIENT_SECRET';
+        $client_id = $_ENV['MERCADO_LIVRE_CLIENT_ID'] ?? '';
+        $client_secret = $_ENV['MERCADO_LIVRE_CLIENT_SECRET'] ?? '';
 
         $url = 'https://api.mercadolibre.com/oauth/token';
         $data = [
