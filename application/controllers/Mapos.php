@@ -455,6 +455,26 @@ class Mapos extends MY_Controller {
                 'EMAIL_SMTP_PORT' => $this->input->post('EMAIL_SMTP_PORT'),
                 'EMAIL_SMTP_USER' => $this->input->post('EMAIL_SMTP_USER'),
                 'EMAIL_SMTP_PASS' => $this->input->post('EMAIL_SMTP_PASS'),
+                // Configurações do Mercado Livre
+                'MERCADO_LIVRE_ENABLED' => $this->input->post('MERCADO_LIVRE_ENABLED'),
+                'MERCADO_LIVRE_CLIENT_ID' => $this->input->post('MERCADO_LIVRE_CLIENT_ID'),
+                'MERCADO_LIVRE_CLIENT_SECRET' => $this->input->post('MERCADO_LIVRE_CLIENT_SECRET'),
+                'MERCADO_LIVRE_REDIRECT_URI' => $this->input->post('MERCADO_LIVRE_REDIRECT_URI'),
+                'MERCADO_LIVRE_ACCESS_TOKEN' => $this->input->post('MERCADO_LIVRE_ACCESS_TOKEN'),
+                'MERCADO_LIVRE_REFRESH_TOKEN' => $this->input->post('MERCADO_LIVRE_REFRESH_TOKEN'),
+                'MERCADO_LIVRE_USER_ID' => $this->input->post('MERCADO_LIVRE_USER_ID'),
+                'MERCADO_LIVRE_NICKNAME' => $this->input->post('MERCADO_LIVRE_NICKNAME'),
+                'MERCADO_LIVRE_SITE_ID' => $this->input->post('MERCADO_LIVRE_SITE_ID'),
+                'MERCADO_LIVRE_AUTO_SYNC' => $this->input->post('MERCADO_LIVRE_AUTO_SYNC'),
+                'MERCADO_LIVRE_DEFAULT_CATEGORY' => $this->input->post('MERCADO_LIVRE_DEFAULT_CATEGORY'),
+                'MERCADO_LIVRE_DEFAULT_CONDITION' => $this->input->post('MERCADO_LIVRE_DEFAULT_CONDITION'),
+                'MERCADO_LIVRE_DEFAULT_LISTING_TYPE' => $this->input->post('MERCADO_LIVRE_DEFAULT_LISTING_TYPE'),
+                'MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS' => $this->input->post('MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS'),
+                'MERCADO_LIVRE_FREE_SHIPPING' => $this->input->post('MERCADO_LIVRE_FREE_SHIPPING'),
+                'MERCADO_LIVRE_WARRANTY' => $this->input->post('MERCADO_LIVRE_WARRANTY'),
+                'MERCADO_LIVRE_STOCK_SYNC' => $this->input->post('MERCADO_LIVRE_STOCK_SYNC'),
+                'MERCADO_LIVRE_PRICE_SYNC' => $this->input->post('MERCADO_LIVRE_PRICE_SYNC'),
+                'MERCADO_LIVRE_LOG_LEVEL' => $this->input->post('MERCADO_LIVRE_LOG_LEVEL'),
             ];
 
             if (!$this->editDontEnv($dataDotEnv)) {
@@ -682,7 +702,7 @@ class Mapos extends MY_Controller {
             : $desconto;
     }
 
-    private function editDontEnv(array $data)
+    public function editDontEnv(array $data)
     {
         $env_file_path = dirname(__FILE__, 2) . DIRECTORY_SEPARATOR . '.env';
         $env_file = file_get_contents($env_file_path);

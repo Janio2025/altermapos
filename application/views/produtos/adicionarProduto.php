@@ -217,11 +217,19 @@
     #campos_ml {
         border-left: 4px solid #ffc107;
         transition: all 0.3s ease;
+        max-width: 100%;
+        box-sizing: border-box;
     }
     
     #campos_ml:hover {
         border-left-color: #ff9800;
         box-shadow: 0 2px 8px rgba(255,193,7,0.1);
+    }
+    
+    /* Ajuste para a widget-box do ML */
+    .widget-box:has(#campos_ml) {
+        max-width: 100%;
+        overflow-x: hidden;
     }
     
     .checkbox input[type="checkbox"] {
@@ -247,6 +255,25 @@
         background: linear-gradient(135deg, #138496, #117a8b);
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(23,162,184,0.3);
+    }
+
+    /* Responsividade para integração ML */
+    @media (max-width: 768px) {
+        #campos_ml .controls {
+            display: block !important;
+        }
+        
+        #campos_ml .checkbox {
+            display: block !important;
+            margin-bottom: 8px !important;
+            width: 100% !important;
+        }
+        
+        #campos_ml .row-fluid .span6 {
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-bottom: 15px !important;
+        }
     }
 </style>
 
@@ -513,12 +540,12 @@
                                 </div>
 
                                 <!-- Seção de Integração com Mercado Livre -->
-                                <div class="span12" style="margin-top: 20px;">
+                                <div class="widget-content nopadding tab-content" style="margin-top: 20px;">
                                     <div class="widget-box">
                                         <div class="widget-title" style="background: #f0f0f0; padding: 10px; border-radius: 5px;">
                                             <h5><i class="fas fa-shopping-cart"></i> Integração com Mercado Livre</h5>
                                         </div>
-                                        <div class="widget-content">
+                                        <div class="widget-content nopadding">
                                             <div class="control-group">
                                                 <div class="controls">
                                                     <label class="checkbox" style="font-weight: bold; color: #333;">
@@ -529,7 +556,7 @@
                                             </div>
 
                                             <!-- Campos do Mercado Livre (aparecem quando checkbox está marcado) -->
-                                            <div id="campos_ml" style="display: none; margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+                                            <div id="campos_ml" style="display: none; margin: 15px; padding: 15px; background: #f9f9f9; border-radius: 5px; overflow-x: auto;">
                                                 
                                                 <!-- Opções de anúncio -->
                                                 <div class="row-fluid" style="margin-bottom: 15px;">
@@ -1279,4 +1306,5 @@ function salvarProdutoComML() {
     $("#formProduto").submit();
 }
 </script>
+
 

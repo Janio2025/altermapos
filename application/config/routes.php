@@ -45,6 +45,14 @@ if (! defined('BASEPATH')) {
 $route['default_controller'] = 'mapos';
 $route['404_override'] = '';
 
+// Rotas do Mercado Livre
+$route['mercadolivre'] = 'mercadolivre/index';
+$route['mercadolivre/autenticar'] = 'mercadolivre/autenticar';
+$route['mercadolivre/callback'] = 'mercadolivre/callback';
+$route['mercadolivre/sincronizar'] = 'mercadolivre/sincronizar';
+$route['mercadolivre/produtos'] = 'mercadolivre/produtos';
+$route['mercadolivre/logs'] = 'mercadolivre/logs';
+
 // Rotas da API
 if (filter_var($_ENV['API_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
     require APPPATH . 'config/routes_api.php';

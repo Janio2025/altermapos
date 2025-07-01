@@ -16,6 +16,7 @@
                 <li><a data-toggle="tab" href="#menu5">OS</a></li>
                 <li><a data-toggle="tab" href="#menu6">API</a></li>
                 <li><a data-toggle="tab" href="#menu7">E-mail</a></li>
+                <li><a data-toggle="tab" href="#menu8">Mercado Livre</a></li>
             </ul>
             <form action="<?php echo current_url(); ?>" id="formConfigurar" method="post" class="form-horizontal">
                 <div class="widget-content nopadding tab-content">
@@ -583,6 +584,244 @@
                                 <span class="help-inline">Informe a senha do e-mail.</span>
                             </div>
                         </div>
+                        <div class="form-actions">
+                            <div class="span8">
+                                <div class="span9">
+                                  <button type="submit" class="button btn btn-primary">
+                                  <span class="button__icon"><i class='bx bx-save'></i></span><span class="button__text2">Salvar Alterações</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Menu Mercado Livre -->
+                    <div id="menu8" class="tab-pane fade">
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_ENABLED" class="control-label">Ativar Integração com Mercado Livre</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_ENABLED" id="MERCADO_LIVRE_ENABLED">
+                                    <option value="true" <?= filter_var($_ENV['MERCADO_LIVRE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Ativar</option>
+                                    <option value="false" <?= !filter_var($_ENV['MERCADO_LIVRE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Desativar</option>
+                                </select>
+                                <span class="help-inline">Ativar ou desativar a integração com Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_CLIENT_ID" class="control-label">CLIENT_ID</label>
+                            <div class="controls">
+                                <input type="text" name="MERCADO_LIVRE_CLIENT_ID" value="<?= $_ENV['MERCADO_LIVRE_CLIENT_ID'] ?? '' ?>" id="MERCADO_LIVRE_CLIENT_ID">
+                                <span class="help-inline">ID do aplicativo registrado no Mercado Livre. <a href="https://developers.mercadolivre.com.br/apps" target="_blank" rel="noopener noreferrer">Criar aplicativo</a></span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_CLIENT_SECRET" class="control-label">CLIENT_SECRET</label>
+                            <div class="controls">
+                                <input type="password" name="MERCADO_LIVRE_CLIENT_SECRET" value="<?= $_ENV['MERCADO_LIVRE_CLIENT_SECRET'] ?? '' ?>" id="MERCADO_LIVRE_CLIENT_SECRET">
+                                <span class="help-inline">Chave secreta do aplicativo registrado no Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_REDIRECT_URI" class="control-label">URL de Redirecionamento</label>
+                            <div class="controls">
+                                <input type="text" name="MERCADO_LIVRE_REDIRECT_URI" value="<?= $_ENV['MERCADO_LIVRE_REDIRECT_URI'] ?? site_url('mercadolivre/callback') ?>" id="MERCADO_LIVRE_REDIRECT_URI" readonly>
+                                <span class="help-inline">URL que deve ser configurada no aplicativo do Mercado Livre como URL de redirecionamento.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_ACCESS_TOKEN" class="control-label">Access Token</label>
+                            <div class="controls">
+                                <input type="password" name="MERCADO_LIVRE_ACCESS_TOKEN" value="<?= $_ENV['MERCADO_LIVRE_ACCESS_TOKEN'] ?? '' ?>" id="MERCADO_LIVRE_ACCESS_TOKEN" readonly>
+                                <span class="help-inline">Token de acesso obtido após autenticação. Será preenchido automaticamente.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_REFRESH_TOKEN" class="control-label">Refresh Token</label>
+                            <div class="controls">
+                                <input type="password" name="MERCADO_LIVRE_REFRESH_TOKEN" value="<?= $_ENV['MERCADO_LIVRE_REFRESH_TOKEN'] ?? '' ?>" id="MERCADO_LIVRE_REFRESH_TOKEN" readonly>
+                                <span class="help-inline">Token de renovação obtido após autenticação. Será preenchido automaticamente.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_USER_ID" class="control-label">User ID</label>
+                            <div class="controls">
+                                <input type="text" name="MERCADO_LIVRE_USER_ID" value="<?= $_ENV['MERCADO_LIVRE_USER_ID'] ?? '' ?>" id="MERCADO_LIVRE_USER_ID" readonly>
+                                <span class="help-inline">ID do usuário no Mercado Livre. Será preenchido automaticamente após autenticação.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_NICKNAME" class="control-label">Nickname</label>
+                            <div class="controls">
+                                <input type="text" name="MERCADO_LIVRE_NICKNAME" value="<?= $_ENV['MERCADO_LIVRE_NICKNAME'] ?? '' ?>" id="MERCADO_LIVRE_NICKNAME" readonly>
+                                <span class="help-inline">Apelido do usuário no Mercado Livre. Será preenchido automaticamente após autenticação.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_SITE_ID" class="control-label">Site ID</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_SITE_ID" id="MERCADO_LIVRE_SITE_ID">
+                                    <option value="MLB" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MLB' ? 'selected' : ''; ?>>Brasil (MLB)</option>
+                                    <option value="MLA" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MLA' ? 'selected' : ''; ?>>Argentina (MLA)</option>
+                                    <option value="MLM" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MLM' ? 'selected' : ''; ?>>México (MLM)</option>
+                                    <option value="MCO" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MCO' ? 'selected' : ''; ?>>Colômbia (MCO)</option>
+                                    <option value="MPE" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MPE' ? 'selected' : ''; ?>>Peru (MPE)</option>
+                                    <option value="MLC" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MLC' ? 'selected' : ''; ?>>Chile (MLC)</option>
+                                    <option value="MLV" <?= ($_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB') == 'MLV' ? 'selected' : ''; ?>>Venezuela (MLV)</option>
+                                </select>
+                                <span class="help-inline">País/região do Mercado Livre onde os produtos serão publicados.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_AUTO_SYNC" class="control-label">Sincronização Automática</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_AUTO_SYNC" id="MERCADO_LIVRE_AUTO_SYNC">
+                                    <option value="true" <?= filter_var($_ENV['MERCADO_LIVRE_AUTO_SYNC'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Ativar</option>
+                                    <option value="false" <?= !filter_var($_ENV['MERCADO_LIVRE_AUTO_SYNC'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Desativar</option>
+                                </select>
+                                <span class="help-inline">Ativar sincronização automática de produtos com o Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_DEFAULT_CATEGORY" class="control-label">Categoria Padrão</label>
+                            <div class="controls">
+                                <input type="text" name="MERCADO_LIVRE_DEFAULT_CATEGORY" value="<?= $_ENV['MERCADO_LIVRE_DEFAULT_CATEGORY'] ?? '' ?>" id="MERCADO_LIVRE_DEFAULT_CATEGORY">
+                                <span class="help-inline">ID da categoria padrão no Mercado Livre para produtos sem categoria específica.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_DEFAULT_CONDITION" class="control-label">Condição Padrão</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_DEFAULT_CONDITION" id="MERCADO_LIVRE_DEFAULT_CONDITION">
+                                    <option value="new" <?= ($_ENV['MERCADO_LIVRE_DEFAULT_CONDITION'] ?? 'new') == 'new' ? 'selected' : ''; ?>>Novo</option>
+                                    <option value="used" <?= ($_ENV['MERCADO_LIVRE_DEFAULT_CONDITION'] ?? 'new') == 'used' ? 'selected' : ''; ?>>Usado</option>
+                                </select>
+                                <span class="help-inline">Condição padrão dos produtos no Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_DEFAULT_LISTING_TYPE" class="control-label">Tipo de Listagem Padrão</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_DEFAULT_LISTING_TYPE" id="MERCADO_LIVRE_DEFAULT_LISTING_TYPE">
+                                    <option value="gold_special" <?= ($_ENV['MERCADO_LIVRE_DEFAULT_LISTING_TYPE'] ?? 'gold_special') == 'gold_special' ? 'selected' : ''; ?>>Premium</option>
+                                    <option value="gold_pro" <?= ($_ENV['MERCADO_LIVRE_DEFAULT_LISTING_TYPE'] ?? 'gold_special') == 'gold_pro' ? 'selected' : ''; ?>>Clássica</option>
+                                    <option value="gold" <?= ($_ENV['MERCADO_LIVRE_DEFAULT_LISTING_TYPE'] ?? 'gold_special') == 'gold' ? 'selected' : ''; ?>>Gratuita</option>
+                                </select>
+                                <span class="help-inline">Tipo de listagem padrão no Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS" class="control-label">Aceita Mercado Envios</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS" id="MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS">
+                                    <option value="true" <?= filter_var($_ENV['MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Sim</option>
+                                    <option value="false" <?= !filter_var($_ENV['MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Não</option>
+                                </select>
+                                <span class="help-inline">Se os produtos aceitam Mercado Envios por padrão.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_FREE_SHIPPING" class="control-label">Frete Grátis</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_FREE_SHIPPING" id="MERCADO_LIVRE_FREE_SHIPPING">
+                                    <option value="false" <?= !filter_var($_ENV['MERCADO_LIVRE_FREE_SHIPPING'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Não</option>
+                                    <option value="true" <?= filter_var($_ENV['MERCADO_LIVRE_FREE_SHIPPING'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Sim</option>
+                                </select>
+                                <span class="help-inline">Se os produtos terão frete grátis por padrão.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_WARRANTY" class="control-label">Garantia Padrão (dias)</label>
+                            <div class="controls">
+                                <input type="number" name="MERCADO_LIVRE_WARRANTY" value="<?= $_ENV['MERCADO_LIVRE_WARRANTY'] ?? '90' ?>" id="MERCADO_LIVRE_WARRANTY" min="0" max="365">
+                                <span class="help-inline">Garantia padrão em dias para os produtos no Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_STOCK_SYNC" class="control-label">Sincronizar Estoque</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_STOCK_SYNC" id="MERCADO_LIVRE_STOCK_SYNC">
+                                    <option value="true" <?= filter_var($_ENV['MERCADO_LIVRE_STOCK_SYNC'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Ativar</option>
+                                    <option value="false" <?= !filter_var($_ENV['MERCADO_LIVRE_STOCK_SYNC'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Desativar</option>
+                                </select>
+                                <span class="help-inline">Sincronizar automaticamente o estoque dos produtos com o Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_PRICE_SYNC" class="control-label">Sincronizar Preços</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_PRICE_SYNC" id="MERCADO_LIVRE_PRICE_SYNC">
+                                    <option value="true" <?= filter_var($_ENV['MERCADO_LIVRE_PRICE_SYNC'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Ativar</option>
+                                    <option value="false" <?= !filter_var($_ENV['MERCADO_LIVRE_PRICE_SYNC'] ?? true, FILTER_VALIDATE_BOOLEAN) ? 'selected' : ''; ?>>Desativar</option>
+                                </select>
+                                <span class="help-inline">Sincronizar automaticamente os preços dos produtos com o Mercado Livre.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="MERCADO_LIVRE_LOG_LEVEL" class="control-label">Nível de Log</label>
+                            <div class="controls">
+                                <select name="MERCADO_LIVRE_LOG_LEVEL" id="MERCADO_LIVRE_LOG_LEVEL">
+                                    <option value="error" <?= ($_ENV['MERCADO_LIVRE_LOG_LEVEL'] ?? 'info') == 'error' ? 'selected' : ''; ?>>Apenas Erros</option>
+                                    <option value="info" <?= ($_ENV['MERCADO_LIVRE_LOG_LEVEL'] ?? 'info') == 'info' ? 'selected' : ''; ?>>Informações</option>
+                                    <option value="debug" <?= ($_ENV['MERCADO_LIVRE_LOG_LEVEL'] ?? 'info') == 'debug' ? 'selected' : ''; ?>>Debug Completo</option>
+                                </select>
+                                <span class="help-inline">Nível de detalhamento dos logs da integração.</span>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <h5 style="margin-left:10px;">Status da Autenticação</h5>
+                        <div class="control-group">
+                            <div class="controls">
+                                <?php 
+                                $ml_enabled = filter_var($_ENV['MERCADO_LIVRE_ENABLED'] ?? false, FILTER_VALIDATE_BOOLEAN);
+                                $ml_token = $_ENV['MERCADO_LIVRE_ACCESS_TOKEN'] ?? '';
+                                $ml_user_id = $_ENV['MERCADO_LIVRE_USER_ID'] ?? '';
+                                
+                                if ($ml_enabled && $ml_token && $ml_user_id): ?>
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle"></i> 
+                                        <strong>Autenticado!</strong> 
+                                        Conectado como: <strong><?= $_ENV['MERCADO_LIVRE_NICKNAME'] ?? 'Usuário ML' ?></strong>
+                                        <br>
+                                        <small>User ID: <?= $ml_user_id ?> | Site: <?= $_ENV['MERCADO_LIVRE_SITE_ID'] ?? 'MLB' ?></small>
+                                    </div>
+                                <?php elseif ($ml_enabled): ?>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        <strong>Configurado mas não autenticado!</strong>
+                                        <br>
+                                        <a href="<?= site_url('mercadolivre/autenticar') ?>" class="btn btn-primary btn-mini">
+                                            <i class="fas fa-sign-in-alt"></i> Autenticar com Mercado Livre
+                                        </a>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i> 
+                                        <strong>Integração desativada!</strong>
+                                        <br>
+                                        Ative a integração e configure o CLIENT_ID e CLIENT_SECRET para começar.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
                         <div class="form-actions">
                             <div class="span8">
                                 <div class="span9">

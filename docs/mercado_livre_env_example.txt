@@ -1,0 +1,55 @@
+# Configurações do Mercado Livre
+# Copie estas linhas para o seu arquivo .env e configure os valores
+
+# Ativar/Desativar integração
+MERCADO_LIVRE_ENABLED=false
+
+# Credenciais da API (obrigatórias)
+MERCADO_LIVRE_CLIENT_ID=seu_client_id_aqui
+MERCADO_LIVRE_CLIENT_SECRET=seu_client_secret_aqui
+
+# URL de redirecionamento (não altere)
+MERCADO_LIVRE_REDIRECT_URI=https://seudominio.com/mercadolivre/callback
+
+# Tokens de autenticação (preenchidos automaticamente)
+MERCADO_LIVRE_ACCESS_TOKEN=
+MERCADO_LIVRE_REFRESH_TOKEN=
+MERCADO_LIVRE_USER_ID=
+MERCADO_LIVRE_NICKNAME=
+MERCADO_LIVRE_TOKEN_EXPIRES_AT=
+
+# Configurações do site
+MERCADO_LIVRE_SITE_ID=MLB
+
+# Configurações de sincronização
+MERCADO_LIVRE_AUTO_SYNC=false
+MERCADO_LIVRE_STOCK_SYNC=true
+MERCADO_LIVRE_PRICE_SYNC=true
+
+# Configurações padrão de produtos
+MERCADO_LIVRE_DEFAULT_CATEGORY=
+MERCADO_LIVRE_DEFAULT_CONDITION=new
+MERCADO_LIVRE_DEFAULT_LISTING_TYPE=gold_special
+MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS=true
+MERCADO_LIVRE_FREE_SHIPPING=false
+MERCADO_LIVRE_WARRANTY=90
+
+# Configurações de log
+MERCADO_LIVRE_LOG_LEVEL=info
+
+# Explicação das configurações:
+# 
+# MERCADO_LIVRE_ENABLED: Ativa ou desativa a integração
+# MERCADO_LIVRE_CLIENT_ID: ID do aplicativo no Mercado Livre
+# MERCADO_LIVRE_CLIENT_SECRET: Chave secreta do aplicativo
+# MERCADO_LIVRE_SITE_ID: País/região (MLB=Brasil, MLA=Argentina, etc.)
+# MERCADO_LIVRE_AUTO_SYNC: Sincronização automática de produtos
+# MERCADO_LIVRE_STOCK_SYNC: Sincronizar estoque automaticamente
+# MERCADO_LIVRE_PRICE_SYNC: Sincronizar preços automaticamente
+# MERCADO_LIVRE_DEFAULT_CATEGORY: ID da categoria padrão no ML
+# MERCADO_LIVRE_DEFAULT_CONDITION: new=Novo, used=Usado
+# MERCADO_LIVRE_DEFAULT_LISTING_TYPE: gold_special=Premium, gold_pro=Clássica, gold=Gratuita
+# MERCADO_LIVRE_ACCEPTS_MERCADOENVIOS: true/false
+# MERCADO_LIVRE_FREE_SHIPPING: true/false
+# MERCADO_LIVRE_WARRANTY: Garantia em dias (0-365)
+# MERCADO_LIVRE_LOG_LEVEL: error=Erros, info=Informações, debug=Debug completo 

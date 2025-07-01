@@ -169,8 +169,41 @@ public function adicionar()
             if (!empty($_FILES['userfile']['name'][0])) {
                 $this->imgAnexar($idProduto);
             }
+
+            // Verificar se deve integrar com Mercado Livre
+            if ($this->input->post('integrar_ml')) {
+                $this->load->model('MercadoLivre_model');
+                
+                $dados_ml = [
+                    'ml_categoria' => $this->input->post('ml_categoria'),
+                    'ml_condicao' => $this->input->post('ml_condicao'),
+                    'ml_garantia' => $this->input->post('ml_garantia'),
+                    'ml_tags' => $this->input->post('ml_tags'),
+                    'ml_descricao' => $this->input->post('ml_descricao'),
+                    'ml_envios' => $this->input->post('ml_envios') ? 1 : 0,
+                    'ml_premium' => $this->input->post('ml_premium') ? 1 : 0,
+                    'ml_destaque' => $this->input->post('ml_destaque') ? 1 : 0,
+                    'ml_classico' => $this->input->post('ml_classico') ? 1 : 0,
+                    'status' => 'pending'
+                ];
+                
+                $this->MercadoLivre_model->salvarProdutoML($idProduto, $dados_ml);
+                
+                // Log da integração
+                $this->MercadoLivre_model->salvarLog(
+                    $idProduto,
+                    'create',
+                    'pending',
+                    'Produto marcado para integração com Mercado Livre'
+                );
+            }
     
-            $this->session->set_flashdata('success', 'Produto adicionado com sucesso!');
+            $mensagem_sucesso = 'Produto adicionado com sucesso!';
+            if ($this->input->post('integrar_ml')) {
+                $mensagem_sucesso .= ' Produto será sincronizado com Mercado Livre.';
+            }
+            
+            $this->session->set_flashdata('success', $mensagem_sucesso);
             log_info('Adicionou um produto');
             redirect(site_url('produtos/adicionar/'));
         } else {
