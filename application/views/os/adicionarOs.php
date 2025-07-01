@@ -31,7 +31,7 @@
                                 <?php if ($custom_error == true) { ?>
                                     <div class="span12 alert alert-danger" id="divInfo" style="padding: 1%;">Dados
                                         incompletos, verifique os campos com asterisco ou se selecionou corretamente
-                                        cliente, responsável e garantia.<br />Ou se tem um cliente e um termo de garantia
+                                        cliente, responsáveis e garantia.<br />Ou se tem um cliente e um termo de garantia
                                         cadastrado.</div>
                                     <?php } ?>
                                 <form action="<?php echo current_url(); ?>" method="post" id="formOs">
