@@ -9,7 +9,7 @@ class MercadoLivre extends MY_Controller
         $this->load->library('session');
         
         // Verificar permissão
-        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'cProduto')) {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'aProduto')) {
             $this->session->set_flashdata('error', 'Você não tem permissão para acessar a integração com Mercado Livre.');
             redirect(base_url());
         }
