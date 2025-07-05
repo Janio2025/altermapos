@@ -241,6 +241,9 @@ public function editar()
 
     // Carregar organizadores para o select
     $this->data['organizadores'] = $this->db->where('ativa', true)->get('organizadores')->result();
+    
+    // Carregar categorias para o select
+    $this->data['todas_categorias'] = $this->Categorias_model->getAll();
 
     if ($this->form_validation->run('produtos') == false) {
         $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
@@ -276,7 +279,8 @@ public function editar()
             'idDirecao' => $this->input->post('idDirecao'),
             'dataPedido' => $this->input->post('dataPedido'),
             'dataChegada' => $this->input->post('dataChegada'),
-            'numeroPeca' => $this->input->post('numeroPeca')
+            'numeroPeca' => $this->input->post('numeroPeca'),
+            'categoria_id' => $this->input->post('categoria_id')
         ];
 
         // Atualiza o produto

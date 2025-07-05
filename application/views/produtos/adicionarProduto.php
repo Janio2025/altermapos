@@ -348,6 +348,19 @@
                                             onChange="javascript:this.value=this.value.toUpperCase();" />
                                     </div>
                                 </div>
+                                <div class="control-group">
+                                    <label for="categoria_id" class="control-label">Categoria</label>
+                                    <div class="controls">
+                                        <select id="categoria_id" name="categoria_id" class="span12">
+                                            <option value="">Selecione uma categoria</option>
+                                            <?php foreach ($todas_categorias as $categoria) : ?>
+                                                <option value="<?php echo $categoria->idCategorias; ?>" <?php echo set_select('categoria_id', $categoria->idCategorias); ?>>
+                                                    <?php echo $categoria->categoria; ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div>
                                     <div class="">
                                         <div class="control-group">

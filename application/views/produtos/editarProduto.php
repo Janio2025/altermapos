@@ -211,6 +211,20 @@ $localizacaoExibida = implode(',', array_slice($localizacao, 1));
                     </div>
 
                     <div class="control-group">
+                        <label for="categoria_id" class="control-label">Categoria</label>
+                        <div class="controls">
+                            <select id="categoria_id" name="categoria_id" class="span12">
+                                <option value="">Selecione uma categoria</option>
+                                <?php foreach ($todas_categorias as $categoria) : ?>
+                                    <option value="<?php echo $categoria->idCategorias; ?>" <?php echo ($result->categoria_id == $categoria->idCategorias) ? 'selected' : ''; ?>>
+                                        <?php echo $categoria->categoria; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
                         <label for="codigoPeca" class="control-label">Codigo da Peça<span class=""></span></label>
                         <div class="controls">
                             <input id="codigoPeca" type="text" name="codigoPeca" value="<?php echo $result->codigoPeca; ?>" onChange="javascript:this.value=this.value.toUpperCase();"/>
