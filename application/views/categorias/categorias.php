@@ -23,9 +23,6 @@
         <span class="button__icon"><i class='bx bx-plus-circle'></i></span><span class="button__text2"> Categoria</span>
       </a>
     <?php } ?>
-    <button type="button" class="button btn btn-mini btn-warning" id="btnVerificarLogs" style="margin-left: 10px;">
-      <span class="button__icon"><i class="fas fa-bug"></i></span><span class="button__text2"> Verificar Logs</span>
-    </button>
   </div>
   <div class="widget-box">
     <h5 style="padding: 11px 0"></h5>
@@ -139,10 +136,6 @@
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-  // Verificar logs
-  $('#btnVerificarLogs').click(function() {
-    window.open('<?php echo site_url('categorias/verificarLogs'); ?>', '_blank');
-  });
 
   // Excluir categoria
   $(document).on('click', '.btn-nwe4', function (event) {
