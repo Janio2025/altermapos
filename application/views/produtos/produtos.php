@@ -55,10 +55,7 @@
       <a href="#modal-etiquetas" role="button" data-toggle="modal" class="button btn btn-mini btn-warning" style="max-width: 160px">
         <span class="button__icon"><i class='bx bx-barcode-reader'></i></span><span class="button__text2">Gerar Etiquetas</span>
       </a>
-      <a href="#" class="button btn btn-mini btn-info btn-sincronizar-ml" style="max-width: 180px; margin-left: 10px;">
-        <span class="button__icon"><i class='bx bx-sync'></i></span>
-        <span class="button__text2">Sincronizar ML (<?php echo isset($qtd_ml_pendentes) ? $qtd_ml_pendentes : 0; ?>)</span>
-      </a>
+
   </div>
 <?php } ?>
 
@@ -207,30 +204,9 @@
   </form>
 </div>
 
-<!-- Modal Sincronizar Mercado Livre -->
-<div id="modal-sincronizar-ml" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalSincronizarMLLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h5 id="modalSincronizarMLLabel"><i class="fas fa-sync"></i> Sincronizar com Mercado Livre</h5>
-  </div>
-  <div class="modal-body">
-    <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>" />
-    <div class="alert alert-warning" role="alert">Tem certeza que deseja sincronizar os produtos abaixo com o Mercado Livre?</div>
-    <div id="ml-lista-produtos">
-      <div class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando produtos...</div>
-    </div>
-  </div>
-  <div class="modal-footer" style="display:flex;justify-content: center">
-    <button type="button" class="button btn btn-warning" data-dismiss="modal" aria-hidden="true">
-      <span class="button__icon"><i class="bx bx-x"></i></span><span class="button__text2">Cancelar</span>
-    </button>
-    <button type="button" class="button btn btn-success" id="btn-confirmar-sincronizar-ml">
-      <span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Sincronizar Agora</span>
-    </button>
-  </div>
-</div>
+<!-- Modal Sincronizar ML removido -->
 
-
+<!-- Modal Logs ML removido -->
 </div>
 
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
@@ -289,126 +265,8 @@
       }
     });
 
-    // Sincronizar produtos com Mercado Livre ao clicar no botão do modal
-    $(document).on('click', '#btn-confirmar-sincronizar-ml', function(e) {
-      e.preventDefault();
-      var btn = $(this);
-      btn.prop('disabled', true).html('<span class="button__icon"><i class="fas fa-spinner fa-spin"></i></span> <span class="button__text2">Sincronizando...</span>');
-      
-      console.log('Iniciando sincronização...');
-      
-      // Obter token CSRF
-      var csrfToken = $('input[name="<?php echo $this->security->get_csrf_token_name(); ?>"]').val();
-      console.log('CSRF Token:', csrfToken);
-      
-      // Primeiro, sincronizar configurações do .env
-      $.ajax({
-        url: '<?php echo base_url('index.php/MercadoLivre/sincronizarConfiguracoes'); ?>',
-        type: 'POST',
-        dataType: 'json',
-        data: { 
-          '<?php echo $this->security->get_csrf_token_name(); ?>': csrfToken
-        },
-        success: function(configResp) {
-          console.log('Resposta sincronização config:', configResp);
-          if (configResp.success) {
-            console.log('Configurações sincronizadas, iniciando sincronização de produtos...');
-            // Agora sincronizar produtos
-            $.ajax({
-              url: '<?php echo base_url('index.php/MercadoLivre/sincronizarProdutos'); ?>',
-              type: 'POST',
-              dataType: 'json',
-              data: { 
-                '<?php echo $this->security->get_csrf_token_name(); ?>': csrfToken
-              },
-              success: function(resp) {
-                console.log('Resposta sincronização produtos:', resp);
-                if (resp && resp.success) {
-                  $('#ml-lista-produtos').html('<div class="alert alert-success">' + resp.message + '</div>');
-                  // Manter modal aberto por 5 segundos para mostrar resultado
-                  setTimeout(function() {
-                    $('#modal-sincronizar-ml').modal('hide');
-                    // Recarregar a página para atualizar a badge de pendentes
-                    location.reload();
-                  }, 5000);
-                } else {
-                  var errorMsg = resp && resp.message ? resp.message : 'Erro desconhecido ao sincronizar produtos';
-                  console.error('Erro na sincronização de produtos:', errorMsg);
-                  $('#ml-lista-produtos').html('<div class="alert alert-danger"><strong>Erro na Sincronização:</strong><br>' + errorMsg + '<br><br><small>Verifique os logs do sistema para mais detalhes.</small></div>');
-                  btn.prop('disabled', false).html('<span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Tentar Novamente</span>');
-                  // Manter modal aberto para mostrar o erro
-                }
-              },
-              error: function(xhr, status, error) {
-                console.error('Erro AJAX na sincronização de produtos:', {xhr: xhr, status: status, error: error});
-                var errorMsg = 'Erro ao sincronizar produtos: ' + error;
-                if (xhr.responseText) {
-                  try {
-                    var resp = JSON.parse(xhr.responseText);
-                    if (resp.message) errorMsg = resp.message;
-                  } catch(e) {
-                    errorMsg += ' - ' + xhr.responseText;
-                  }
-                }
-                $('#ml-lista-produtos').html('<div class="alert alert-danger"><strong>Erro na Sincronização:</strong><br>' + errorMsg + '<br><br><small>Verifique os logs do sistema para mais detalhes.</small></div>');
-                btn.prop('disabled', false).html('<span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Tentar Novamente</span>');
-                // Manter modal aberto para mostrar o erro
-              }
-            });
-          } else {
-            var errorMsg = configResp.message || 'Erro desconhecido ao sincronizar configurações';
-            console.error('Erro na sincronização de configurações:', errorMsg);
-            $('#ml-lista-produtos').html('<div class="alert alert-danger"><strong>Erro ao Sincronizar Configurações:</strong><br>' + errorMsg + '<br><br><small>Verifique se as configurações do Mercado Livre estão corretas no arquivo .env</small></div>');
-            btn.prop('disabled', false).html('<span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Tentar Novamente</span>');
-            // Manter modal aberto para mostrar o erro
-          }
-        },
-        error: function(xhr, status, error) {
-          console.error('Erro AJAX na sincronização de configurações:', {xhr: xhr, status: status, error: error});
-          var errorMsg = 'Erro ao sincronizar configurações: ' + error;
-          if (xhr.responseText) {
-            try {
-              var resp = JSON.parse(xhr.responseText);
-              if (resp.message) errorMsg = resp.message;
-            } catch(e) {
-              errorMsg += ' - ' + xhr.responseText;
-            }
-          }
-          $('#ml-lista-produtos').html('<div class="alert alert-danger"><strong>Erro ao Sincronizar Configurações:</strong><br>' + errorMsg + '<br><br><small>Verifique se as configurações do Mercado Livre estão corretas no arquivo .env</small></div>');
-          btn.prop('disabled', false).html('<span class="button__icon"><i class="bx bx-sync"></i></span><span class="button__text2">Tentar Novamente</span>');
-          // Manter modal aberto para mostrar o erro
-        }
-      });
-    });
+    // Scripts de sincronização ML removidos
 
-    // Abrir modal de sincronização ML
-    $(document).on('click', '.btn-sincronizar-ml', function (e) {
-      e.preventDefault();
-      $('#modal-sincronizar-ml').modal('show');
-      // Carregar lista de produtos via AJAX
-      $('#ml-lista-produtos').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando produtos...</div>');
-      $.getJSON('<?php echo base_url('index.php/produtos/ml_pendentes'); ?>', function (data) {
-        if (data && data.length > 0) {
-          var html = '<table class="table table-bordered"><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Ações</th></tr></thead><tbody>';
-          $.each(data, function(i, prod) {
-            html += '<tr>' +
-              '<td>' + prod.descricao + '</td>' +
-              '<td>' + (prod.categoria_nome ? prod.categoria_nome : '-') + '</td>' +
-              '<td>R$ ' + prod.precoVenda + '</td>' +
-              '<td>' +
-                '<a href="<?php echo base_url('index.php/produtos/editar/'); ?>' + prod.idProdutos + '" class="btn btn-mini btn-primary" title="Editar"><i class="bx bx-edit"></i></a> ' +
-                '<a href="#" class="btn btn-mini btn-danger btn-excluir-ml" data-id="' + prod.produto_id + '" title="Remover da lista"><i class="bx bx-trash"></i></a>' +
-              '</td>' +
-            '</tr>';
-          });
-          html += '</tbody></table>';
-          $('#ml-lista-produtos').html(html);
-        } else {
-          $('#ml-lista-produtos').html('<div class="alert alert-info">Nenhum produto pendente de sincronização.</div>');
-        }
-      });
-    });
-
-
+    // Scripts de logs ML removidos
   });
 </script>
