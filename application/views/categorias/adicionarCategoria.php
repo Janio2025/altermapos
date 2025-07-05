@@ -8,18 +8,7 @@
   <div class="widget-box">
     <div class="widget-content nopadding tab-content">
       
-      <!-- Seleção do tipo de cadastro -->
-      <div class="control-group" style="margin-bottom: 20px;">
-        <label class="control-label">Tipo de Cadastro</label>
-        <div class="controls">
-          <label class="radio inline">
-            <input type="radio" name="tipo_cadastro" value="local" checked> Cadastro Local
-          </label>
-          <label class="radio inline">
-            <input type="radio" name="tipo_cadastro" value="mercado_livre"> Importar do Mercado Livre
-          </label>
-        </div>
-      </div>
+
 
       <!-- Formulário de cadastro local -->
       <form action="<?php echo site_url('categorias/adicionar'); ?>" method="post" class="form-horizontal" id="formCategoria">
@@ -30,15 +19,20 @@
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label">ML ID (Mercado Livre)</label>
-          <div class="controls">
-            <input type="text" name="ml_id" class="span4" placeholder="Ex: MLB1182" />
-          </div>
-        </div>
-        <div class="control-group">
           <label class="control-label">Tipo</label>
           <div class="controls">
-            <input type="text" name="tipo" class="span4" placeholder="Ex: interna, mercado_livre" />
+            <select name="tipo" id="tipoSelect" class="span3" style="margin-right: 10px;">
+              <option value="">Selecione um tipo...</option>
+              <?php if (isset($tipos_existentes) && $tipos_existentes): ?>
+                <?php foreach ($tipos_existentes as $tipo): ?>
+                  <option value="<?php echo $tipo->tipo; ?>"><?php echo ucfirst(str_replace('_', ' ', $tipo->tipo)); ?></option>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </select>
+            <input type="text" name="tipo_novo" id="tipoNovo" class="span3" placeholder="Ou digite um novo tipo" style="display: none;" />
+            <button type="button" id="btnNovoTipo" class="btn btn-mini btn-info" style="margin-left: 5px;">
+              <i class="bx bx-plus"></i> Novo Tipo
+            </button>
           </div>
         </div>
         <div class="control-group">
@@ -58,42 +52,7 @@
         </div>
       </form>
 
-      <!-- Interface de importação do Mercado Livre -->
-      <div id="importacaoML" style="display: none;">
-        <div class="control-group">
-          <label class="control-label">Buscar Categorias do Mercado Livre</label>
-          <div class="controls">
-            <button type="button" id="btnBuscarCategorias" class="button btn btn-primary">
-              <span class="button__icon"><i class='bx bx-search'></i></span>
-              <span class="button__text2">Buscar Categorias</span>
-            </button>
-            <div id="loadingCategorias" style="display: none; margin-top: 10px;">
-              <i class="fas fa-spinner fa-spin"></i> Buscando categorias...
-            </div>
-          </div>
-        </div>
-        
-        <div id="listaCategorias" style="display: none; margin-top: 20px;">
-          <h6>Selecione as categorias que deseja importar:</h6>
-          <div id="categoriasContainer" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
-            <!-- Categorias serão carregadas aqui -->
-          </div>
-          <div style="margin-top: 15px;">
-            <button type="button" id="btnSelecionarTodos" class="button btn btn-mini btn-info">
-              <span class="button__icon"><i class='bx bx-check-square'></i></span>
-              <span class="button__text2">Selecionar Todos</span>
-            </button>
-            <button type="button" id="btnLimparSelecao" class="button btn btn-mini btn-warning">
-              <span class="button__icon"><i class='bx bx-square'></i></span>
-              <span class="button__text2">Limpar Seleção</span>
-            </button>
-            <button type="button" id="btnImportarCategorias" class="button btn btn-success">
-              <span class="button__icon"><i class='bx bx-download'></i></span>
-              <span class="button__text2">Importar Selecionadas</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- Interface de importação ML removida -->
     </div>
   </div>
 </div>
@@ -108,16 +67,7 @@
       $("#formCategoria select[name='parent_id']").val(parentId);
     }
 
-    // Controle de exibição dos formulários
-    $('input[name="tipo_cadastro"]').change(function() {
-      if ($(this).val() === 'local') {
-        $('#formCategoria').show();
-        $('#importacaoML').hide();
-      } else {
-        $('#formCategoria').hide();
-        $('#importacaoML').show();
-      }
-    });
+
 
     $('#formCategoria').validate({
       rules: { categoria: { required: true } },
@@ -165,139 +115,35 @@
       });
     });
 
-    // Buscar categorias do Mercado Livre
-    $('#btnBuscarCategorias').click(function() {
-      $('#loadingCategorias').show();
-      $('#btnBuscarCategorias').prop('disabled', true);
-      
-      $.ajax({
-        url: '<?php echo site_url('categorias/buscarCategoriasML'); ?>',
-        type: 'GET',
-        dataType: 'json',
-        success: function(resp) {
-          $('#loadingCategorias').hide();
-          $('#btnBuscarCategorias').prop('disabled', false);
-          
-          if (resp.success) {
-            renderizarCategorias(resp.categorias);
-            $('#listaCategorias').show();
-          } else {
-            // Se a API principal falhar, tentar o método alternativo
-            if (resp.message && resp.message.includes('bloqueou o acesso')) {
-              $('#loadingCategorias').show();
-              $.ajax({
-                url: '<?php echo site_url('categorias/buscarCategoriasAlternativas'); ?>',
-                type: 'GET',
-                dataType: 'json',
-                success: function(respAlt) {
-                  $('#loadingCategorias').hide();
-                  if (respAlt.success) {
-                    renderizarCategorias(respAlt.categorias);
-                    $('#listaCategorias').show();
-                    $('#msgCategoria').html('<div class="alert alert-info">Usando categorias pré-definidas (API bloqueada).</div>');
-                  } else {
-                    $('#msgCategoria').html('<div class="alert alert-error">' + respAlt.message + '</div>');
-                  }
-                },
-                error: function() {
-                  $('#loadingCategorias').hide();
-                  $('#msgCategoria').html('<div class="alert alert-error">Erro ao carregar categorias alternativas.</div>');
-                }
-              });
-            } else {
-              $('#msgCategoria').html('<div class="alert alert-error">' + resp.message + '</div>');
-            }
-          }
-        },
-        error: function() {
-          $('#loadingCategorias').hide();
-          $('#btnBuscarCategorias').prop('disabled', false);
-          $('#msgCategoria').html('<div class="alert alert-error">Erro ao buscar categorias do Mercado Livre.</div>');
-        }
-      });
-    });
-
-    // Renderizar categorias em formato de árvore
-    function renderizarCategorias(categorias) {
-      var html = '<div class="categorias-tree">';
-      categorias.forEach(function(cat) {
-        html += '<div class="categoria-item" style="margin: 5px 0; padding: 5px; border: 1px solid #eee; border-radius: 3px;">';
-        html += '<label style="display: flex; align-items: center; margin: 0;">';
-        html += '<input type="checkbox" name="categorias_ml[]" value="' + cat.id + '" data-nome="' + cat.name + '" style="margin-right: 8px;">';
-        html += '<span style="font-weight: bold;">' + cat.name + '</span>';
-        html += '<span style="margin-left: 10px; color: #666; font-size: 12px;">(' + cat.id + ')</span>';
-        html += '</label>';
-        if (cat.children && cat.children.length > 0) {
-          html += '<div style="margin-left: 20px; margin-top: 5px;">';
-          cat.children.forEach(function(subcat) {
-            html += '<div style="margin: 3px 0;">';
-            html += '<label style="display: flex; align-items: center; margin: 0;">';
-            html += '<input type="checkbox" name="categorias_ml[]" value="' + subcat.id + '" data-nome="' + subcat.name + '" style="margin-right: 8px;">';
-            html += '<span>' + subcat.name + '</span>';
-            html += '<span style="margin-left: 10px; color: #666; font-size: 12px;">(' + subcat.id + ')</span>';
-            html += '</label>';
-            html += '</div>';
-          });
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-      html += '</div>';
-      $('#categoriasContainer').html(html);
-    }
-
-    // Selecionar todos
-    $('#btnSelecionarTodos').click(function() {
-      $('input[name="categorias_ml[]"]').prop('checked', true);
-    });
-
-    // Limpar seleção
-    $('#btnLimparSelecao').click(function() {
-      $('input[name="categorias_ml[]"]').prop('checked', false);
-    });
-
-    // Importar categorias selecionadas
-    $('#btnImportarCategorias').click(function() {
-      var categoriasSelecionadas = [];
-      $('input[name="categorias_ml[]"]:checked').each(function() {
-        categoriasSelecionadas.push({
-          id: $(this).val(),
-          name: $(this).data('nome')
-        });
-      });
-
-      if (categoriasSelecionadas.length === 0) {
-        $('#msgCategoria').html('<div class="alert alert-warning">Selecione pelo menos uma categoria.</div>');
-        return;
+    // Controle do campo tipo
+    $('#btnNovoTipo').click(function() {
+      if ($('#tipoNovo').is(':visible')) {
+        // Se o campo novo está visível, voltar para o select
+        $('#tipoNovo').hide();
+        $('#tipoSelect').show();
+        $('#btnNovoTipo').html('<i class="bx bx-plus"></i> Novo Tipo');
+        $('#tipoNovo').val('');
+      } else {
+        // Se o select está visível, mostrar campo novo
+        $('#tipoSelect').hide();
+        $('#tipoNovo').show();
+        $('#btnNovoTipo').html('<i class="bx bx-arrow-back"></i> Usar Existente');
+        $('#tipoNovo').focus();
       }
-
-      $('#btnImportarCategorias').prop('disabled', true);
-      $('#btnImportarCategorias').html('<i class="fas fa-spinner fa-spin"></i> Importando...');
-
-      $.ajax({
-        url: '<?php echo site_url('categorias/importarCategoriasML'); ?>',
-        type: 'POST',
-        data: { categorias: categoriasSelecionadas },
-        dataType: 'json',
-        success: function(resp) {
-          $('#btnImportarCategorias').prop('disabled', false);
-          $('#btnImportarCategorias').html('<span class="button__icon"><i class="bx bx-download"></i></span><span class="button__text2">Importar Selecionadas</span>');
-          
-          if (resp.success) {
-            $('#msgCategoria').html('<div class="alert alert-success">' + resp.message + '</div>');
-            setTimeout(function() {
-              window.location.href = '<?php echo site_url('categorias'); ?>';
-            }, 2000);
-          } else {
-            $('#msgCategoria').html('<div class="alert alert-error">' + resp.message + '</div>');
-          }
-        },
-        error: function() {
-          $('#btnImportarCategorias').prop('disabled', false);
-          $('#btnImportarCategorias').html('<span class="button__icon"><i class="bx bx-download"></i></span><span class="button__text2">Importar Selecionadas</span>');
-          $('#msgCategoria').html('<div class="alert alert-error">Erro ao importar categorias.</div>');
-        }
-      });
     });
+
+    // Quando selecionar um tipo no select, limpar o campo novo
+    $('#tipoSelect').change(function() {
+      if ($(this).val()) {
+        $('#tipoNovo').val('');
+      }
+    });
+
+    // Quando digitar no campo novo, limpar o select
+    $('#tipoNovo').on('input', function() {
+      $('#tipoSelect').val('');
+    });
+
+    // Scripts de importação ML removidos
   });
 </script> 

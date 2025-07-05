@@ -32,21 +32,25 @@ class Categorias extends MY_Controller
         }
         if ($this->input->post('categoria')) {
             $parent_id = $this->input->post('parent_id');
-            $ml_id = strtoupper(trim($this->input->post('ml_id')));
             $tipo = trim($this->input->post('tipo'));
+            $tipo_novo = trim($this->input->post('tipo_novo'));
+            
+            // Usar o tipo novo se foi preenchido, senão usar o tipo do select
+            $tipo_final = $tipo_novo ?: $tipo;
+            
             // Normalizar: remover acentos, trocar espaços por underline, minúsculo
-            $tipo = strtolower(str_replace(' ', '_',
+            $tipo_final = strtolower(str_replace(' ', '_',
                 preg_replace('/[áàãâä]/ui', 'a',
                 preg_replace('/[éèêë]/ui', 'e',
                 preg_replace('/[íìîï]/ui', 'i',
                 preg_replace('/[óòõôö]/ui', 'o',
                 preg_replace('/[úùûü]/ui', 'u',
-                preg_replace('/[ç]/ui', 'c', $tipo))))))));
+                preg_replace('/[ç]/ui', 'c', $tipo_final))))))));
             $dados = [
-                'ml_id' => $ml_id,
+                'ml_id' => null,
                 'categoria' => $this->input->post('categoria'),
                 'parent_id' => ($parent_id === '' ? null : $parent_id),
-                'tipo' => $tipo,
+                'tipo' => $tipo_final ?: 'interna',
                 'status' => 1,
                 'cadastro' => date('Y-m-d')
             ];
@@ -63,6 +67,15 @@ class Categorias extends MY_Controller
             redirect(site_url('categorias'));
         }
         $this->data['categorias'] = $this->Categorias_model->getAll();
+        
+        // Buscar tipos únicos já cadastrados
+        $this->db->select('DISTINCT tipo', false);
+        $this->db->where('tipo IS NOT NULL');
+        $this->db->where('tipo !=', '');
+        $this->db->order_by('tipo', 'ASC');
+        $tipos_existentes = $this->db->get('categorias')->result();
+        $this->data['tipos_existentes'] = $tipos_existentes;
+        
         $this->data['view'] = 'categorias/adicionarCategoria';
         return $this->layout();
     }
@@ -76,21 +89,25 @@ class Categorias extends MY_Controller
         $this->data['categoria'] = $this->Categorias_model->getById($id);
         if ($this->input->post('categoria')) {
             $parent_id = $this->input->post('parent_id');
-            $ml_id = strtoupper(trim($this->input->post('ml_id')));
             $tipo = trim($this->input->post('tipo'));
+            $tipo_novo = trim($this->input->post('tipo_novo'));
+            
+            // Usar o tipo novo se foi preenchido, senão usar o tipo do select
+            $tipo_final = $tipo_novo ?: $tipo;
+            
             // Normalizar: remover acentos, trocar espaços por underline, minúsculo
-            $tipo = strtolower(str_replace(' ', '_',
+            $tipo_final = strtolower(str_replace(' ', '_',
                 preg_replace('/[áàãâä]/ui', 'a',
                 preg_replace('/[éèêë]/ui', 'e',
                 preg_replace('/[íìîï]/ui', 'i',
                 preg_replace('/[óòõôö]/ui', 'o',
                 preg_replace('/[úùûü]/ui', 'u',
-                preg_replace('/[ç]/ui', 'c', $tipo))))))));
+                preg_replace('/[ç]/ui', 'c', $tipo_final))))))));
             $dados = [
-                'ml_id' => $ml_id,
+                'ml_id' => null,
                 'categoria' => $this->input->post('categoria'),
                 'parent_id' => ($parent_id === '' ? null : $parent_id),
-                'tipo' => $tipo
+                'tipo' => $tipo_final ?: 'interna'
             ];
             $this->Categorias_model->editar($id, $dados);
             $this->session->set_flashdata('success', 'Categoria editada com sucesso!');
