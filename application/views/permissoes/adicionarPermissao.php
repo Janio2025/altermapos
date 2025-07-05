@@ -671,6 +671,50 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="accordion-group widget-box">
+                            <div class="accordion-heading">
+                                <div class="widget-title">
+                                    <a data-parent="#collapse-group" href="#collapseGCategorias" data-toggle="collapse">
+                                        <span><i class='bx bx-category icon-cli'></i></span>
+                                        <h5 style="padding-left: 28px">Categorias</h5>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="collapse accordion-body" id="collapseGCategorias">
+                                <div class="widget-content">
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <label>
+                                                    <input name="vCategoria" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Visualizar Categorias</span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    <input name="aCategoria" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Adicionar Categoria</span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    <input name="eCategoria" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Editar Categoria</span>
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label>
+                                                    <input name="dCategoria" class="marcar" type="checkbox" value="1" />
+                                                    <span class="lbl"> Excluir Categoria</span>
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <div class="span12">

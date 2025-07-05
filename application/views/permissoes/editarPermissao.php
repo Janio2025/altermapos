@@ -1,4 +1,3 @@
-
 <style>
     .widget-title h5 {
         font-weight : 500;
@@ -1057,6 +1056,49 @@
                                         </label>
                                     </td>
                                     <td></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-group widget-box">
+                    <div class="accordion-heading">
+                        <div class="widget-title">
+                            <a data-parent="#collapse-group" href="#collapseGCategorias" data-toggle="collapse">
+                                <span><i class='bx bx-category icon-cli'></i></span>
+                                <h5 style="padding-left: 28px">Categorias</h5>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="collapse accordion-body" id="collapseGCategorias">
+                        <div class="widget-content">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <input <?php if (isset($permissoes['vCategoria'])) { if ($permissoes['vCategoria'] == '1') { echo 'checked'; } }?> name="vCategoria" class="marcar" type="checkbox" value="1" />
+                                            <span class="lbl"> Visualizar Categorias</span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input <?php if (isset($permissoes['aCategoria'])) { if ($permissoes['aCategoria'] == '1') { echo 'checked'; } }?> name="aCategoria" class="marcar" type="checkbox" value="1" />
+                                            <span class="lbl"> Adicionar Categoria</span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input <?php if (isset($permissoes['eCategoria'])) { if ($permissoes['eCategoria'] == '1') { echo 'checked'; } }?> name="eCategoria" class="marcar" type="checkbox" value="1" />
+                                            <span class="lbl"> Editar Categoria</span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label>
+                                            <input <?php if (isset($permissoes['dCategoria'])) { if ($permissoes['dCategoria'] == '1') { echo 'checked'; } }?> name="dCategoria" class="marcar" type="checkbox" value="1" />
+                                            <span class="lbl"> Excluir Categoria</span>
+                                        </label>
+                                    </td>
                                 </tr>
                             </table>
                         </div>

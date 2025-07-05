@@ -174,6 +174,16 @@
                     </li>
                 <?php } ?>
 
+                <?php if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCategoria')) { ?>
+                    <li class="<?php if (isset($menuCategorias)) { echo 'active'; }; ?>">
+                        <a class="tip-bottom" title="" href="<?= site_url('categorias') ?>">
+                            <i class='bx bx-category iconX'></i>
+                            <span class="title">Categorias</span>
+                            <span class="title-tooltip">Categorias</span>
+                        </a>
+                    </li>
+                <?php } ?>
+
             </ul>
         </div>
 

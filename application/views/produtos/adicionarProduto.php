@@ -213,24 +213,7 @@
         font-weight: bold;
     }
 
-    /* Estilos para integração com Mercado Livre */
-    #campos_ml {
-        border-left: 4px solid #ffc107;
-        transition: all 0.3s ease;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-    
-    #campos_ml:hover {
-        border-left-color: #ff9800;
-        box-shadow: 0 2px 8px rgba(255,193,7,0.1);
-    }
-    
-    /* Ajuste para a widget-box do ML */
-    .widget-box:has(#campos_ml) {
-        max-width: 100%;
-        overflow-x: hidden;
-    }
+
     
     .checkbox input[type="checkbox"] {
         margin-right: 8px;
@@ -257,23 +240,52 @@
         box-shadow: 0 4px 8px rgba(23,162,184,0.3);
     }
 
-    /* Responsividade para integração ML */
-    @media (max-width: 768px) {
-        #campos_ml .controls {
-            display: block !important;
-        }
-        
-        #campos_ml .checkbox {
-            display: block !important;
-            margin-bottom: 8px !important;
-            width: 100% !important;
-        }
-        
-        #campos_ml .row-fluid .span6 {
-            width: 100% !important;
-            margin-left: 0 !important;
-            margin-bottom: 15px !important;
-        }
+    .dropdown-categorias-ml {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+    }
+    .dropdown-categorias-ml .menu {
+        border: 1px solid #ccc;
+        background: #fff;
+        width: 100%;
+        position: absolute;
+        z-index: 1000;
+        display: none;
+        max-height: 300px;
+        overflow-y: auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-categorias-ml .menu .item {
+        padding: 8px 16px;
+        cursor: pointer;
+        position: relative;
+        white-space: nowrap;
+    }
+    .dropdown-categorias-ml .menu .item:hover {
+        background: #f0f0f0;
+    }
+    .dropdown-categorias-ml .menu .submenu {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        min-width: 180px;
+        border: 1px solid #ccc;
+        background: #fff;
+        z-index: 1001;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-categorias-ml .menu .item.has-sub:hover > .submenu {
+        display: block;
+    }
+    .dropdown-categorias-ml .selected {
+        border: 1px solid #ccc;
+        padding: 8px 16px;
+        background: #fff;
+        cursor: pointer;
+        width: 100%;
+        box-sizing: border-box;
     }
 </style>
 
@@ -317,14 +329,21 @@
                                         <div id="formAnexos" action="javascript:;" accept-charset="utf-8" method="post">
                                             <div class="span10">
                                                 <input type="hidden" name="idProdutoImg" id="idProdutoImg" value="" />
-                                                <label for="userfile"></label>
+                                                <label for="userfile">Imagens do Produto</label>
                                                 <input type="file" class="span12" name="userfile[]" id="userfile"
                                                     multiple="multiple" size="20" onchange="previewImages(event)" />
                                             </div>
                                         </div>
                                     </div>
+
+                                    
+                                </div>
                                 </div>
                             </div>
+
+            
+                            
+                          
                             <div class="span3 div-bord" style="padding: 1%; margin-left: 1">
                                 <div class="control-group">
                                     <label for="descricao" class="control-label">Produto / Peça <span
@@ -352,7 +371,7 @@
                                             value="<?php echo set_value('modeloProduto'); ?>"
                                             onChange="javascript:this.value=this.value.toUpperCase();" />
                                         <button type="button" id="addCompativelProduto"
-                                            class=" span2 btn btn-primary">+</button>
+                                            class="span2 btn btn-primary">+</button>
                                     </div>
                                 </div>
                                 <div id="additionalCompativelProdutos"></div>
@@ -368,8 +387,7 @@
                                     </div>
                                 </div>
                                 <div class="control-group">
-                                    <label for="nsProduto" class="control-label">Número de Série<span
-                                            class=""></span></label>
+                                    <label for="nsProduto" class="control-label">Número de Série</label>
                                     <div class="controls">
                                         <input id="nsProduto" class="span12" type="text" name="nsProduto"
                                             value="<?php echo set_value('nsProduto'); ?>"
@@ -410,9 +428,7 @@
                                                 <option value="">Buscar organizador...</option>
                                                 <?php foreach ($organizadores as $organizador) : ?>
                                                     <option value="<?php echo $organizador->id; ?>">
-                                                        <?php echo $organizador->nome_organizador; ?>
-                                                        <label for="">-</label> 
-                                                        <?php echo $organizador->localizacao; ?>
+                                                        <?php echo $organizador->nome_organizador; ?> - <?php echo $organizador->localizacao; ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
@@ -436,7 +452,7 @@
                                         <div class="span12 controls">
                                             <label for="entrada" class="span6 btn btn-default"
                                                 style="margin-top: 5px;">Entrada
-                                                <input type="checkbox" id="entrada" name="entrada" class=" badgebox"
+                                                <input type="checkbox" id="entrada" name="entrada" class="badgebox"
                                                     value="1" checked>
                                                 <span class="badge">&check;</span>
                                             </label>
@@ -533,148 +549,133 @@
                                                 </div>
 
                                             </div>
-
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <!-- Seção de Integração com Mercado Livre -->
-                                <div class="widget-content nopadding tab-content" style="margin-top: 20px;">
-                                    <div class="widget-box">
-                                        <div class="widget-title" style="background: #f0f0f0; padding: 10px; border-radius: 5px;">
-                                            <h5><i class="fas fa-shopping-cart"></i> Integração com Mercado Livre</h5>
-                                        </div>
-                                        <div class="widget-content nopadding">
-                                            <div class="control-group">
+                                            
+                                            <!-- Checkbox Sincronizar Mercado Livre -->
+                                            <div class="span12 control-group" style="margin-top: 10px;">
                                                 <div class="controls">
-                                                    <label class="checkbox" style="font-weight: bold; color: #333;">
-                                                        <input type="checkbox" id="integrar_ml" name="integrar_ml" value="1" style="margin-right: 8px;">
-                                                        <i class="fas fa-link"></i> Integrar este produto ao Mercado Livre
+                                                    <label class="checkbox" style="font-weight: bold;">
+                                                        <input type="checkbox" id="sincronizar_ml" name="sincronizar_ml" value="1" />
+                                                        Sincronizar Com Mercado Livre
                                                     </label>
                                                 </div>
                                             </div>
 
-                                            <!-- Campos do Mercado Livre (aparecem quando checkbox está marcado) -->
-                                            <div id="campos_ml" style="display: none; margin: 15px; padding: 15px; background: #f9f9f9; border-radius: 5px; overflow-x: auto;">
-                                                
-                                                <!-- Opções de anúncio -->
-                                                <div class="row-fluid" style="margin-bottom: 15px;">
-                                                    <div class="span12">
-                                                        <h6 style="color: #666; margin-bottom: 10px;"><i class="fas fa-star"></i> Tipo de Anúncio:</h6>
-                                                        <div class="controls">
-                                                            <label class="checkbox" style="margin-right: 15px;">
-                                                                <input type="checkbox" name="ml_envios" value="1" style="margin-right: 5px;">
-                                                                <i class="fas fa-truck"></i> Aceita Mercado Envios
-                                                            </label>
-                                                            <label class="checkbox" style="margin-right: 15px;">
-                                                                <input type="checkbox" name="ml_premium" value="1" style="margin-right: 5px;">
-                                                                <i class="fas fa-crown"></i> Anúncio Premium
-                                                            </label>
-                                                            <label class="checkbox" style="margin-right: 15px;">
-                                                                <input type="checkbox" name="ml_destaque" value="1" style="margin-right: 5px;">
-                                                                <i class="fas fa-fire"></i> Anúncio Destaque
-                                                            </label>
-                                                            <label class="checkbox">
-                                                                <input type="checkbox" name="ml_classico" value="1" style="margin-right: 5px;">
-                                                                <i class="fas fa-tag"></i> Anúncio Clássico
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                        </div>
+                                    </div>
 
-                                                <!-- Categoria e Condição -->
-                                                <div class="row-fluid" style="margin-bottom: 15px;">
-                                                    <div class="span6">
-                                                        <label for="ml_categoria" class="control-label">Categoria ML:</label>
-                                                        <div class="controls">
-                                                            <select id="ml_categoria" name="ml_categoria" class="span12">
-                                                                <option value="">Selecione uma categoria</option>
-                                                                <option value="MLB5672">Acessórios para Veículos</option>
-                                                                <option value="MLB1000">Agro</option>
-                                                                <option value="MLB1500">Alimentos e Bebidas</option>
-                                                                <option value="MLB1403">Animais</option>
-                                                                <option value="MLB1367">Antiguidades e Coleções</option>
-                                                                <option value="MLB1368">Arte e Artesanato</option>
-                                                                <option value="MLB1384">Bebês</option>
-                                                                <option value="MLB1246">Beleza e Cuidado Pessoal</option>
-                                                                <option value="MLB1132">Brinquedos e Jogos</option>
-                                                                <option value="MLB1430">Calçados, Roupas e Bolsas</option>
-                                                                <option value="MLB1039">Câmeras e Acessórios</option>
-                                                                <option value="MLB1051">Carros, Motos e Outros</option>
-                                                                <option value="MLB1144">Casa, Móveis e Decoração</option>
-                                                                <option value="MLB1182">Celulares e Telefones</option>
-                                                                <option value="MLB1648">Construção</option>
-                                                                <option value="MLB1276">Eletrodomésticos</option>
-                                                                <option value="MLB5726">Eletrônicos, Áudio e Vídeo</option>
-                                                                <option value="MLB1168">Esportes e Fitness</option>
-                                                                <option value="MLB1071">Ferramentas</option>
-                                                                <option value="MLB1459">Festas e Lembrancinhas</option>
-                                                                <option value="MLB1499">Games e Consoles</option>
-                                                                <option value="MLB1953">Imóveis</option>
-                                                                <option value="MLB1574">Indústria e Comércio</option>
-                                                                <option value="MLB1168">Informática</option>
-                                                                <option value="MLB3025">Instrumentos Musicais</option>
-                                                                <option value="MLB1144">Joias e Relógios</option>
-                                                                <option value="MLB3937">Livros, Revistas e Comics</option>
-                                                                <option value="MLB1168">Música, Filmes e Seriados</option>
-                                                                <option value="MLB264586">Saúde</option>
-                                                                <option value="MLB1540">Serviços</option>
-                                                                <option value="MLB1953">Turismo</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="span6">
-                                                        <label for="ml_condicao" class="control-label">Condição:</label>
-                                                        <div class="controls">
-                                                            <select id="ml_condicao" name="ml_condicao" class="span12">
-                                                                <option value="new">Novo</option>
-                                                                <option value="used">Usado</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
+                                    <div class="control-group ml-campos-adicionais" style="display:none;">
+                                        <!-- Primeira linha: Categoria -->
+                                        <div class="row-fluid" style="margin-bottom: 15px;">
+                                            <div class="control-group span12">
+                                                <label for="categoria_id" class="control-label">Categoria <span class="required">*</span></label>
+                                                <div class="controls">
+                                                    <select id="categoria_id" name="categoria_id" class="span12 select2">
+                                                        <option value="">Selecione uma categoria...</option>
+                                                        <?php if (isset($todas_categorias) && is_array($todas_categorias)): ?>
+                                                            <?php foreach ($todas_categorias as $cat): ?>
+                                                                <option value="<?php echo $cat->idCategorias; ?>">
+                                                                    <?php echo $cat->categoria; ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                    </select>
                                                 </div>
+                                            </div>
+                                        </div>
 
-                                                <!-- Garantia e Descrição -->
-                                                <div class="row-fluid" style="margin-bottom: 15px;">
-                                                    <div class="span6">
-                                                        <label for="ml_garantia" class="control-label">Garantia (dias):</label>
-                                                        <div class="controls">
-                                                            <input type="number" id="ml_garantia" name="ml_garantia" class="span12" min="0" max="365" placeholder="Ex: 90">
-                                                        </div>
-                                                    </div>
-                                                    <div class="span6">
-                                                        <label for="ml_tags" class="control-label">Tags/Palavras-chave:</label>
-                                                        <div class="controls">
-                                                            <input type="text" id="ml_tags" name="ml_tags" class="span12" placeholder="Ex: original, garantia, frete grátis">
-                                                        </div>
-                                                    </div>
+                                        <!-- Segunda linha: Moeda, Modo de Compra, Tipo de Anúncio -->
+                                        <div class="row-fluid" style="margin-bottom: 15px;">
+                                            <div class="control-group span4">
+                                                <label for="currency_id" class="control-label">Moeda</label>
+                                                <div class="controls">
+                                                    <select id="currency_id" name="currency_id" class="span12">
+                                                        <option value="BRL">BRL (Real)</option>
+                                                        <option value="USD">USD (Dólar)</option>
+                                                        <option value="EUR">EUR (Euro)</option>
+                                                    </select>
                                                 </div>
-
-                                                <!-- Descrição específica para ML -->
-                                                <div class="row-fluid">
-                                                    <div class="span12">
-                                                        <label for="ml_descricao" class="control-label">Descrição para Mercado Livre:</label>
-                                                        <div class="controls">
-                                                            <textarea id="ml_descricao" name="ml_descricao" class="span12" rows="4" placeholder="Descreva o produto especificamente para o anúncio no Mercado Livre..."></textarea>
-                                                        </div>
-                                                    </div>
+                                            </div>
+                                            <div class="control-group span4">
+                                                <label for="buying_mode" class="control-label">Modo de Compra</label>
+                                                <div class="controls">
+                                                    <select id="buying_mode" name="buying_mode" class="span12">
+                                                        <option value="">Selecione...</option>
+                                                        <option value="buy_it_now">Comprar Agora</option>
+                                                        <option value="classified">Classificado</option>
+                                                    </select>
                                                 </div>
+                                            </div>
+                                            <div class="control-group span4">
+                                                <label for="listing_type_id" class="control-label">Tipo de Anúncio</label>
+                                                <div class="controls">
+                                                    <select id="listing_type_id" name="listing_type_id" class="span12">
+                                                        <option value="">Selecione...</option>
+                                                        <option value="gold_pro">Gold Pro</option>
+                                                        <option value="gold_special">Gold Special</option>
+                                                        <option value="silver">Silver</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                                <!-- Preview do anúncio -->
-                                                <div class="row-fluid" style="margin-top: 15px;">
-                                                    <div class="span12">
-                                                        <button type="button" id="preview_anuncio" class="btn btn-info btn-small">
-                                                            <i class="fas fa-eye"></i> Visualizar Anúncio
-                                                        </button>
+                                        <!-- Terceira linha: Modo de Envio, Garantia -->
+                                        <div class="row-fluid" style="margin-bottom: 15px;">
+                                            <div class="control-group span6">
+                                                <label for="shipping_mode" class="control-label">Modo de Envio</label>
+                                                <div class="controls">
+                                                    <select id="shipping_mode" name="shipping_mode" class="span12">
+                                                        <option value="">Selecione...</option>
+                                                        <option value="me2">Mercado Envios</option>
+                                                        <option value="custom">Personalizado</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="control-group span6">
+                                                <label for="ml_garantia" class="control-label">Garantia (em dias)</label>
+                                                <div class="controls">
+                                                    <input id="ml_garantia" name="ml_garantia" type="number" min="0" class="span12" placeholder="Ex: 90" value="<?php echo set_value('ml_garantia'); ?>" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                         <!-- Seção de Atributos Dinâmicos do Mercado Livre -->
+                                        <div id="atributosMLContainer" style="display: none;">
+                                            <div class="row-fluid" style="margin-bottom: 15px;">
+                                                <div class="control-group span12">
+                                                    <div class="controls">
+                                                        <div id="atributosML">
+                                                            <p style="color: #666; margin-bottom: 15px;">
+                                                                <i class="fas fa-info-circle"></i> 
+                                                                Selecione uma categoria do Mercado Livre para carregar os atributos necessários.
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Quarta linha: Descrição (largura total) -->
+                                        <div class="row-fluid" style="margin-bottom: 15px;">
+                                            <div class="control-group span12">
+                                                <label for="ml_descricao" class="control-label">Descrição para o Mercado Livre <span class="required">*</span></label>
+                                                <div class="controls">
+                                                    <textarea id="ml_descricao" name="ml_descricao" class="span12" rows="3" maxlength="2000" placeholder="Descrição detalhada para o anúncio no Mercado Livre..."><?php echo set_value('ml_descricao'); ?></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                       
+                                        
                                     </div>
-                                </div>
+                                    </div>
+                                    
+                               
+
+                                
                                 
                             </div>
+                        </div>
+
                         </div>
                     </div>
 
@@ -838,18 +839,49 @@
             }
         });
 
-        // Controle da integração com Mercado Livre
-        $("#integrar_ml").change(function() {
-            if ($(this).is(':checked')) {
-                $("#campos_ml").slideDown(300);
-                // Adiciona validação para campos obrigatórios do ML
-                $("#ml_categoria").addClass('required');
-                $("#ml_condicao").addClass('required');
-            } else {
-                $("#campos_ml").slideUp(300);
-                // Remove validação dos campos do ML
-                $("#ml_categoria").removeClass('required');
-                $("#ml_condicao").removeClass('required');
+        // Mapeamento automático da condição do produto
+        $("#condicaoProduto").change(function() {
+            var condicao = $(this).val();
+            if (condicao === "Novo") {
+                $("#ml_condicao").val("new");
+            } else if (condicao === "Usado") {
+                $("#ml_condicao").val("used");
+            }
+        });
+
+        // Auto-preenchimento da descrição ML baseada na descrição do produto
+        $("#descricao").on('input', function() {
+            if (!$("#ml_descricao").val()) {
+                var descricao = $(this).val();
+                var marca = $("#marcaProduto").val();
+                var modelo = $("#modeloProduto").val();
+                
+                if (descricao && marca) {
+                    var descricaoML = descricao + " - " + marca;
+                    if (modelo) {
+                        descricaoML += " " + modelo;
+                    }
+                    descricaoML += "\n\nProduto de qualidade com garantia.\nEntrega rápida e segura.";
+                    $("#ml_descricao").val(descricaoML);
+                }
+            }
+        });
+
+        // Auto-preenchimento de tags baseado na descrição
+        $("#descricao, #marcaProduto, #modeloProduto").on('input', function() {
+            if (!$("#ml_tags").val()) {
+                var descricao = $("#descricao").val();
+                var marca = $("#marcaProduto").val();
+                var modelo = $("#modeloProduto").val();
+                
+                var tags = [];
+                if (descricao) tags.push(descricao.toLowerCase());
+                if (marca) tags.push(marca.toLowerCase());
+                if (modelo) tags.push(modelo.toLowerCase());
+                
+                if (tags.length > 0) {
+                    $("#ml_tags").val(tags.join(", "));
+                }
             }
         });
 
@@ -1297,14 +1329,322 @@ function salvarProdutoComML() {
     // Fecha o modal de preview
     $("#modal-preview").modal('hide');
     
-    // Marca o checkbox de integração se não estiver marcado
-    if (!$("#integrar_ml").is(':checked')) {
-        $("#integrar_ml").prop('checked', true).trigger('change');
-    }
-    
     // Submete o formulário
     $("#formProduto").submit();
 }
 </script>
 
+<script>
+// Mercado Livre: Busca dinâmica de subcategorias e atributos obrigatórios
+$(document).ready(function() {
+    // Elementos
+    const categoriaSelect = $('#ml_categoria');
+    const atributosContainer = $('<div id="ml_atributos_container"></div>');
+    categoriaSelect.parent().append(atributosContainer);
 
+    // Função para buscar subcategorias
+    function buscarSubcategorias(category_id) {
+        $.getJSON('<?php echo site_url('mercadolivre/buscarSubcategorias'); ?>', {category_id: category_id}, function(resp) {
+            if (resp.success) {
+                if (resp.subcategories && resp.subcategories.length > 0) {
+                    // Monta select de subcategorias
+                    let subSelect = $('<select class="span12 ml_subcategoria_select"></select>');
+                    subSelect.append('<option value="">Selecione uma subcategoria...</option>');
+                    resp.subcategories.forEach(function(sub) {
+                        subSelect.append(`<option value="${sub.id}">${sub.name}</option>`);
+                    });
+                    atributosContainer.html(subSelect);
+                    // Ao selecionar subcategoria, buscar recursivamente
+                    subSelect.change(function() {
+                        let subId = $(this).val();
+                        if (subId) {
+                            buscarSubcategorias(subId);
+                            categoriaSelect.val(subId); // Atualiza o select principal
+                        }
+                    });
+                } else {
+                    // Categoria folha: buscar atributos obrigatórios
+                    buscarAtributosObrigatorios(category_id);
+                }
+            } else {
+                atributosContainer.html('<div class="alert alert-danger">Erro ao buscar subcategorias</div>');
+            }
+        });
+    }
+
+    // Função para buscar atributos obrigatórios
+    function buscarAtributosObrigatorios(category_id) {
+        $.getJSON('<?php echo site_url('mercadolivre/buscarAtributosCategoria'); ?>', {category_id: category_id}, function(resp) {
+            if (resp.success) {
+                let html = '<div class="ml-atributos">';
+                resp.attributes.forEach(function(attr) {
+                    if (attr.required || attr.catalog_required) {
+                        html += `<div class="control-group">
+                            <label class="control-label">${attr.name} <span class="required">*</span></label>
+                            <div class="controls">`;
+                        if (attr.values && attr.values.length > 0) {
+                            html += `<select name="ml_atributo_${attr.id}" class="span12 ml-atributo-campo" data-ml-attr-id="${attr.id}" required>`;
+                            html += '<option value="">Selecione...</option>';
+                            attr.values.forEach(function(val) {
+                                html += `<option value="${val.id}">${val.name}</option>`;
+                            });
+                            html += '</select>';
+                        } else {
+                            html += `<input type="text" name="ml_atributo_${attr.id}" class="span12 ml-atributo-campo" data-ml-attr-id="${attr.id}" required />`;
+                        }
+                        html += '</div></div>';
+                    }
+                });
+                html += '</div>';
+                atributosContainer.html(html);
+            } else {
+                atributosContainer.html('<div class="alert alert-danger">Erro ao buscar atributos</div>');
+            }
+        });
+    }
+
+    // Ao selecionar categoria, buscar subcategorias
+    categoriaSelect.change(function() {
+        let catId = $(this).val();
+        if (catId) {
+            buscarSubcategorias(catId);
+        } else {
+            atributosContainer.html('');
+        }
+    });
+
+    // Validação dos atributos obrigatórios antes de enviar
+    $('#formProduto').submit(function(e) {
+        let valid = true;
+        $('.ml-atributo-campo[required]').each(function() {
+            if (!$(this).val()) {
+                valid = false;
+                $(this).addClass('error');
+            } else {
+                $(this).removeClass('error');
+            }
+        });
+        if (!valid) {
+            alert('Preencha todos os atributos obrigatórios do Mercado Livre!');
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+<script>
+$(function() {
+    var categorias = <?php echo json_encode($categorias_ml_agrupadas); ?>;
+    var $dropdown = $('#dropdown-categorias-ml');
+    var $input = $('#ml_categoria');
+    var selectedText = 'Selecione uma categoria...';
+
+    function buildMenu() {
+        var html = '<div class="selected span12">' + selectedText + '</div><div class="menu">';
+        categorias.forEach(function(item) {
+            if (item.subcats.length > 0) {
+                html += '<div class="item has-sub" data-id="' + item.mae.ml_id + '">' + item.mae.categoria;
+                html += '<div class="submenu">';
+                item.subcats.forEach(function(sub) {
+                    html += '<div class="item" data-id="' + sub.ml_id + '">' + sub.categoria + '</div>';
+                });
+                html += '</div></div>';
+            } else {
+                html += '<div class="item" data-id="' + item.mae.ml_id + '">' + item.mae.categoria + '</div>';
+            }
+        });
+        html += '</div>';
+        $dropdown.html(html);
+    }
+
+    buildMenu();
+
+    // Mostrar menu ao clicar
+    $dropdown.on('click', '.selected', function(e) {
+        e.stopPropagation();
+        $dropdown.find('.menu').toggle();
+    });
+
+    // Selecionar categoria mãe sem sub ou subcategoria
+    $dropdown.on('click', '.menu .item:not(.has-sub)', function(e) {
+        var id = $(this).data('id');
+        var text = $(this).text();
+        $input.val(id);
+        $dropdown.find('.selected').text(text);
+        $dropdown.find('.menu').hide();
+    });
+
+    // Selecionar subcategoria
+    $dropdown.on('click', '.submenu .item', function(e) {
+        var id = $(this).data('id');
+        var text = $(this).text();
+        $input.val(id);
+        $dropdown.find('.selected').text(text);
+        $dropdown.find('.menu').hide();
+        e.stopPropagation();
+    });
+
+    // Fechar menu ao clicar fora
+    $(document).on('click', function() {
+        $dropdown.find('.menu').hide();
+    });
+});
+</script>
+
+<script>
+$(document).ready(function() {
+    $('#sincronizar_ml').change(function() {
+        if ($(this).is(':checked')) {
+            $('.ml-campos-adicionais').show();
+            $('#ml_descricao').attr('required', true);
+        } else {
+            $('.ml-campos-adicionais').hide();
+            $('#ml_descricao').attr('required', false);
+            $('#ml_descricao').val('');
+            $('#ml_garantia').val('');
+        }
+    });
+    // Exibir se já estiver marcado ao carregar
+    if ($('#sincronizar_ml').is(':checked')) {
+        $('.ml-campos-adicionais').show();
+        $('#ml_descricao').attr('required', true);
+    }
+
+    // Carregar atributos dinamicamente quando categoria for selecionada
+    $('#categoria_id').change(function() {
+        var categoriaId = $(this).val();
+        console.log('Categoria selecionada:', categoriaId);
+        
+        if (categoriaId) {
+            carregarAtributosCategoria(categoriaId);
+        } else {
+            $('#atributosMLContainer').hide();
+        }
+    });
+
+    // Função para carregar atributos da categoria
+    function carregarAtributosCategoria(categoriaId) {
+        console.log('Carregando atributos para categoria:', categoriaId);
+        
+        $.ajax({
+            url: '<?php echo site_url('produtos/getAtributosCategoria'); ?>',
+            type: 'GET',
+            data: { categoria_id: categoriaId },
+            dataType: 'json',
+            success: function(resp) {
+                console.log('Resposta da API de atributos:', resp);
+                
+                if (resp.success && resp.atributos && resp.atributos.length > 0) {
+                    renderizarAtributos(resp.atributos);
+                    $('#atributosMLContainer').show();
+                    console.log('Atributos carregados com sucesso:', resp.atributos.length, 'atributos');
+                } else {
+                    $('#atributosMLContainer').hide();
+                    console.log('Nenhum atributo encontrado para esta categoria');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('Erro ao carregar atributos:', {xhr: xhr, status: status, error: error});
+                $('#atributosMLContainer').hide();
+            }
+        });
+    }
+
+    // Função para renderizar atributos
+    function renderizarAtributos(atributos) {
+        console.log('Renderizando atributos:', atributos);
+        
+        var html = '';
+        
+        // Agrupar atributos em linhas de 3, 2 ou 1
+        for (var i = 0; i < atributos.length; i += 3) {
+            var atributosLinha = atributos.slice(i, i + 3);
+            var totalLinha = atributosLinha.length;
+            
+            // Determinar as classes CSS baseado no número de atributos na linha
+            var classeSpan;
+            if (totalLinha === 3) {
+                classeSpan = 'span4';
+            } else if (totalLinha === 2) {
+                classeSpan = 'span6';
+            } else {
+                classeSpan = 'span12';
+            }
+            
+            html += '<div class="row-fluid" style="margin-bottom: 15px;">';
+            
+            atributosLinha.forEach(function(atributo) {
+                console.log('Processando atributo:', atributo);
+                
+                html += '<div class="control-group ' + classeSpan + '">';
+                html += '<label class="control-label">' + atributo.name;
+                if (atributo.required) {
+                    html += ' <span class="required">*</span>';
+                }
+                html += '</label>';
+                html += '<div class="controls">';
+                
+                // Renderizar campo baseado no tipo
+                if (atributo.value_type === 'list' && atributo.values && atributo.values.length > 0) {
+                    html += '<select name="ml_atributo_' + atributo.ml_attribute_id + '" class="span12"';
+                    if (atributo.required) {
+                        html += ' required';
+                    }
+                    html += '>';
+                    html += '<option value="">Selecione...</option>';
+                    
+                    // Decodificar valores JSON se necessário
+                    var valores = atributo.values;
+                    if (typeof valores === 'string') {
+                        try {
+                            valores = JSON.parse(valores);
+                        } catch (e) {
+                            console.log('Erro ao parsear valores JSON:', e);
+                            valores = [];
+                        }
+                    }
+                    
+                    if (Array.isArray(valores)) {
+                        valores.forEach(function(valor) {
+                            html += `<option value="${valor.id}">${valor.name}</option>`;
+                        });
+                    }
+                    html += '</select>';
+                } else if (atributo.value_type === 'boolean') {
+                    html += '<select name="ml_atributo_' + atributo.ml_attribute_id + '" class="span12"';
+                    if (atributo.required) {
+                        html += ' required';
+                    }
+                    html += '>';
+                    html += '<option value="">Selecione...</option>';
+                    html += '<option value="true">Sim</option>';
+                    html += '<option value="false">Não</option>';
+                    html += '</select>';
+                } else if (atributo.value_type === 'number') {
+                    html += '<input type="number" name="ml_atributo_' + atributo.ml_attribute_id + '" class="span12"';
+                    if (atributo.required) {
+                        html += ' required';
+                    }
+                    html += ' placeholder="Digite um número" />';
+                } else {
+                    // Campo de texto padrão
+                    html += '<input type="text" name="ml_atributo_' + atributo.ml_attribute_id + '" class="span12"';
+                    if (atributo.required) {
+                        html += ' required';
+                    }
+                    html += ' placeholder="Digite o valor" />';
+                }
+                
+                html += '</div>';
+                html += '</div>';
+            });
+            
+            html += '</div>'; // Fecha row-fluid
+        }
+        
+        console.log('HTML gerado:', html);
+        $('#atributosML').html(html);
+    }
+});
+</script>
+ <div></div>

@@ -12,6 +12,7 @@ class Produtos extends MY_Controller
 
         $this->load->helper('form');
         $this->load->model('produtos_model');
+        $this->load->model('Categorias_model');
         $this->data['menuProdutos'] = 'Produtos';
     }
 
@@ -63,6 +64,11 @@ class Produtos extends MY_Controller
     $this->db->limit($this->data['configuration']['per_page'], $this->uri->segment(3));
     $this->data['results'] = $this->db->get()->result();
     
+    // Buscar quantidade de produtos para sincronizar com Mercado Livre
+    $this->db->where('status', 'pending');
+    $qtd_ml_pendentes = $this->db->count_all_results('produtos_mercado_livre');
+    $this->data['qtd_ml_pendentes'] = $qtd_ml_pendentes;
+    
     $this->data['view'] = 'produtos/produtos';
     
     return $this->layout();
@@ -82,6 +88,31 @@ public function adicionar()
 
     // Carregar organizadores para o select
     $this->data['organizadores'] = $this->db->where('ativa', true)->get('organizadores')->result();
+    
+    // Carregar categorias do Mercado Livre agrupadas (mãe + subcategorias)
+    $categorias_mae = $this->db->where('parent_id IS NULL')
+        ->where('tipo', 'mercado_livre')
+        ->where('status', 1)
+        ->order_by('categoria', 'ASC')
+        ->get('categorias')
+        ->result();
+
+    $categorias_agrupadas = [];
+    foreach ($categorias_mae as $mae) {
+        $subcats = $this->db->where('parent_id', $mae->idCategorias)
+            ->where('tipo', 'mercado_livre')
+            ->where('status', 1)
+            ->order_by('categoria', 'ASC')
+            ->get('categorias')
+            ->result();
+        $categorias_agrupadas[] = [
+            'mae' => $mae,
+            'subcats' => $subcats
+        ];
+    }
+    $this->data['categorias_ml_agrupadas'] = $categorias_agrupadas;
+
+    $this->data['todas_categorias'] = $this->Categorias_model->getAll();
 
     if ($this->form_validation->run('produtos') == false) {
         $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
@@ -152,7 +183,12 @@ public function adicionar()
             'idDirecao' => $idDirecao,
             'dataPedido' => set_value('dataPedido'),
             'dataChegada' => set_value('dataChegada'),
-            'numeroPeca' => set_value('numeroPeca')
+            'numeroPeca' => set_value('numeroPeca'),
+            'categoria_id' => $this->input->post('categoria_id'),
+            'currency_id' => $this->input->post('currency_id'),
+            'buying_mode' => $this->input->post('buying_mode'),
+            'listing_type_id' => $this->input->post('listing_type_id'),
+            'shipping_mode' => $this->input->post('shipping_mode'),
         ];
     
         if ($this->produtos_model->add('produtos', $data) == true) {
@@ -170,32 +206,48 @@ public function adicionar()
                 $this->imgAnexar($idProduto);
             }
 
-            // Verificar se deve integrar com Mercado Livre
-            if ($this->input->post('integrar_ml')) {
-                $this->load->model('MercadoLivre_model');
+            // Sincronizar com Mercado Livre se checkbox marcado
+            if ($this->input->post('sincronizar_ml')) {
+                // Buscar o ml_id da categoria selecionada
+                $ml_categoria = null;
+                $categoria_id = $this->input->post('categoria_id');
+                if ($categoria_id) {
+                    $categoria = $this->db->where('idCategorias', $categoria_id)->get('categorias')->row();
+                    if ($categoria && !empty($categoria->ml_id)) {
+                        $ml_categoria = $categoria->ml_id;
+                    }
+                }
+                
+                // Coletar atributos do formulário
+                $atributos_ml = [];
+                $post_data = $this->input->post();
+                foreach ($post_data as $key => $value) {
+                    if (strpos($key, 'ml_atributo_') === 0 && !empty($value)) {
+                        $ml_attribute_id = str_replace('ml_atributo_', '', $key);
+                        $atributos_ml[] = [
+                            'ml_attribute_id' => $ml_attribute_id,
+                            'value' => $value
+                        ];
+                    }
+                }
                 
                 $dados_ml = [
-                    'ml_categoria' => $this->input->post('ml_categoria'),
-                    'ml_condicao' => $this->input->post('ml_condicao'),
+                    'produto_id' => $idProduto,
+                    'ml_categoria' => $ml_categoria,
+                    'ml_condicao' => $this->input->post('ml_condicao') ?? ($this->input->post('condicaoProduto') == 'Novo' ? 'new' : 'used'),
                     'ml_garantia' => $this->input->post('ml_garantia'),
                     'ml_tags' => $this->input->post('ml_tags'),
                     'ml_descricao' => $this->input->post('ml_descricao'),
-                    'ml_envios' => $this->input->post('ml_envios') ? 1 : 0,
-                    'ml_premium' => $this->input->post('ml_premium') ? 1 : 0,
-                    'ml_destaque' => $this->input->post('ml_destaque') ? 1 : 0,
-                    'ml_classico' => $this->input->post('ml_classico') ? 1 : 0,
-                    'status' => 'pending'
+                    'ml_envios' => $this->input->post('shipping_mode') == 'me2' ? 1 : 0,
+                    'ml_premium' => $this->input->post('listing_type_id') == 'gold_pro' ? 1 : 0,
+                    'ml_destaque' => $this->input->post('listing_type_id') == 'gold_special' ? 1 : 0,
+                    'ml_classico' => $this->input->post('listing_type_id') == 'silver' ? 1 : 0,
+                    'ml_atributos' => !empty($atributos_ml) ? json_encode($atributos_ml) : null,
+                    'status' => 'pending',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
                 ];
-                
-                $this->MercadoLivre_model->salvarProdutoML($idProduto, $dados_ml);
-                
-                // Log da integração
-                $this->MercadoLivre_model->salvarLog(
-                    $idProduto,
-                    'create',
-                    'pending',
-                    'Produto marcado para integração com Mercado Livre'
-                );
+                $this->db->insert('produtos_mercado_livre', $dados_ml);
             }
     
             $mensagem_sucesso = 'Produto adicionado com sucesso!';
@@ -703,5 +755,70 @@ public function downloadProduto($id = null)
         echo json_encode(['result' => true, 'mensagem' => 'Arquivo(s) anexado(s) com sucesso.']);
     }
 }
+
+    // Retorna produtos pendentes de sincronização ML (AJAX)
+    public function ml_pendentes() {
+        $this->db->select('p.idProdutos, p.descricao, p.precoVenda, c.categoria as categoria_nome, ml.produto_id');
+        $this->db->from('produtos_mercado_livre ml');
+        $this->db->join('produtos p', 'ml.produto_id = p.idProdutos');
+        $this->db->join('categorias c', 'p.categoria_id = c.idCategorias', 'left');
+        $this->db->where('ml.status', 'pending');
+        $query = $this->db->get();
+        echo json_encode($query->result());
+    }
+
+    // Remove produto da lista de sincronização ML (AJAX)
+    public function remover_ml_pendente() {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'dProduto')) {
+            $this->session->set_flashdata('error', 'Você não tem permissão para remover produtos.');
+            redirect(base_url());
+        }
+        
+        $produto_id = $this->input->post('produto_id');
+        if ($produto_id) {
+            $this->db->where('produto_id', $produto_id);
+            $this->db->delete('produtos_mercado_livre');
+            $this->session->set_flashdata('success', 'Produto removido da lista de pendentes do Mercado Livre.');
+        }
+        redirect(site_url('produtos'));
+    }
+
+    /**
+     * Buscar atributos de uma categoria (AJAX)
+     */
+    public function getAtributosCategoria() {
+        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'vProduto')) {
+            echo json_encode(['success' => false, 'message' => 'Sem permissão.']);
+            return;
+        }
+
+        $categoria_id = $this->input->get('categoria_id');
+        
+        if (!$categoria_id) {
+            echo json_encode(['success' => false, 'message' => 'ID da categoria não informado.']);
+            return;
+        }
+
+        try {
+            // Verificar se a categoria existe e é do tipo mercado_livre
+            $categoria = $this->Categorias_model->getById($categoria_id);
+            if (!$categoria || $categoria->tipo !== 'mercado_livre') {
+                echo json_encode(['success' => false, 'message' => 'Categoria não encontrada ou não é do Mercado Livre.']);
+                return;
+            }
+
+            // Buscar atributos da categoria
+            $atributos = $this->Categorias_model->getAtributosByCategoria($categoria_id);
+            
+            if ($atributos) {
+                echo json_encode(['success' => true, 'atributos' => $atributos]);
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Nenhum atributo encontrado para esta categoria.']);
+            }
+
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Erro: ' . $e->getMessage()]);
+        }
+    }
 
 }

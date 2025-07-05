@@ -139,6 +139,12 @@ class Permissoes extends MY_Controller
                 'eCobranca' => $this->input->post('eCobranca'),
                 'dCobranca' => $this->input->post('dCobranca'),
                 'vCobranca' => $this->input->post('vCobranca'),
+
+                // Permissões de Categorias
+                'vCategoria' => $this->input->post('vCategoria'),
+                'aCategoria' => $this->input->post('aCategoria'),
+                'eCategoria' => $this->input->post('eCategoria'),
+                'dCategoria' => $this->input->post('dCategoria'),
             ];
             $permissoes = serialize($permissoes);
 
@@ -259,6 +265,12 @@ class Permissoes extends MY_Controller
                 'eCobranca' => $this->input->post('eCobranca'),
                 'dCobranca' => $this->input->post('dCobranca'),
                 'vCobranca' => $this->input->post('vCobranca'),
+
+                // Permissões de Categorias
+                'vCategoria' => $this->input->post('vCategoria'),
+                'aCategoria' => $this->input->post('aCategoria'),
+                'eCategoria' => $this->input->post('eCategoria'),
+                'dCategoria' => $this->input->post('dCategoria'),
             ];
             $permissoes = serialize($permissoes);
 

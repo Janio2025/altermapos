@@ -262,12 +262,16 @@ CREATE TABLE IF NOT EXISTS `resets_de_senha` (
 -- Table `categorias`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categorias` (
-    `idCategorias` int NOT NULL AUTO_INCREMENT,
-    `categoria` varchar(80) DEFAULT NULL,
-    `cadastro` date DEFAULT NULL,
-    `status` tinyint(1) DEFAULT NULL,
-    `tipo` varchar(15) DEFAULT NULL,
-    PRIMARY KEY (`idCategorias`)
+    `idCategorias` INT NOT NULL AUTO_INCREMENT,
+    `ml_id` VARCHAR(50) DEFAULT NULL,         -- Código do Mercado Livre (ex: MLB1182, MLB1183)
+    `categoria` VARCHAR(80) DEFAULT NULL,     -- Nome da categoria/subcategoria
+    `parent_id` INT DEFAULT NULL,             -- ID da categoria pai (NULL para categoria raiz)
+    `cadastro` DATE DEFAULT NULL,
+    `status` TINYINT(1) DEFAULT NULL,
+    `tipo` VARCHAR(15) DEFAULT NULL,          -- Ex: 'interna', 'mercado_livre'
+    PRIMARY KEY (`idCategorias`),
+    UNIQUE KEY `ml_id_UNIQUE` (`ml_id`),
+    INDEX (`parent_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
@@ -701,6 +705,12 @@ CREATE TABLE IF NOT EXISTS `produtos` (
     `unidade` varchar(10) DEFAULT NULL,
     `precoCompra` decimal(10,2) DEFAULT NULL,
     `precoVenda` decimal(10,2) NOT NULL,
+    -- Novos campos para Mercado Livre
+    `currency_id` VARCHAR(5) DEFAULT 'BRL',
+    `buying_mode` VARCHAR(20) DEFAULT NULL,
+    `listing_type_id` VARCHAR(20) DEFAULT NULL,
+    `shipping_mode` VARCHAR(20) DEFAULT NULL,
+    -- Continuação dos campos já existentes
     `estoque` int NOT NULL,
     `estoqueMinimo` int DEFAULT NULL,
     `saida` tinyint(1) DEFAULT NULL,
@@ -713,6 +723,7 @@ CREATE TABLE IF NOT EXISTS `produtos` (
     `dataChegada` date DEFAULT NULL,
     `idCompativel` int DEFAULT NULL,
     `numeroPeca` varchar(80) DEFAULT NULL,
+    `categoria_id` int DEFAULT NULL, -- Coluna para relacionar com categorias
     PRIMARY KEY (`idProdutos`),
     KEY `idModelo` (`idModelo`),
     KEY `idCondicao` (`idCondicao`),
@@ -720,6 +731,7 @@ CREATE TABLE IF NOT EXISTS `produtos` (
     KEY `idCompativel` (`idCompativel`),
     KEY `organizador_id` (`organizador_id`),
     KEY `compartimento_id` (`compartimento_id`),
+    KEY `categoria_id` (`categoria_id`),
     CONSTRAINT `produtos_ibfk_1`
         FOREIGN KEY (`idModelo`)
         REFERENCES `modelo` (`idModelo`)
@@ -749,9 +761,13 @@ CREATE TABLE IF NOT EXISTS `produtos` (
         FOREIGN KEY (`compartimento_id`)
         REFERENCES `compartimentos` (`id`)
         ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT `produtos_ibfk_7`
+        FOREIGN KEY (`categoria_id`)
+        REFERENCES `categorias`(`idCategorias`)
+        ON DELETE SET NULL
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 -- -----------------------------------------------------
 -- Table `produto_compativel`
 -- -----------------------------------------------------
@@ -1239,6 +1255,7 @@ CREATE TABLE IF NOT EXISTS `produtos_mercado_livre` (
     `ml_premium` tinyint(1) DEFAULT 0 COMMENT 'Anúncio Premium',
     `ml_destaque` tinyint(1) DEFAULT 0 COMMENT 'Anúncio Destaque',
     `ml_classico` tinyint(1) DEFAULT 0 COMMENT 'Anúncio Clássico',
+    `ml_atributos` json DEFAULT NULL COMMENT 'Atributos dinâmicos da categoria (JSON)',
     `status` enum('active','paused','closed','pending') DEFAULT 'pending' COMMENT 'Status do anúncio',
     `ultima_sincronizacao` timestamp NULL DEFAULT NULL COMMENT 'Última sincronização com ML',
     `erro_sincronizacao` text COMMENT 'Erro na última sincronização',
@@ -1254,6 +1271,30 @@ CREATE TABLE IF NOT EXISTS `produtos_mercado_livre` (
         ON DELETE CASCADE 
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Configurações de integração com Mercado Livre';
+
+-- -----------------------------------------------------
+-- Table `atributos_ml`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `atributos_ml` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `categoria_id` int NOT NULL COMMENT 'ID da categoria relacionada',
+    `ml_attribute_id` varchar(50) NOT NULL COMMENT 'ID do atributo no Mercado Livre',
+    `name` varchar(255) NOT NULL COMMENT 'Nome do atributo',
+    `value_type` varchar(20) DEFAULT NULL COMMENT 'Tipo do valor (string, number, boolean, list_unit, etc)',
+    `required` tinyint(1) DEFAULT 0 COMMENT 'Se o atributo é obrigatório',
+    `values` json DEFAULT NULL COMMENT 'Valores possíveis (para atributos do tipo list)',
+    `hierarchy` varchar(255) DEFAULT NULL COMMENT 'Hierarquia do atributo',
+    `tags` text COMMENT 'Tags associadas ao atributo',
+    `attribute_group_id` varchar(50) DEFAULT NULL COMMENT 'ID do grupo do atributo',
+    `attribute_group_name` varchar(255) DEFAULT NULL COMMENT 'Nome do grupo do atributo',
+    `status` tinyint(1) DEFAULT 1 COMMENT 'Status do atributo (1=ativo, 0=inativo)',
+    `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `categoria_id` (`categoria_id`),
+    KEY `ml_attribute_id` (`ml_attribute_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Atributos do Mercado Livre por categoria';
+
 
 -- -----------------------------------------------------
 -- Table `ml_configuracoes`
