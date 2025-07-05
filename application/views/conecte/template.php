@@ -82,6 +82,9 @@
                     <li class="<?php if (isset($menuCobrancas)) {
                                     echo 'active';
                                 }; ?>"><a class="tip-bottom" title="" href="<?php echo base_url() ?>index.php/mine/cobrancas"><i class='bx bx-credit-card-front iconX'></i> <span class="title">Cobranças</span></a></li>
+                    <li class="<?php if (isset($menuLoja)) {
+                                    echo 'active';
+                                }; ?>"><a class="tip-bottom" title="" href="<?php echo base_url() ?>index.php/mine/loja"><i class='bx bx-store iconX'></i> <span class="title">Loja</span></a></li>
                 </ul>
             </div>
 

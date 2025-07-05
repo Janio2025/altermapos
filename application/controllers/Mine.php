@@ -525,6 +525,149 @@ class Mine extends CI_Controller
         $this->load->view('conecte/template', $data);
     }
 
+    public function loja()
+    {
+        if (! session_id() || ! $this->session->userdata('conectado')) {
+            redirect('mine');
+        }
+
+        $data['menuLoja'] = 'loja';
+        
+        // Buscar dados do cliente
+        $cliente = $this->Conecte_model->getDados();
+        
+        // Array para armazenar produtos recomendados
+        $produtos_recomendados = [];
+        $produtos_categoria = [];
+        $produtos_gerais = [];
+        
+        // Se o cliente tem tipo_id
+        if ($cliente->tipo_id) {
+            // Buscar categorias relacionadas ao tipo do cliente
+            $this->db->select('idCategorias');
+            $this->db->where('tipo_id', $cliente->tipo_id);
+            $this->db->where('status', 1);
+            $categorias = $this->db->get('categorias')->result();
+            
+            if ($categorias) {
+                $categoria_ids = array_column($categorias, 'idCategorias');
+                
+                // Buscar produtos dessas categorias
+                $this->db->select('p.*, m.nomeModelo, c.categoria as nome_categoria');
+                $this->db->from('produtos p');
+                $this->db->join('modelo m', 'm.idModelo = p.idModelo', 'left');
+                $this->db->join('categorias c', 'c.idCategorias = p.categoria_id', 'left');
+                $this->db->where_in('p.categoria_id', $categoria_ids);
+                $this->db->where('p.saida', 1); // Produtos ativos
+                $produtos_categoria = $this->db->get()->result();
+                
+                // Buscar imagens para cada produto
+                foreach ($produtos_categoria as $produto) {
+                    $this->db->select('urlImagem, anexo');
+                    $this->db->where('produto_id', $produto->idProdutos);
+                    $this->db->order_by('idImagem', 'ASC');
+                    $imagens = $this->db->get('imagens_produto')->result();
+                    
+                    if ($imagens) {
+                        $produto->imagens = $imagens;
+                        $produto->primeira_imagem = $imagens[0]->urlImagem ?: $imagens[0]->anexo;
+                    } else {
+                        $produto->imagens = [];
+                        $produto->primeira_imagem = null;
+                    }
+                }
+                
+                // Buscar OS do cliente para comparar modelos
+                $this->db->select('modeloProdutoOs');
+                $this->db->where('clientes_id', $this->session->userdata('cliente_id'));
+                $this->db->where('modeloProdutoOs IS NOT NULL');
+                $this->db->where('modeloProdutoOs !=', '');
+                $os_cliente = $this->db->get('os')->result();
+                
+                if ($os_cliente) {
+                    // Para cada produto, verificar similaridade com modelos das OS
+                    foreach ($produtos_categoria as $produto) {
+                        $similaridade_maxima = 0;
+                        
+                        foreach ($os_cliente as $os) {
+                            if ($produto->nomeModelo && $os->modeloProdutoOs) {
+                                $similaridade = similar_text(
+                                    strtolower($produto->nomeModelo), 
+                                    strtolower($os->modeloProdutoOs), 
+                                    $percent
+                                );
+                                
+                                if ($percent > $similaridade_maxima) {
+                                    $similaridade_maxima = $percent;
+                                }
+                            }
+                        }
+                        
+                        // Se similaridade >= 70%, adicionar aos recomendados
+                        if ($similaridade_maxima >= 70) {
+                            $produto->similaridade = $similaridade_maxima;
+                            $produtos_recomendados[] = $produto;
+                        }
+                    }
+                    
+                    // Ordenar produtos recomendados por similaridade (maior primeiro)
+                    usort($produtos_recomendados, function($a, $b) {
+                        return $b->similaridade - $a->similaridade;
+                    });
+                }
+            }
+        }
+        
+        // Buscar produtos APENAS das categorias relacionadas ao tipo do cliente
+        if ($cliente->tipo_id) {
+            // Buscar categorias relacionadas ao tipo do cliente
+            $this->db->select('idCategorias');
+            $this->db->where('tipo_id', $cliente->tipo_id);
+            $this->db->where('status', 1);
+            $categorias = $this->db->get('categorias')->result();
+            
+            if ($categorias) {
+                $categoria_ids = array_column($categorias, 'idCategorias');
+                
+                // Buscar produtos APENAS dessas categorias
+                $this->db->select('p.*, m.nomeModelo, c.categoria as nome_categoria');
+                $this->db->from('produtos p');
+                $this->db->join('modelo m', 'm.idModelo = p.idModelo', 'left');
+                $this->db->join('categorias c', 'c.idCategorias = p.categoria_id', 'left');
+                $this->db->where_in('p.categoria_id', $categoria_ids);
+                $this->db->where('p.saida', 1);
+                $produtos_gerais = $this->db->get()->result();
+                
+                // Buscar imagens para esses produtos
+                foreach ($produtos_gerais as $produto) {
+                    $this->db->select('urlImagem, anexo');
+                    $this->db->where('produto_id', $produto->idProdutos);
+                    $this->db->order_by('idImagem', 'ASC');
+                    $imagens = $this->db->get('imagens_produto')->result();
+                    
+                    if ($imagens) {
+                        $produto->imagens = $imagens;
+                        $produto->primeira_imagem = $imagens[0]->urlImagem ?: $imagens[0]->anexo;
+                    } else {
+                        $produto->imagens = [];
+                        $produto->primeira_imagem = null;
+                    }
+                }
+            } else {
+                $produtos_gerais = [];
+            }
+        } else {
+            // Se cliente não tem tipo_id, não mostrar produtos
+            $produtos_gerais = [];
+        }
+        
+        $data['produtos_recomendados'] = $produtos_recomendados;
+        $data['produtos_categoria'] = $produtos_categoria;
+        $data['produtos_gerais'] = $produtos_gerais;
+        $data['output'] = 'conecte/loja';
+        $this->load->view('conecte/template', $data);
+    }
+
     public function visualizarOs($id = null)
     {
         if (! session_id() || ! $this->session->userdata('conectado')) {

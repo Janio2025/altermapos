@@ -113,6 +113,14 @@ class Categorias extends MY_Controller
             redirect(site_url('categorias'));
         }
         $this->data['categorias'] = $this->Categorias_model->getAll();
+        
+        // Buscar tipos da tabela tipos
+        $this->db->select('*');
+        $this->db->where('ativo', 1);
+        $this->db->order_by('nome', 'ASC');
+        $tipos_existentes = $this->db->get('tipos')->result();
+        $this->data['tipos_existentes'] = $tipos_existentes;
+        
         $this->data['view'] = 'categorias/editarCategoria';
         return $this->layout();
     }

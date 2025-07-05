@@ -19,9 +19,13 @@
     <div class="control-group">
       <label class="control-label">Tipo</label>
       <div class="controls">
-        <select name="tipo" class="span3">
-          <option value="mercado_livre" <?php if ($categoria->tipo == 'mercado_livre') echo 'selected'; ?>>Mercado Livre</option>
-          <option value="interna" <?php if ($categoria->tipo == 'interna') echo 'selected'; ?>>Interna</option>
+        <select name="tipo_id" class="span3">
+          <option value="">Selecione um tipo...</option>
+          <?php foreach ($tipos_existentes as $tipo): ?>
+            <option value="<?php echo $tipo->id; ?>" <?php echo ($categoria->tipo_id == $tipo->id) ? 'selected' : ''; ?>>
+              <?php echo $tipo->nome; ?>
+            </option>
+          <?php endforeach; ?>
         </select>
       </div>
     </div>
