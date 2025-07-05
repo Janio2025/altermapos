@@ -7,12 +7,6 @@ class MercadoLivre extends MY_Controller
         parent::__construct();
         $this->load->model('MercadoLivre_model');
         $this->load->library('session');
-        
-        // Verificar permissão
-        if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'aProduto')) {
-            $this->session->set_flashdata('error', 'Você não tem permissão para acessar a integração com Mercado Livre.');
-            redirect(base_url());
-        }
     }
 
     /**
@@ -62,6 +56,14 @@ class MercadoLivre extends MY_Controller
      */
     public function autenticar()
     {
+        // Verificar permissão apenas se o usuário estiver logado
+        if ($this->session->userdata('logado')) {
+            if (!$this->permission->checkPermission($this->session->userdata('permissao'), 'aProduto')) {
+                $this->session->set_flashdata('error', 'Você não tem permissão para acessar a integração com Mercado Livre.');
+                redirect(site_url('mapos/configurar'));
+            }
+        }
+        
         $client_id = $_ENV['MERCADO_LIVRE_CLIENT_ID'] ?? '';
         $redirect_uri = $_ENV['MERCADO_LIVRE_REDIRECT_URI'] ?? site_url('mercadolivre/callback');
         
@@ -169,7 +171,8 @@ class MercadoLivre extends MY_Controller
         curl_close($ch);
 
         // Log para depuração
-        file_put_contents('C:\\wamp64\\tmp\\ml_debug.txt', date('Y-m-d H:i:s') . "\n" . $response . "\n\n", FILE_APPEND);
+        $log_path = dirname(__FILE__, 2) . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'ml_debug.txt';
+        file_put_contents($log_path, date('Y-m-d H:i:s') . "\n" . $response . "\n\n", FILE_APPEND);
 
         if ($http_code == 200) {
             return json_decode($response, true);
