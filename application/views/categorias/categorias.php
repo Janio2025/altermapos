@@ -32,7 +32,6 @@
           <tr>
             <th>ID</th>
             <th>Nome</th>
-            <th>ML ID</th>
             <th>Tipo</th>
             <th>Categoria Pai</th>
             <th>Ações</th>
@@ -40,13 +39,12 @@
         </thead>
         <tbody>
           <?php if (!$categorias) {
-            echo '<tr><td colspan="6">Nenhuma Categoria Cadastrada</td></tr>';
+            echo '<tr><td colspan="5">Nenhuma Categoria Cadastrada</td></tr>';
           }
           foreach ($categorias as $cat) {
             echo '<tr>';
             echo '<td data-label="ID">' . $cat->idCategorias . '</td>';
             echo '<td data-label="Nome">' . $cat->categoria . '</td>';
-            echo '<td data-label="ML ID">' . $cat->ml_id . '</td>';
             echo '<td data-label="Tipo">' . $cat->tipo . '</td>';
             echo '<td data-label="Categoria Pai">';
             if ($cat->parent_id) {
