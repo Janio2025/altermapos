@@ -243,12 +243,28 @@ CREATE TABLE IF NOT EXISTS `clientes` (
     `contato` varchar(45) DEFAULT NULL,
     `complemento` varchar(45) DEFAULT NULL,
     `fornecedor` tinyint(1) NOT NULL DEFAULT '0',
-    PRIMARY KEY (`idClientes`)
+    `tipo_id` int DEFAULT NULL,
+    PRIMARY KEY (`idClientes`),
+    KEY `tipo_id` (`tipo_id`),
+    CONSTRAINT `clientes_ibfk_tipo`
+        FOREIGN KEY (`tipo_id`)
+        REFERENCES `tipos`(`id`)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------
 -- Table `resets_de_senha`
 -- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `tipos` (
+    `id` int NOT NULL AUTO_INCREMENT,
+    `nome` varchar(100) NOT NULL,
+    `descricao` text,
+    `ativo` tinyint(1) NOT NULL DEFAULT '1',
+    `data_criacao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 CREATE TABLE IF NOT EXISTS `resets_de_senha` (
     `id` int NOT NULL AUTO_INCREMENT,
     `email` varchar(200) NOT NULL,
@@ -269,9 +285,16 @@ CREATE TABLE IF NOT EXISTS `categorias` (
     `cadastro` DATE DEFAULT NULL,
     `status` TINYINT(1) DEFAULT NULL,
     `tipo` VARCHAR(15) DEFAULT NULL,          -- Ex: 'interna', 'mercado_livre'
+    `tipo_id` INT DEFAULT NULL,               -- ID do tipo da tabela tipos
     PRIMARY KEY (`idCategorias`),
     UNIQUE KEY `ml_id_UNIQUE` (`ml_id`),
-    INDEX (`parent_id`)
+    INDEX (`parent_id`),
+    INDEX (`tipo_id`),
+    CONSTRAINT `categorias_ibfk_tipo`
+        FOREIGN KEY (`tipo_id`)
+        REFERENCES `tipos`(`id`)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- -----------------------------------------------------

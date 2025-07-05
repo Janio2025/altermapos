@@ -144,6 +144,22 @@ $tipoCliente = $this->input->get('tipo') ?? 'cliente'; // Define 'cliente' como 
                             </div>
                         </div>
                         <div class="control-group">
+                            <label for="tipo_id" class="control-label">Tipo de Interesse</label>
+                            <div class="controls">
+                                <select id="tipo_id" name="tipo_id" class="span12">
+                                    <option value="">Selecione um tipo de interesse...</option>
+                                    <?php if (isset($tipos_existentes) && $tipos_existentes): ?>
+                                        <?php foreach ($tipos_existentes as $tipo): ?>
+                                            <option value="<?php echo $tipo->id; ?>" <?php echo set_select('tipo_id', $tipo->id); ?>>
+                                                <?php echo $tipo->nome; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                                <small class="help-block">Selecione o tipo de produto que mais interessa ao cliente</small>
+                            </div>
+                        </div>
+                        <div class="control-group">
     <label class="control-label">Tipo de Cliente</label>
     <div class="controls">
         <!-- Cliente (valor 0) -->

@@ -45,7 +45,15 @@
             echo '<tr>';
             echo '<td data-label="ID">' . $cat->idCategorias . '</td>';
             echo '<td data-label="Nome">' . $cat->categoria . '</td>';
-            echo '<td data-label="Tipo">' . $cat->tipo . '</td>';
+            echo '<td data-label="Tipo">';
+            if ($cat->tipo_id) {
+                // Buscar o nome do tipo na tabela tipos
+                $tipo = $this->db->where('id', $cat->tipo_id)->get('tipos')->row();
+                echo $tipo ? $tipo->nome : '-';
+            } else {
+                echo '-';
+            }
+            echo '</td>';
             echo '<td data-label="Categoria Pai">';
             if ($cat->parent_id) {
               $pai = array_filter($categorias, function($c) use ($cat) { return $c->idCategorias == $cat->parent_id; });

@@ -55,6 +55,12 @@ class Clientes extends MY_Controller
 
         $this->load->library('form_validation');
         $this->data['custom_error'] = '';
+        
+        // Carregar tipos da tabela tipos
+        $this->db->select('*');
+        $this->db->where('ativo', 1);
+        $this->db->order_by('nome', 'ASC');
+        $this->data['tipos_existentes'] = $this->db->get('tipos')->result();
 
         $senhaCliente = $this->input->post('senha') ? $this->input->post('senha') : preg_replace('/[^\p{L}\p{N}\s]/', '', set_value('documento'));
 
@@ -95,6 +101,7 @@ class Clientes extends MY_Controller
                 'cep' => set_value('cep'),
                 'dataCadastro' => date('Y-m-d'),
                 'fornecedor' => $fornecedor, // Novo valor (0, 1 ou 2)
+                'tipo_id' => $this->input->post('tipo_id'),
             ];
 
             if ($this->clientes_model->add('clientes', $data) == true) {
@@ -125,6 +132,12 @@ class Clientes extends MY_Controller
 
         $this->load->library('form_validation');
         $this->data['custom_error'] = '';
+        
+        // Carregar tipos da tabela tipos
+        $this->db->select('*');
+        $this->db->where('ativo', 1);
+        $this->db->order_by('nome', 'ASC');
+        $this->data['tipos_existentes'] = $this->db->get('tipos')->result();
 
         if ($this->form_validation->run('clientes') == false) {
             $this->data['custom_error'] = (validation_errors() ? '<div class="form_error">' . validation_errors() . '</div>' : false);
@@ -156,6 +169,7 @@ class Clientes extends MY_Controller
                     'estado' => $this->input->post('estado'),
                     'cep' => $this->input->post('cep'),
                     'fornecedor' => $fornecedor, // Novo valor (0, 1 ou 2)
+                    'tipo_id' => $this->input->post('tipo_id'),
                 ];
             } else {
                 $fornecedor = 0; // Valor padrão (Cliente Normal)
@@ -181,6 +195,7 @@ class Clientes extends MY_Controller
                     'estado' => $this->input->post('estado'),
                     'cep' => $this->input->post('cep'),
                     'fornecedor' => $fornecedor, // Novo valor (0, 1 ou 2)
+                    'tipo_id' => $this->input->post('tipo_id'),
                 ];
             }
 

@@ -78,13 +78,14 @@
                     <th>Celular</th>
                     <th>Email</th>
                     <th>Tipo</th>
+                    <th>Tipo de Interesse</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 if (!$results) {
-                    echo '<tr><td colspan="9">Nenhum Cliente Cadastrado</td></tr>';
+                    echo '<tr><td colspan="10">Nenhum Cliente Cadastrado</td></tr>';
                 }
                 foreach ($results as $r) {
                     echo '<tr>';
@@ -100,6 +101,16 @@
                         ($r->fornecedor == 2 ? '<span class="label label-warning">Colaborador</span>' : 
                         '<span class="label label-success">Cliente</span>')) . 
                     '</td>';
+                    
+                    // Buscar o tipo de interesse
+                    $tipo_interesse = '';
+                    if ($r->tipo_id) {
+                        $tipo = $this->db->where('id', $r->tipo_id)->get('tipos')->row();
+                        if ($tipo) {
+                            $tipo_interesse = $tipo->nome;
+                        }
+                    }
+                    echo '<td data-label="Tipo de Interesse">' . $tipo_interesse . '</td>';
 
                     echo '<td data-label="Ações">';
                     if ($this->permission->checkPermission($this->session->userdata('permissao'), 'vCliente')) {

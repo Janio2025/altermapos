@@ -43,7 +43,32 @@
                                 <tr>
                                     <td style="text-align: right"><strong>Tipo do Cliente</strong></td>
                                     <td>
-                                        <?php echo $result->fornecedor == true ? 'Fornecedor' : 'Cliente'; ?>
+                                        <?php 
+                                        if ($result->fornecedor == 1) {
+                                            echo '<span class="label label-primary">Fornecedor</span>';
+                                        } elseif ($result->fornecedor == 2) {
+                                            echo '<span class="label label-warning">Colaborador</span>';
+                                        } else {
+                                            echo '<span class="label label-success">Cliente</span>';
+                                        }
+                                        ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right"><strong>Tipo de Interesse</strong></td>
+                                    <td>
+                                        <?php 
+                                        if ($result->tipo_id) {
+                                            $tipo = $this->db->where('id', $result->tipo_id)->get('tipos')->row();
+                                            if ($tipo) {
+                                                echo $tipo->nome;
+                                            } else {
+                                                echo '<span class="text-muted">Não informado</span>';
+                                            }
+                                        } else {
+                                            echo '<span class="text-muted">Não informado</span>';
+                                        }
+                                        ?>
                                     </td>
                                 </tr>
                                 </tbody>

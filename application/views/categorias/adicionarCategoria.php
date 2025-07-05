@@ -21,11 +21,11 @@
         <div class="control-group">
           <label class="control-label">Tipo</label>
           <div class="controls">
-            <select name="tipo" id="tipoSelect" class="span3" style="margin-right: 10px;">
+            <select name="tipo_id" id="tipoSelect" class="span3" style="margin-right: 10px;">
               <option value="">Selecione um tipo...</option>
               <?php if (isset($tipos_existentes) && $tipos_existentes): ?>
                 <?php foreach ($tipos_existentes as $tipo): ?>
-                  <option value="<?php echo $tipo->tipo; ?>"><?php echo ucfirst(str_replace('_', ' ', $tipo->tipo)); ?></option>
+                  <option value="<?php echo $tipo->id; ?>"><?php echo $tipo->nome; ?></option>
                 <?php endforeach; ?>
               <?php endif; ?>
             </select>
@@ -123,7 +123,7 @@
         $('#tipoSelect').show();
         $('#btnNovoTipo').html('<i class="bx bx-plus"></i> Novo Tipo');
         $('#tipoNovo').val('');
-      } else {
+          } else {
         // Se o select está visível, mostrar campo novo
         $('#tipoSelect').hide();
         $('#tipoNovo').show();
