@@ -138,10 +138,16 @@
     }
     
     .modal-imagem img {
-        max-width: 100%;
-        max-height: 100%;
+        max-width: 90vw;
+        max-height: 90vh;
+        width: auto;
+        height: auto;
+        object-fit: contain;
         border-radius: 8px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: #222;
+        margin: auto;
+        display: block;
     }
     
     .fechar-modal {
@@ -204,7 +210,7 @@
                                     <img src="<?php echo $produto->primeira_imagem; ?>" 
                                          alt="<?php echo $produto->descricao; ?>" 
                                          class="produto-imagem"
-                                         onclick="abrirModal('<?php echo $produto->primeira_imagem; ?>', '<?php echo $produto->descricao; ?>')">
+                                         onclick="abrirModal('<?php echo $produto->imagem_completa ?? $produto->primeira_imagem; ?>', '<?php echo $produto->descricao; ?>')">
                                 <?php else: ?>
                                     <img src="<?php echo base_url('assets/img/no-image.png'); ?>" 
                                          alt="Sem imagem" 
@@ -257,7 +263,7 @@
                                     <img src="<?php echo $produto->primeira_imagem; ?>" 
                                          alt="<?php echo $produto->descricao; ?>" 
                                          class="produto-imagem"
-                                         onclick="abrirModal('<?php echo $produto->primeira_imagem; ?>', '<?php echo $produto->descricao; ?>')">
+                                         onclick="abrirModal('<?php echo $produto->imagem_completa ?? $produto->primeira_imagem; ?>', '<?php echo $produto->descricao; ?>')">
                                 <?php else: ?>
                                     <img src="<?php echo base_url('assets/img/no-image.png'); ?>" 
                                          alt="Sem imagem" 

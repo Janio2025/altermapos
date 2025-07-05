@@ -572,14 +572,19 @@ class Mine extends CI_Controller
                         $primeira_imagem = $imagens[0];
                         if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
                             $produto->primeira_imagem = $primeira_imagem->urlImagem . '/thumbs/' . $primeira_imagem->thumb;
+                            // Salvar também a URL da imagem completa para o modal
+                            $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
                         } elseif (isset($primeira_imagem->anexo) && $primeira_imagem->anexo) {
                             $produto->primeira_imagem = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                            $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
                         } else {
                             $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                            $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
                         }
                     } else {
                         $produto->imagens = [];
                         $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                        $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
                     }
                 }
                 
@@ -654,14 +659,18 @@ class Mine extends CI_Controller
                         $primeira_imagem = $imagens[0];
                         if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
                             $produto->primeira_imagem = $primeira_imagem->urlImagem . '/thumbs/' . $primeira_imagem->thumb;
+                            $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
                         } elseif (isset($primeira_imagem->anexo) && $primeira_imagem->anexo) {
                             $produto->primeira_imagem = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                            $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
                         } else {
                             $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                            $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
                         }
                     } else {
                         $produto->imagens = [];
                         $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                        $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
                     }
                 }
             } else {
