@@ -55,6 +55,20 @@
  * NOTE: If you change these, also change the error_reporting() code below
  */
 
+// Processamento manual de rotas para LiteSpeed
+$request_uri = $_SERVER['REQUEST_URI'] ?? '';
+$script_name = $_SERVER['SCRIPT_NAME'] ?? '';
+
+// Se a requisição não inclui index.php, adicionar manualmente
+if (strpos($request_uri, 'index.php') === false && strpos($request_uri, '/mercadolivre/') !== false) {
+    $path_info = str_replace(dirname($script_name), '', $request_uri);
+    $path_info = ltrim($path_info, '/');
+    
+    // Definir manualmente o PATH_INFO para o CodeIgniter
+    $_SERVER['PATH_INFO'] = '/' . $path_info;
+    $_SERVER['REQUEST_URI'] = $script_name . '/' . $path_info;
+}
+
 $composerAutoloadFile = __DIR__ . DIRECTORY_SEPARATOR . 'application' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 if (file_exists($composerAutoloadFile)) {
     require_once $composerAutoloadFile;
