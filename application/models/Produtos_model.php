@@ -119,6 +119,11 @@ class Produtos_model extends CI_Model
         return $this->db->get('imagens_produto')->result();
     }
 
+    public function getImagens($produtoId)
+    {
+        return $this->getImagensProduto($produtoId);
+    }
+
     public function update_modelos_compativeis($idProduto, $modelosCompativeis)
     {
         $this->db->select('idCompativel');

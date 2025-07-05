@@ -562,18 +562,24 @@ class Mine extends CI_Controller
                 $produtos_categoria = $this->db->get()->result();
                 
                 // Buscar imagens para cada produto
+                $this->load->model('produtos_model');
                 foreach ($produtos_categoria as $produto) {
-                    $this->db->select('urlImagem, anexo');
-                    $this->db->where('produto_id', $produto->idProdutos);
-                    $this->db->order_by('idImagem', 'ASC');
-                    $imagens = $this->db->get('imagens_produto')->result();
+                    $imagens = $this->produtos_model->getImagens($produto->idProdutos);
                     
                     if ($imagens) {
                         $produto->imagens = $imagens;
-                        $produto->primeira_imagem = $imagens[0]->urlImagem ?: $imagens[0]->anexo;
+                        // Usar a mesma lógica da view de produtos
+                        $primeira_imagem = $imagens[0];
+                        if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
+                            $produto->primeira_imagem = $primeira_imagem->urlImagem . '/thumbs/' . $primeira_imagem->thumb;
+                        } elseif (isset($primeira_imagem->anexo) && $primeira_imagem->anexo) {
+                            $produto->primeira_imagem = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                        } else {
+                            $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                        }
                     } else {
                         $produto->imagens = [];
-                        $produto->primeira_imagem = null;
+                        $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
                     }
                 }
                 
@@ -640,17 +646,22 @@ class Mine extends CI_Controller
                 
                 // Buscar imagens para esses produtos
                 foreach ($produtos_gerais as $produto) {
-                    $this->db->select('urlImagem, anexo');
-                    $this->db->where('produto_id', $produto->idProdutos);
-                    $this->db->order_by('idImagem', 'ASC');
-                    $imagens = $this->db->get('imagens_produto')->result();
+                    $imagens = $this->produtos_model->getImagens($produto->idProdutos);
                     
                     if ($imagens) {
                         $produto->imagens = $imagens;
-                        $produto->primeira_imagem = $imagens[0]->urlImagem ?: $imagens[0]->anexo;
+                        // Usar a mesma lógica da view de produtos
+                        $primeira_imagem = $imagens[0];
+                        if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
+                            $produto->primeira_imagem = $primeira_imagem->urlImagem . '/thumbs/' . $primeira_imagem->thumb;
+                        } elseif (isset($primeira_imagem->anexo) && $primeira_imagem->anexo) {
+                            $produto->primeira_imagem = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                        } else {
+                            $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                        }
                     } else {
                         $produto->imagens = [];
-                        $produto->primeira_imagem = null;
+                        $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
                     }
                 }
             } else {
