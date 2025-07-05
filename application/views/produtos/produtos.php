@@ -59,10 +59,6 @@
         <span class="button__icon"><i class='bx bx-sync'></i></span>
         <span class="button__text2">Sincronizar ML (<?php echo isset($qtd_ml_pendentes) ? $qtd_ml_pendentes : 0; ?>)</span>
       </a>
-      <a href="#" class="button btn btn-mini btn-warning btn-logs-ml" style="max-width: 140px; margin-left: 10px;">
-        <span class="button__icon"><i class='bx bx-file-doc'></i></span>
-        <span class="button__text2">Logs ML</span>
-      </a>
   </div>
 <?php } ?>
 
@@ -234,29 +230,7 @@
   </div>
 </div>
 
-<!-- Modal Logs Mercado Livre -->
-<div id="modal-logs-ml" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalLogsMLLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h5 id="modalLogsMLLabel"><i class="fas fa-file-alt"></i> Logs do Mercado Livre</h5>
-  </div>
-  <div class="modal-body">
-    <div class="alert alert-info" role="alert">
-      <strong>Logs de Sincronização:</strong> Últimos logs de integração com o Mercado Livre
-    </div>
-    <div id="ml-logs-content">
-      <div class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando logs...</div>
-    </div>
-  </div>
-  <div class="modal-footer" style="display:flex;justify-content: center">
-    <button type="button" class="button btn btn-warning" data-dismiss="modal" aria-hidden="true">
-      <span class="button__icon"><i class="bx bx-x"></i></span><span class="button__text2">Fechar</span>
-    </button>
-    <button type="button" class="button btn btn-info" id="btn-atualizar-logs-ml">
-      <span class="button__icon"><i class="bx bx-refresh"></i></span><span class="button__text2">Atualizar</span>
-    </button>
-  </div>
-</div>
+
 </div>
 
 <script src="<?php echo base_url() ?>assets/js/jquery.validate.js"></script>
@@ -435,56 +409,6 @@
       });
     });
 
-    // Abrir modal de logs ML
-    $(document).on('click', '.btn-logs-ml', function (e) {
-      e.preventDefault();
-      $('#modal-logs-ml').modal('show');
-      carregarLogsML();
-    });
 
-    // Atualizar logs ML
-    $(document).on('click', '#btn-atualizar-logs-ml', function (e) {
-      e.preventDefault();
-      carregarLogsML();
-    });
-
-    // Função para carregar logs do ML
-    function carregarLogsML() {
-      $('#ml-logs-content').html('<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando logs...</div>');
-      
-      $.ajax({
-        url: '<?php echo base_url('index.php/MercadoLivre/getLogs'); ?>',
-        type: 'GET',
-        dataType: 'json',
-        success: function(data) {
-          if (data && data.success && data.logs && data.logs.length > 0) {
-            var html = '<div class="table-responsive"><table class="table table-bordered table-striped">';
-            html += '<thead><tr><th>Data/Hora</th><th>Produto</th><th>Ação</th><th>Status</th><th>Mensagem</th></tr></thead><tbody>';
-            
-            $.each(data.logs, function(i, log) {
-              var statusClass = log.status === 'success' ? 'success' : (log.status === 'error' ? 'danger' : (log.status === 'info' ? 'info' : 'warning'));
-              var statusText = log.status === 'success' ? 'Sucesso' : (log.status === 'error' ? 'Erro' : (log.status === 'info' ? 'Info' : 'Aviso'));
-              
-              html += '<tr class="' + statusClass + '">';
-              html += '<td><small>' + log.created_at + '</small></td>';
-              html += '<td>' + (log.produto_nome || 'Sistema') + '</td>';
-              html += '<td>' + log.acao + '</td>';
-              html += '<td><span class="label label-' + statusClass + '">' + statusText + '</span></td>';
-              html += '<td><small>' + (log.mensagem || '') + '</small></td>';
-              html += '</tr>';
-            });
-            
-            html += '</tbody></table></div>';
-            html += '<div class="alert alert-info"><small><strong>Total de logs:</strong> ' + data.logs.length + ' registros encontrados</small></div>';
-            $('#ml-logs-content').html(html);
-          } else {
-            $('#ml-logs-content').html('<div class="alert alert-info">Nenhum log encontrado.</div>');
-          }
-        },
-        error: function(xhr, status, error) {
-          $('#ml-logs-content').html('<div class="alert alert-danger">Erro ao carregar logs: ' + error + '</div>');
-        }
-      });
-    }
   });
 </script>
