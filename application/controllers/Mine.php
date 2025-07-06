@@ -559,6 +559,7 @@ class Mine extends CI_Controller
                 $this->db->join('categorias c', 'c.idCategorias = p.categoria_id', 'left');
                 $this->db->where_in('p.categoria_id', $categoria_ids);
                 $this->db->where('p.saida', 1); // Produtos ativos
+                $this->db->where('p.estoque >', 0); // Apenas produtos com estoque
                 $produtos_categoria = $this->db->get()->result();
                 
                 // Buscar imagens para cada produto
@@ -647,6 +648,7 @@ class Mine extends CI_Controller
                 $this->db->join('categorias c', 'c.idCategorias = p.categoria_id', 'left');
                 $this->db->where_in('p.categoria_id', $categoria_ids);
                 $this->db->where('p.saida', 1);
+                $this->db->where('p.estoque >', 0); // Apenas produtos com estoque
                 $produtos_gerais = $this->db->get()->result();
                 
                 // Buscar imagens para esses produtos
