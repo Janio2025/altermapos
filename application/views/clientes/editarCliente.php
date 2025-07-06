@@ -161,7 +161,7 @@
                         <div class="control-group">
                             <label for="tipo_id" class="control-label">Tipo de Interesse</label>
                             <div class="controls">
-                                <select id="tipo_id" name="tipo_id" class="span12">
+                                <select id="tipo_id" name="tipo_id" class="">
                                     <option value="">Selecione um tipo...</option>
                                     <?php foreach ($tipos_existentes as $tipo): ?>
                                         <option value="<?php echo $tipo->id; ?>" <?php echo ($result->tipo_id == $tipo->id) ? 'selected' : ''; ?>>

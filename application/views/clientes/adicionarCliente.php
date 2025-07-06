@@ -143,10 +143,11 @@ $tipoCliente = $this->input->get('tipo') ?? 'cliente'; // Define 'cliente' como 
                                 <img id="imgSenha" src="<?php echo base_url() ?>assets/img/eye.svg" alt="">
                             </div>
                         </div>
+                        
                         <div class="control-group">
                             <label for="tipo_id" class="control-label">Tipo de Interesse</label>
                             <div class="controls">
-                                <select id="tipo_id" name="tipo_id" class="span12">
+                                <select id="tipo_id" name="tipo_id" class="">
                                     <option value="">Selecione um tipo de interesse...</option>
                                     <?php if (isset($tipos_existentes) && $tipos_existentes): ?>
                                         <?php foreach ($tipos_existentes as $tipo): ?>
@@ -156,31 +157,31 @@ $tipoCliente = $this->input->get('tipo') ?? 'cliente'; // Define 'cliente' como 
                                         <?php endforeach; ?>
                                     <?php endif; ?>
                                 </select>
-                                <small class="help-block">Selecione o tipo de produto que mais interessa ao cliente</small>
+                                
                             </div>
                         </div>
                         <div class="control-group">
-    <label class="control-label">Tipo de Cliente</label>
-    <div class="controls">
-        <!-- Cliente (valor 0) -->
-        <label for="cliente" class="btn btn-default">Cliente
-            <input type="checkbox" id="cliente" name="cliente" class="badgebox" value="0" <?php echo ($tipoCliente == 'cliente') ? 'checked' : ''; ?>>
-            <span class="badge">&check;</span>
-        </label>
+                            <label class="control-label">Tipo de Cliente</label>
+                            <div class="controls">
+                                <!-- Cliente (valor 0) -->
+                                <label for="cliente" class="btn btn-default">Cliente
+                                    <input type="checkbox" id="cliente" name="cliente" class="badgebox" value="0" <?php echo ($tipoCliente == 'cliente') ? 'checked' : ''; ?>>
+                                    <span class="badge">&check;</span>
+                                </label>
 
-        <!-- Fornecedor (valor 1) -->
-        <label for="fornecedor" class="btn btn-default">Fornecedor
-            <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1" <?php echo ($tipoCliente == 'fornecedor') ? 'checked' : ''; ?>>
-            <span class="badge">&check;</span>
-        </label>
+                                <!-- Fornecedor (valor 1) -->
+                                <label for="fornecedor" class="btn btn-default">Fornecedor
+                                    <input type="checkbox" id="fornecedor" name="fornecedor" class="badgebox" value="1" <?php echo ($tipoCliente == 'fornecedor') ? 'checked' : ''; ?>>
+                                    <span class="badge">&check;</span>
+                                </label>
 
-        <!-- Colaborador (valor 2) -->
-        <label for="colaborador" class="btn btn-default">Colaborador
-            <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2" <?php echo ($tipoCliente == 'colaborador') ? 'checked' : ''; ?>>
-            <span class="badge">&check;</span>
-        </label>
-    </div>
-</div>
+                                <!-- Colaborador (valor 2) -->
+                                <label for="colaborador" class="btn btn-default">Colaborador
+                                    <input type="checkbox" id="colaborador" name="colaborador" class="badgebox" value="2" <?php echo ($tipoCliente == 'colaborador') ? 'checked' : ''; ?>>
+                                    <span class="badge">&check;</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="span6">
