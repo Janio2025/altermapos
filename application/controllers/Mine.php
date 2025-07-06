@@ -567,26 +567,35 @@ class Mine extends CI_Controller
                 foreach ($produtos_categoria as $produto) {
                     $imagens = $this->produtos_model->getImagens($produto->idProdutos);
                     
-                    if ($imagens) {
-                        $produto->imagens = $imagens;
-                        // Usar a mesma lógica da view de produtos
-                        $primeira_imagem = $imagens[0];
-                        if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
-                            $produto->primeira_imagem = $primeira_imagem->urlImagem . '/thumbs/' . $primeira_imagem->thumb;
-                            // Salvar também a URL da imagem completa para o modal
-                            $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
-                        } elseif (isset($primeira_imagem->anexo) && $primeira_imagem->anexo) {
-                            $produto->primeira_imagem = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
-                            $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                                            if ($imagens) {
+                            $produto->imagens = $imagens;
+                            // Preparar todas as imagens para o modal
+                            $produto->todas_imagens = [];
+                            foreach ($imagens as $imagem) {
+                                if (isset($imagem->anexo) && $imagem->anexo) {
+                                    $produto->todas_imagens[] = $imagem->urlImagem . '/' . $imagem->anexo;
+                                }
+                            }
+                            
+                            // Usar a mesma lógica da view de produtos
+                            $primeira_imagem = $imagens[0];
+                            if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
+                                $produto->primeira_imagem = $primeira_imagem->urlImagem . '/thumbs/' . $primeira_imagem->thumb;
+                                // Salvar também a URL da imagem completa para o modal
+                                $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                            } elseif (isset($primeira_imagem->anexo) && $primeira_imagem->anexo) {
+                                $produto->primeira_imagem = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                                $produto->imagem_completa = $primeira_imagem->urlImagem . '/' . $primeira_imagem->anexo;
+                            } else {
+                                $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
+                                $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
+                            }
                         } else {
+                            $produto->imagens = [];
+                            $produto->todas_imagens = [];
                             $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
                             $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
                         }
-                    } else {
-                        $produto->imagens = [];
-                        $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
-                        $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
-                    }
                 }
                 
                 // Buscar OS do cliente para comparar modelos
@@ -657,6 +666,14 @@ class Mine extends CI_Controller
                     
                     if ($imagens) {
                         $produto->imagens = $imagens;
+                        // Preparar todas as imagens para o modal
+                        $produto->todas_imagens = [];
+                        foreach ($imagens as $imagem) {
+                            if (isset($imagem->anexo) && $imagem->anexo) {
+                                $produto->todas_imagens[] = $imagem->urlImagem . '/' . $imagem->anexo;
+                            }
+                        }
+                        
                         // Usar a mesma lógica da view de produtos
                         $primeira_imagem = $imagens[0];
                         if (isset($primeira_imagem->thumb) && $primeira_imagem->thumb) {
@@ -671,6 +688,7 @@ class Mine extends CI_Controller
                         }
                     } else {
                         $produto->imagens = [];
+                        $produto->todas_imagens = [];
                         $produto->primeira_imagem = base_url() . 'assets/img/icon-file.png';
                         $produto->imagem_completa = base_url() . 'assets/img/icon-file.png';
                     }

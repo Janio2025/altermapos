@@ -210,7 +210,7 @@
                                     <img src="<?php echo $produto->primeira_imagem; ?>" 
                                          alt="<?php echo $produto->descricao; ?>" 
                                          class="produto-imagem"
-                                         onclick="abrirModal('<?php echo $produto->imagem_completa ?? $produto->primeira_imagem; ?>', '<?php echo $produto->descricao; ?>')">
+                                         onclick="abrirModal(<?php echo htmlspecialchars(json_encode($produto->todas_imagens), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo $produto->descricao; ?>')">
                                 <?php else: ?>
                                     <img src="<?php echo base_url('assets/img/no-image.png'); ?>" 
                                          alt="Sem imagem" 
@@ -220,9 +220,7 @@
                                 <div class="produto-titulo"><?php echo $produto->descricao; ?></div>
                                 
                                 <?php if ($produto->nomeModelo): ?>
-                                    <div class="produto-modelo">
-                                        <strong>Modelo:</strong> <?php echo $produto->nomeModelo; ?>
-                                    </div>
+                                    <div class="produto-categoria"><?php echo $produto->nomeModelo; ?></div>
                                 <?php endif; ?>
                                 
                                 <div class="produto-preco">
@@ -263,7 +261,7 @@
                                     <img src="<?php echo $produto->primeira_imagem; ?>" 
                                          alt="<?php echo $produto->descricao; ?>" 
                                          class="produto-imagem"
-                                         onclick="abrirModal('<?php echo $produto->imagem_completa ?? $produto->primeira_imagem; ?>', '<?php echo $produto->descricao; ?>')">
+                                         onclick="abrirModal(<?php echo htmlspecialchars(json_encode($produto->todas_imagens), ENT_QUOTES, 'UTF-8'); ?>, '<?php echo $produto->descricao; ?>')">
                                 <?php else: ?>
                                     <img src="<?php echo base_url('assets/img/no-image.png'); ?>" 
                                          alt="Sem imagem" 
@@ -273,9 +271,7 @@
                                 <div class="produto-titulo"><?php echo $produto->descricao; ?></div>
                                 
                                 <?php if ($produto->nomeModelo): ?>
-                                    <div class="produto-modelo">
-                                        <strong>Modelo:</strong> <?php echo $produto->nomeModelo; ?>
-                                    </div>
+                                    <div class="produto-categoria"><?php echo $produto->nomeModelo; ?></div>
                                 <?php endif; ?>
                                 
                                 <div class="produto-preco">
@@ -302,20 +298,72 @@
     <span class="fechar-modal" onclick="fecharModal()">&times;</span>
     <div class="modal-conteudo">
         <img id="imagemModal" src="" alt="Imagem do Produto">
+        <div id="navegacao" style="margin-top: 20px; text-align: center; display: none;">
+            <button id="btnAnterior" onclick="imagemAnterior()" style="background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 6px; margin-right: 15px; cursor: pointer; font-size: 14px; font-weight: bold;">‹ Anterior</button>
+            <span id="indicador" style="color: white; margin: 0 15px; font-size: 16px; font-weight: bold; background: rgba(0,0,0,0.5); padding: 8px 12px; border-radius: 4px;"></span>
+            <button id="btnProximo" onclick="proximaImagem()" style="background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 6px; margin-left: 15px; cursor: pointer; font-size: 14px; font-weight: bold;">Próximo ›</button>
+        </div>
         <div id="descricaoModal" style="color: #fff; margin-top: 10px; font-size: 18px;"></div>
     </div>
 </div>
 
 <script>
-function abrirModal(src, descricao) {
-    document.getElementById('imagemModal').src = src;
-    document.getElementById('descricaoModal').innerText = descricao;
+var imagensAtuais = [];
+var imagemAtual = 0;
+
+function abrirModal(imagens, descricao) {
+    if (Array.isArray(imagens) && imagens.length > 0) {
+        imagensAtuais = imagens;
+        imagemAtual = 0;
+        document.getElementById('imagemModal').src = imagens[0];
+        document.getElementById('descricaoModal').innerText = descricao;
+        
+        // Mostrar navegação se houver mais de uma imagem
+        if (imagens.length > 1) {
+            document.getElementById('navegacao').style.display = 'block';
+            atualizarIndicador();
+        } else {
+            document.getElementById('navegacao').style.display = 'none';
+        }
+    } else {
+        // Fallback para imagem única
+        document.getElementById('imagemModal').src = imagens;
+        document.getElementById('descricaoModal').innerText = descricao;
+        document.getElementById('navegacao').style.display = 'none';
+    }
+    
     document.getElementById('modalImagem').style.display = 'block';
 }
+
+function proximaImagem() {
+    if (imagemAtual < imagensAtuais.length - 1) {
+        imagemAtual++;
+        document.getElementById('imagemModal').src = imagensAtuais[imagemAtual];
+        atualizarIndicador();
+    }
+}
+
+function imagemAnterior() {
+    if (imagemAtual > 0) {
+        imagemAtual--;
+        document.getElementById('imagemModal').src = imagensAtuais[imagemAtual];
+        atualizarIndicador();
+    }
+}
+
+function atualizarIndicador() {
+    document.getElementById('indicador').innerText = (imagemAtual + 1) + ' de ' + imagensAtuais.length;
+    document.getElementById('btnAnterior').disabled = imagemAtual === 0;
+    document.getElementById('btnProximo').disabled = imagemAtual === imagensAtuais.length - 1;
+}
+
 function fecharModal() {
     document.getElementById('modalImagem').style.display = 'none';
     document.getElementById('imagemModal').src = '';
+    imagensAtuais = [];
+    imagemAtual = 0;
 }
+
 // Fechar ao clicar fora da imagem
 window.onclick = function(event) {
     var modal = document.getElementById('modalImagem');
@@ -323,4 +371,17 @@ window.onclick = function(event) {
         fecharModal();
     }
 }
+
+// Navegação com teclado
+document.addEventListener('keydown', function(event) {
+    if (document.getElementById('modalImagem').style.display === 'block') {
+        if (event.key === 'ArrowLeft') {
+            imagemAnterior();
+        } else if (event.key === 'ArrowRight') {
+            proximaImagem();
+        } else if (event.key === 'Escape') {
+            fecharModal();
+        }
+    }
+});
 </script> 
