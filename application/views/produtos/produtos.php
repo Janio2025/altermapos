@@ -130,7 +130,7 @@
 
 <!-- Modal Estoque -->
 <div id="atualizar-estoque" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="modalEstoqueLabel" aria-hidden="true">
-  <form id="formEstoque" action="<?php echo base_url() ?>index.php/produtos/atualizarEstoque" method="post">
+  <form id="formEstoque" action="<?php echo base_url() ?>index.php/produtos/atualizar_estoque" method="post">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
       <h5 id="modalEstoqueLabel"><i class="fas fa-plus-square"></i> Atualizar Estoque</h5>
